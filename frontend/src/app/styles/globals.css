@@ -1,4 +1,22 @@
-:root {
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+
+  color: var(--color-text-primary);
+  background-color: var(--color-background);
+
   font-family:
     Pretendard,
     -apple-system,
@@ -9,47 +27,14 @@
     Arial,
     sans-serif;
 
-  color: #191f28;
-  background-color: #ffffff;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  --color-primary: #ffcc00;
-  --color-text-primary: #191f28;
-  --color-text-secondary: #6b7684;
-  --color-background: #ffffff;
-  --color-background-secondary: #f7f8fa;
-  --color-border: #e5e8eb;
-  --color-error: #f04452;
-
-  --max-width: 1200px;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-}
-
-html,
-body,
 #root {
-  width: 100%;
-  min-height: 100%;
-}
-
-body {
-  min-width: 320px;
   min-height: 100vh;
-  background-color: var(--color-background);
 }
 
 button,
@@ -60,9 +45,17 @@ select {
 }
 
 button {
+  padding: 0;
   border: 0;
   background: none;
+}
+
+button:not(:disabled) {
   cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
 }
 
 a {
@@ -72,6 +65,8 @@ a {
 
 ul,
 ol {
+  padding: 0;
+  margin: 0;
   list-style: none;
 }
 
@@ -80,6 +75,11 @@ picture,
 svg {
   display: block;
   max-width: 100%;
+}
+
+input,
+textarea {
+  min-width: 0;
 }
 
 textarea {
