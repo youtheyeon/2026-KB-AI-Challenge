@@ -1,4 +1,4 @@
-import { AlertTriangle, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, X } from 'lucide-react';
 import { useState } from 'react';
 
 import {
@@ -26,7 +26,7 @@ const METRIC_ROWS = [
 ];
 
 export const CompareStep = ({ cond, onNext }: CompareStepProps) => {
-  const [scbTab, setScbTab] = useState('A');
+  const [selected, setSelected] = useState<string | null>(null);
   const monthly = calcMonthly(cond.loanAmount, cond.rate, cond.period, cond.grace, cond.method);
 
   const getValue = (sc: Scenario, key: string) => {
@@ -60,109 +60,99 @@ export const CompareStep = ({ cond, onNext }: CompareStepProps) => {
       <div>
         <h2 className="text-xl font-semibold">시나리오 비교</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          A·B·C안의 예상 효과와 위험을 동일한 기준으로 비교합니다. AI는 특정 안을 추천하지 않습니다.
+          A·B·C안의 예상 효과와 위험을 동일한 기준으로 비교합니다.
         </p>
       </div>
 
-      <div className="overflow-hidden overflow-x-auto rounded border border-border">
-        <table className="w-full min-w-[560px]">
-          <thead>
-            <tr className="border-b border-border bg-muted/30">
-              <th className="w-36 px-5 py-3 text-left font-mono text-xs text-muted-foreground">
-                지표
-              </th>
-              {SCENARIOS.map((sc) => (
-                <th key={sc.id} className="border-l border-border px-5 py-3 text-center">
-                  <p className="font-mono text-xs font-bold">{sc.id}안</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{sc.type}</p>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {METRIC_ROWS.map((row) => (
-              <tr key={row.key} className="border-b border-border last:border-0">
-                <td className="px-5 py-3">
-                  <p className="text-xs text-muted-foreground">{row.label}</p>
-                </td>
-                {SCENARIOS.map((sc) => {
-                  const val = getValue(sc, row.key);
-                  const warn = row.key === 'risk' ? riskColor[sc.riskLevel] : '';
-                  return (
-                    <td key={sc.id} className="border-l border-border px-5 py-3 text-center">
-                      <p className={`font-mono text-sm ${warn}`}>{val}</p>
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
       <div className="space-y-3">
-        <div>
-          <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
-            SCB 연계 심사지표 해석
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            모델 출력(매출·고용·온라인 활동·상권 위치)을 SCB 평가 항목 언어로 설명합니다.
-          </p>
-        </div>
-        <div className="overflow-hidden rounded border border-border">
-          <div className="flex border-b border-border">
-            {SCENARIOS.map((sc) => (
+        <p className="text-xs text-muted-foreground">
+          카드를 눌러 배분 근거와 SCB 성장 가능성을 확인할 수 있습니다.
+        </p>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {SCENARIOS.map((sc) => {
+            const Icon = sc.icon;
+            const isSelected = selected === sc.id;
+            return (
               <button
                 key={sc.id}
-                onClick={() => setScbTab(sc.id)}
-                className={`flex-1 py-2.5 font-mono text-xs font-bold transition-colors ${
-                  scbTab === sc.id
-                    ? 'bg-foreground text-background'
-                    : 'text-muted-foreground hover:bg-muted/30 hover:text-foreground'
+                onClick={() => setSelected(isSelected ? null : sc.id)}
+                className={`flex flex-col overflow-hidden rounded border text-left transition-colors ${
+                  isSelected ? 'border-foreground' : 'border-border hover:border-foreground/40'
                 }`}
               >
-                {sc.id}안
-              </button>
-            ))}
-          </div>
-          {SCENARIOS.filter((sc) => sc.id === scbTab).map((sc) => (
-            <div key={sc.id} className="space-y-3 px-6 py-5">
-              <p className="font-mono text-xs text-muted-foreground">{sc.type}</p>
-              <div className="space-y-4">
-                {sc.scbHints.map((hint) => (
-                  <div key={hint} className="flex items-start gap-3">
-                    <span className="mt-2 w-1.5 h-1.5 shrink-0 rounded-full bg-primary" />
-                    <p className="text-sm leading-relaxed text-foreground">{hint}</p>
+                <div className="space-y-1.5 border-b border-border bg-muted/20 px-4 py-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="rounded bg-foreground px-1.5 py-0.5 font-mono text-xs font-bold text-background">
+                        {sc.id}안
+                      </span>
+                      <Icon className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">{sc.type}</span>
+                    </div>
+                    <ChevronDown
+                      className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${
+                        isSelected ? 'rotate-180' : ''
+                      }`}
+                    />
                   </div>
-                ))}
+                  <p className="text-sm font-semibold">{sc.title}</p>
+                  <p className="text-xs leading-relaxed text-muted-foreground">{sc.desc}</p>
+                </div>
+                <div className="space-y-2 px-4 py-3">
+                  {METRIC_ROWS.map((row) => {
+                    const val = getValue(sc, row.key);
+                    const warn = row.key === 'risk' ? riskColor[sc.riskLevel] : '';
+                    return (
+                      <div key={row.key} className="flex items-center justify-between gap-2">
+                        <span className="text-xs text-muted-foreground">{row.label}</span>
+                        <span className={`font-mono text-xs ${warn}`}>{val}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {selected &&
+          SCENARIOS.filter((sc) => sc.id === selected).map((sc) => (
+            <div key={sc.id} className="overflow-hidden rounded border border-foreground">
+              <div className="flex items-center justify-between gap-2 border-b border-border bg-muted/20 px-6 py-4">
+                <div className="flex items-center gap-2">
+                  <span className="rounded bg-foreground px-1.5 py-0.5 font-mono text-xs font-bold text-background">
+                    {sc.id}안
+                  </span>
+                  <p className="text-sm font-semibold">배분 근거 & SCB 성장 가능성</p>
+                </div>
+                <button
+                  onClick={() => setSelected(null)}
+                  className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  닫기
+                </button>
+              </div>
+              <div className="grid grid-cols-1 divide-y divide-border md:grid-cols-2 md:divide-x md:divide-y-0">
+                <div className="space-y-2 px-6 py-5">
+                  <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
+                    배분 근거
+                  </p>
+                  <p className="text-sm leading-relaxed text-foreground">
+                    {sc.allocationRationale}
+                  </p>
+                </div>
+                <div className="space-y-2 px-6 py-5">
+                  <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
+                    SCB 성장 가능성
+                  </p>
+                  <p className="text-sm leading-relaxed text-foreground">
+                    {sc.scbGrowthPotential}
+                  </p>
+                </div>
               </div>
             </div>
           ))}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {SCENARIOS.map((sc) => (
-          <div key={sc.id} className="space-y-3 rounded border border-border p-4">
-            <p className="font-mono text-xs font-bold">{sc.id}안 가정 및 위험</p>
-            <div className="space-y-1">
-              {sc.assumptions.map((a) => (
-                <p key={a} className="flex items-start gap-1.5 text-xs text-muted-foreground">
-                  <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground/40" />
-                  {a}
-                </p>
-              ))}
-            </div>
-            <div className="space-y-1 border-t border-border pt-3">
-              {sc.risks.map((r) => (
-                <p key={r} className="flex items-start gap-1.5 text-xs text-muted-foreground">
-                  <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />
-                  {r}
-                </p>
-              ))}
-            </div>
-          </div>
-        ))}
       </div>
 
       <div className="flex justify-end">

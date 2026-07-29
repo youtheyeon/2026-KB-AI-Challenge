@@ -54,7 +54,8 @@ export interface Scenario {
   riskLevel: RiskLevel;
   assumptions: string[];
   risks: string[];
-  scbHints: string[];
+  allocationRationale: string;
+  scbGrowthPotential: string;
 }
 
 export type LoanRateMode = 'demo' | 'manual';
