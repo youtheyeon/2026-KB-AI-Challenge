@@ -1,6 +1,12 @@
 import { AlertTriangle, ChevronRight } from 'lucide-react';
 
-import { calcMonthly, DEMO_RATE, SAMPLE, type LoanCond, type LoanRateMode } from '@/entities/simulation';
+import {
+  calcMonthly,
+  DEMO_RATE,
+  SAMPLE,
+  type LoanCond,
+  type LoanRateMode,
+} from '@/entities/simulation';
 
 interface LoanStepProps {
   cond: LoanCond;

@@ -146,9 +146,7 @@ export const CompareStep = ({ cond, onNext }: CompareStepProps) => {
                   <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
                     SCB 성장 가능성
                   </p>
-                  <p className="text-sm leading-relaxed text-foreground">
-                    {sc.scbGrowthPotential}
-                  </p>
+                  <p className="text-sm leading-relaxed text-foreground">{sc.scbGrowthPotential}</p>
                 </div>
               </div>
             </div>
