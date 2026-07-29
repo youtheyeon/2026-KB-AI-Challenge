@@ -14,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +62,7 @@ public class Diagnosis extends BaseTimeEntity {
             name = "diagnosis_bottlenecks",
             joinColumns = @JoinColumn(name = "diagnosis_id")
     )
+    @OrderColumn(name = "bottleneck_order")
     private List<Bottleneck> bottlenecks = new ArrayList<>();
 
     private Diagnosis(Business business, Dataset dataset) {

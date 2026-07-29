@@ -12,7 +12,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -39,10 +38,6 @@ public class AllocationPlan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "simulation_id", nullable = false)
-    private Simulation simulation;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "plan_code", nullable = false, length = 5)
     private PlanCode planCode;
@@ -65,14 +60,12 @@ public class AllocationPlan {
     private List<AllocationItem> items = new ArrayList<>();
 
     AllocationPlan(
-            Simulation simulation,
             PlanCode planCode,
             String planType,
             String title,
             Long totalAmount,
             List<AllocationItem> items
     ) {
-        this.simulation = Objects.requireNonNull(simulation);
         this.planCode = Objects.requireNonNull(planCode);
         this.planType = Objects.requireNonNull(planType);
         this.title = Objects.requireNonNull(title);

@@ -47,17 +47,17 @@ public class Dataset extends BaseTimeEntity {
     private LocalDateTime confirmedAt;
 
     @OneToMany(
-            mappedBy = "dataset",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @JoinColumn(name = "dataset_id", nullable = false)
     private List<DatasetFile> files = new ArrayList<>();
 
     @OneToMany(
-            mappedBy = "dataset",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @JoinColumn(name = "dataset_id", nullable = false)
     private List<ColumnMapping> columnMappings = new ArrayList<>();
 
     private Dataset(Business business) {
@@ -75,7 +75,7 @@ public class Dataset extends BaseTimeEntity {
         if (duplicate) {
             throw new IllegalArgumentException("동일한 파일 유형은 한 번만 등록할 수 있습니다.");
         }
-        files.add(new DatasetFile(this, fileType, fileName));
+        files.add(new DatasetFile(fileType, fileName));
     }
 
     public void addAutoMapping(
@@ -85,7 +85,6 @@ public class Dataset extends BaseTimeEntity {
             BigDecimal confidence
     ) {
         columnMappings.add(new ColumnMapping(
-                this,
                 fileType,
                 sourceColumn,
                 targetField,

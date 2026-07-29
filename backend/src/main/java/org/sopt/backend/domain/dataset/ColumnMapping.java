@@ -5,12 +5,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
@@ -35,10 +32,6 @@ public class ColumnMapping {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "dataset_id", nullable = false)
-    private Dataset dataset;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "file_type", nullable = false, length = 20)
     private DatasetFileType fileType;
@@ -56,13 +49,11 @@ public class ColumnMapping {
     private boolean confirmed;
 
     ColumnMapping(
-            Dataset dataset,
             DatasetFileType fileType,
             String sourceColumn,
             String targetField,
             BigDecimal confidence
     ) {
-        this.dataset = Objects.requireNonNull(dataset);
         this.fileType = Objects.requireNonNull(fileType);
         this.sourceColumn = Objects.requireNonNull(sourceColumn);
         this.targetField = Objects.requireNonNull(targetField);

@@ -12,10 +12,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -48,10 +52,10 @@ public class Simulation extends BaseTimeEntity {
     private Integer predictionMonths;
 
     @OneToMany(
-            mappedBy = "simulation",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @JoinColumn(name = "simulation_id", nullable = false)
     private List<AllocationPlan> plans = new ArrayList<>();
 
     private Simulation(
@@ -89,7 +93,6 @@ public class Simulation extends BaseTimeEntity {
         }
 
         AllocationPlan plan = new AllocationPlan(
-                this,
                 planCode,
                 planType,
                 title,
@@ -98,5 +101,20 @@ public class Simulation extends BaseTimeEntity {
         );
         plans.add(plan);
         return plan;
+    }
+
+    public List<AllocationPlan> getPlans() {
+        return List.copyOf(plans);
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void validatePlanSet() {
+        Set<PlanCode> planCodes = EnumSet.noneOf(PlanCode.class);
+        plans.forEach(plan -> planCodes.add(plan.getPlanCode()));
+        if (plans.size() != PlanCode.values().length
+                || !planCodes.equals(EnumSet.allOf(PlanCode.class))) {
+            throw new IllegalStateException("A, B, C 배분안이 각각 하나씩 필요합니다.");
+        }
     }
 }

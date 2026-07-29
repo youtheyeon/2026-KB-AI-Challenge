@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
@@ -46,8 +47,8 @@ public class OutcomeData extends BaseTimeEntity {
     @Column(name = "source_type", nullable = false, length = 20)
     private OutcomeSourceType sourceType;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dataset_id", unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dataset_id")
     private Dataset dataset;
 
     @Embedded

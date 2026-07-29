@@ -97,12 +97,14 @@ CREATE INDEX idx_diagnosis_status ON diagnoses (status);
 
 CREATE TABLE diagnosis_bottlenecks (
     diagnosis_id BIGINT NOT NULL,
+    bottleneck_order INTEGER NOT NULL,
     bottleneck_code VARCHAR(100),
     bottleneck_title VARCHAR(200) NOT NULL,
     priority VARCHAR(30),
     confidence VARCHAR(30),
     evidence VARCHAR(1000),
     description VARCHAR(1000),
+    PRIMARY KEY (diagnosis_id, bottleneck_order),
     CONSTRAINT fk_diagnosis_bottleneck
         FOREIGN KEY (diagnosis_id) REFERENCES diagnoses (id)
 );
@@ -209,7 +211,6 @@ CREATE TABLE outcome_data (
     created_at TIMESTAMP(6) NOT NULL,
     updated_at TIMESTAMP(6) NOT NULL,
     CONSTRAINT uk_outcome_data_simulation UNIQUE (simulation_id),
-    CONSTRAINT uk_outcome_data_dataset UNIQUE (dataset_id),
     CONSTRAINT fk_outcome_data_simulation
         FOREIGN KEY (simulation_id) REFERENCES simulations (id),
     CONSTRAINT fk_outcome_data_dataset
@@ -217,6 +218,7 @@ CREATE TABLE outcome_data (
 );
 
 CREATE INDEX idx_outcome_data_status ON outcome_data (status);
+CREATE INDEX idx_outcome_data_dataset ON outcome_data (dataset_id);
 
 CREATE TABLE outcomes (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

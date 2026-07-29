@@ -57,7 +57,7 @@ public class PlanSelection extends BaseTimeEntity {
             String memo,
             LocalDate verificationAvailableDate
     ) {
-        if (selectedPlan.getSimulation() != simulation) {
+        if (!simulation.getPlans().contains(selectedPlan)) {
             throw new IllegalArgumentException("선택한 배분안은 같은 시뮬레이션에 속해야 합니다.");
         }
         this.simulation = Objects.requireNonNull(simulation);
