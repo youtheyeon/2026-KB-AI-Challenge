@@ -1,4 +1,3 @@
-import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 import { DEMO_CREDENTIALS } from '@/features/login/model/mock';
@@ -40,12 +39,8 @@ export const LoginForm = () => {
       </div>
 
       <Button onClick={() => navigate(ROUTES.simulation)} className="w-full py-3">
-        로그인 <ArrowRight className="h-4 w-4" />
+        로그인
       </Button>
-
-      <p className="text-center text-xs text-muted-foreground">
-        데모용 계정이 이미 입력되어 있습니다.
-      </p>
     </div>
   );
 };
