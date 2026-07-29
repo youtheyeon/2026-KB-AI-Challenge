@@ -1,6 +1,4 @@
-import type { ComponentType } from 'react';
-
-export type IconComponent = ComponentType<{ className?: string }>;
+import type { IconComponent } from '@/shared/lib/types';
 
 export type SlotState = 'idle' | 'parsing' | 'done';
 
