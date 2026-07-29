@@ -1,6 +1,6 @@
 import { FileSpreadsheet, FileText, Megaphone, Users, Wrench } from 'lucide-react';
 
-import type { Bottleneck, ColumnMap, RiskLevel, Scenario, UploadSlot } from './types';
+import type { Bottleneck, RiskLevel, Scenario, UploadSlot } from './types';
 
 export const STEPS = [
   '사업 데이터 연결',
@@ -69,13 +69,6 @@ export const UPLOAD_SLOTS: UploadSlot[] = [
     badge: '선택',
     bc: 'bg-secondary text-muted-foreground border-border',
   },
-];
-
-export const COL_MAPS: ColumnMap[] = [
-  { orig: '결제일', mapped: '거래일자', conf: '높음', cc: 'text-green-600' },
-  { orig: '승인금액', mapped: '매출금액', conf: '높음', cc: 'text-green-600' },
-  { orig: '상품명', mapped: '상품분류', conf: '보통', cc: 'text-amber-600' },
-  { orig: '취소여부', mapped: '거래상태', conf: '높음', cc: 'text-green-600' },
 ];
 
 export const BOTTLENECKS: Bottleneck[] = [

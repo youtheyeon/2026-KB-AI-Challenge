@@ -1,13 +1,13 @@
-import { CheckCircle2, ChevronLeft, ChevronRight, Info, Upload } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, Upload } from 'lucide-react';
 import { useState } from 'react';
 
-import { COL_MAPS, SAMPLE, UPLOAD_SLOTS, type SlotState } from '@/entities/simulation';
+import { SAMPLE, UPLOAD_SLOTS, type SlotState } from '@/entities/simulation';
 import { Button } from '@/shared/ui';
 
 const CHANNELS = ['홀 판매', '배달 플랫폼', '포장', '온라인 판매', '기타'];
 const BIZ_TYPES = ['외식업', '카페·베이커리', '소매업', '미용·생활서비스', '숙박업', '기타'];
 
-type Section = 'info' | 'upload' | 'mapping';
+type Section = 'info' | 'upload';
 
 interface DataConnectStepProps {
   isSample: boolean;
@@ -88,7 +88,6 @@ export const DataConnectStep = ({ isSample, onNext }: DataConnectStepProps) => {
       <div className="flex border-b border-border">
         {sectionTab('info', '1 · 기본정보')}
         {sectionTab('upload', '2 · 데이터 업로드')}
-        {sectionTab('mapping', '3 · 컬럼 매핑 확인')}
       </div>
 
       {section === 'info' && (
@@ -237,63 +236,6 @@ export const DataConnectStep = ({ isSample, onNext }: DataConnectStepProps) => {
               <ChevronLeft className="h-4 w-4" />
               기본정보
             </button>
-            <Button variant="outline" onClick={() => setSection('mapping')} className="px-4 py-2">
-              컬럼 매핑 확인 <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {section === 'mapping' && (
-        <div className="space-y-4">
-          <div className="overflow-hidden rounded border border-border">
-            <div className="grid grid-cols-12 border-b border-border bg-muted/30 px-5 py-2.5">
-              {['원본 컬럼', '변환 컬럼', '신뢰도', ''].map((h, i) => (
-                <p
-                  key={h || i}
-                  className={`font-mono text-xs text-muted-foreground ${
-                    i === 0
-                      ? 'col-span-3'
-                      : i === 1
-                        ? 'col-span-4'
-                        : i === 2
-                          ? 'col-span-2'
-                          : 'col-span-3'
-                  }`}
-                >
-                  {h}
-                </p>
-              ))}
-            </div>
-            {COL_MAPS.map((m) => (
-              <div
-                key={m.orig}
-                className="grid grid-cols-12 items-center border-b border-border px-5 py-3 last:border-0"
-              >
-                <p className="col-span-3 font-mono text-sm">{m.orig}</p>
-                <p className="col-span-4 font-mono text-sm text-muted-foreground">→ {m.mapped}</p>
-                <p className={`col-span-2 font-mono text-xs ${m.cc}`}>{m.conf}</p>
-                <button className="col-span-3 text-left text-xs text-muted-foreground underline hover:text-foreground">
-                  수정
-                </button>
-              </div>
-            ))}
-          </div>
-          <div className="flex items-start gap-2 rounded border border-border bg-muted/20 px-4 py-3">
-            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <p className="text-xs text-muted-foreground">
-              금액 단위는 원으로 통일되었습니다. 취소 거래는 매출에서 제외됩니다. 신뢰도
-              &apos;보통&apos; 이하 항목은 직접 확인을 권장합니다.
-            </p>
-          </div>
-          <div className="flex justify-between">
-            <button
-              onClick={() => setSection('upload')}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              데이터 업로드
-            </button>
             <Button
               onClick={onNext}
               disabled={!canNext}
@@ -305,7 +247,7 @@ export const DataConnectStep = ({ isSample, onNext }: DataConnectStepProps) => {
         </div>
       )}
 
-      {section !== 'mapping' && (
+      {section === 'info' && (
         <div className="flex justify-end pt-2">
           <Button
             onClick={onNext}

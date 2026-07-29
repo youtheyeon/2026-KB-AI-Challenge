@@ -1,6 +1,5 @@
 export {
   BOTTLENECKS,
-  COL_MAPS,
   DEMO_RATE,
   riskColor,
   SAMPLE,
@@ -12,7 +11,6 @@ export {
 export type {
   Bottleneck,
   BottleneckSeverity,
-  ColumnMap,
   LoanCond,
   LoanRateMode,
   RiskLevel,

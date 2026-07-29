@@ -12,13 +12,6 @@ export interface UploadSlot {
   bc: string;
 }
 
-export interface ColumnMap {
-  orig: string;
-  mapped: string;
-  conf: string;
-  cc: string;
-}
-
 export type BottleneckSeverity = 'high' | 'medium' | 'low';
 
 export interface Bottleneck {
