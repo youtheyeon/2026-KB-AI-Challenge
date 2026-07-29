@@ -430,10 +430,17 @@ export const ResultCompareStep = ({ onPrev }: ResultCompareStepProps) => {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button onClick={() => navigate(`${ROUTES.simulation}?sample=true`)} className="px-5 py-3">
+              <Button
+                onClick={() => navigate(`${ROUTES.simulation}?sample=true`)}
+                className="px-5 py-3"
+              >
                 <RefreshCw className="h-4 w-4" />새 시뮬레이션 시작
               </Button>
-              <Button variant="outline" onClick={() => navigate(ROUTES.dashboard)} className="px-5 py-3">
+              <Button
+                variant="outline"
+                onClick={() => navigate(ROUTES.dashboard)}
+                className="px-5 py-3"
+              >
                 <BarChart2 className="h-4 w-4" />
                 전체 대시보드
               </Button>
