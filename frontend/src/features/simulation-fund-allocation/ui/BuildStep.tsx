@@ -1,6 +1,7 @@
 import { ChevronRight } from 'lucide-react';
 
 import { SCENARIOS, type LoanCond } from '@/entities/simulation';
+import { Button } from '@/shared/ui';
 
 interface BuildStepProps {
   cond: LoanCond;
@@ -68,12 +69,9 @@ export const BuildStep = ({ cond, onNext }: BuildStepProps) => {
         })}
       </div>
       <div className="flex justify-end">
-        <button
-          onClick={onNext}
-          className="flex items-center gap-2 rounded bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
-        >
+        <Button onClick={onNext} className="px-5 py-2.5">
           시나리오 비교 <ChevronRight className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
     </div>
   );

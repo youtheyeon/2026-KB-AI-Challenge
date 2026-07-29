@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
 import { ARCHIVED_SIMS, DEFAULT_ITEMS } from '@/entities/verify';
+import { Button } from '@/shared/ui';
 
 interface RecordExecutionStepProps {
   onPrev: () => void;
@@ -165,13 +166,13 @@ export const RecordExecutionStep = ({ onPrev, onNext }: RecordExecutionStepProps
           <ChevronLeft className="h-4 w-4" />
           이전
         </button>
-        <button
+        <Button
           onClick={onNext}
           disabled={!execMode}
-          className="flex items-center gap-2 rounded bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+          className="px-5 py-2.5 disabled:cursor-not-allowed disabled:opacity-30"
         >
           진행 내역 저장 후 결과 비교 <ChevronRight className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
     </div>
   );

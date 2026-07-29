@@ -2,6 +2,7 @@ import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
 import { ARCHIVED_SIMS } from '@/entities/verify';
+import { Button } from '@/shared/ui';
 
 interface LoadSimulationStepProps {
   onNext: () => void;
@@ -76,13 +77,13 @@ export const LoadSimulationStep = ({ onNext }: LoadSimulationStepProps) => {
       </div>
 
       <div className="flex justify-end">
-        <button
+        <Button
           onClick={onNext}
           disabled={!loadedSim}
-          className="flex items-center gap-2 rounded bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+          className="px-5 py-2.5 disabled:cursor-not-allowed disabled:opacity-30"
         >
           실제 진행 등록 <ChevronRight className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
     </div>
   );

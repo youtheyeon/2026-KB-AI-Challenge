@@ -35,6 +35,7 @@ import {
   TREND_DATA,
 } from '@/entities/verify';
 import { ROUTES } from '@/shared/config/routes';
+import { Button } from '@/shared/ui';
 
 type DataMode = 'mock' | 'upload' | 'manual';
 
@@ -132,12 +133,9 @@ export const ResultCompareStep = ({ onPrev }: ResultCompareStepProps) => {
               <p className="font-mono text-xs text-muted-foreground">
                 기간: 2026.01~03 (진행 후 3개월)
               </p>
-              <button
-                onClick={() => setDataLoaded(true)}
-                className="flex items-center gap-2 rounded bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
-              >
+              <Button onClick={() => setDataLoaded(true)} className="px-4 py-2">
                 Mock 데이터 불러오기 <ArrowRight className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           )}
 
@@ -149,12 +147,9 @@ export const ResultCompareStep = ({ onPrev }: ResultCompareStepProps) => {
                 <br />
                 <span className="text-xs">.csv, .xlsx 지원</span>
               </p>
-              <button
-                onClick={() => setDataLoaded(true)}
-                className="rounded border border-border px-4 py-2 text-sm transition-colors hover:bg-secondary"
-              >
+              <Button variant="outline" onClick={() => setDataLoaded(true)} className="px-4 py-2">
                 파일 선택 (실습: Mock으로 대체)
-              </button>
+              </Button>
             </div>
           )}
 
@@ -172,12 +167,9 @@ export const ResultCompareStep = ({ onPrev }: ResultCompareStepProps) => {
                   />
                 </div>
               ))}
-              <button
-                onClick={() => setDataLoaded(true)}
-                className="flex w-full items-center justify-center gap-2 rounded bg-foreground py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
-              >
+              <Button onClick={() => setDataLoaded(true)} className="w-full py-2.5">
                 저장하고 비교 <ArrowRight className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -438,19 +430,13 @@ export const ResultCompareStep = ({ onPrev }: ResultCompareStepProps) => {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <button
-                onClick={() => navigate(`${ROUTES.simulation}?sample=true`)}
-                className="flex items-center justify-center gap-2 rounded bg-foreground px-5 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90"
-              >
+              <Button onClick={() => navigate(`${ROUTES.simulation}?sample=true`)} className="px-5 py-3">
                 <RefreshCw className="h-4 w-4" />새 시뮬레이션 시작
-              </button>
-              <button
-                onClick={() => navigate(ROUTES.dashboard)}
-                className="flex items-center justify-center gap-2 rounded border border-border px-5 py-3 text-sm transition-colors hover:bg-secondary"
-              >
+              </Button>
+              <Button variant="outline" onClick={() => navigate(ROUTES.dashboard)} className="px-5 py-3">
                 <BarChart2 className="h-4 w-4" />
                 전체 대시보드
-              </button>
+              </Button>
             </div>
           </div>
         </div>
