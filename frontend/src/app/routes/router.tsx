@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router';
 
 import { LandingPage } from '@/pages/landing';
 import { LoginPage } from '@/pages/login';
+import { SimulationPage } from '@/pages/simulation';
 import { ROUTES } from '@/shared/config/routes';
 
 export const router = createBrowserRouter([
@@ -12,5 +13,9 @@ export const router = createBrowserRouter([
   {
     path: ROUTES.login,
     Component: LoginPage,
+  },
+  {
+    path: ROUTES.simulation,
+    Component: SimulationPage,
   },
 ]);
