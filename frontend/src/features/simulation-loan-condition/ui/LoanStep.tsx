@@ -7,6 +7,7 @@ import {
   type LoanCond,
   type LoanRateMode,
 } from '@/entities/simulation';
+import { Button } from '@/shared/ui';
 
 interface LoanStepProps {
   cond: LoanCond;
@@ -224,12 +225,9 @@ export const LoanStep = ({ cond, setCond, onNext }: LoanStepProps) => {
       </div>
 
       <div className="flex justify-end">
-        <button
-          onClick={onNext}
-          className="flex items-center gap-2 rounded bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
-        >
+        <Button onClick={onNext} className="px-5 py-2.5">
           자금 배분안 구성 <ChevronRight className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
     </div>
   );

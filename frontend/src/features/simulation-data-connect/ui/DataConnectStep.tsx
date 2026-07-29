@@ -2,6 +2,7 @@ import { CheckCircle2, ChevronLeft, ChevronRight, Info, Upload } from 'lucide-re
 import { useState } from 'react';
 
 import { COL_MAPS, SAMPLE, UPLOAD_SLOTS, type SlotState } from '@/entities/simulation';
+import { Button } from '@/shared/ui';
 
 const CHANNELS = ['홀 판매', '배달 플랫폼', '포장', '온라인 판매', '기타'];
 const BIZ_TYPES = ['외식업', '카페·베이커리', '소매업', '미용·생활서비스', '숙박업', '기타'];
@@ -70,12 +71,9 @@ export const DataConnectStep = ({ isSample, onNext }: DataConnectStepProps) => {
             사업 기본정보를 입력하고 매출·비용 데이터를 연결하세요.
           </p>
         </div>
-        <button
-          onClick={applySample}
-          className="shrink-0 rounded border border-border px-3 py-2 text-sm transition-colors hover:bg-secondary"
-        >
+        <Button variant="outline" onClick={applySample} className="shrink-0 px-3 py-2">
           샘플로 체험
-        </button>
+        </Button>
       </div>
 
       {useSample && (
@@ -152,12 +150,9 @@ export const DataConnectStep = ({ isSample, onNext }: DataConnectStepProps) => {
             </div>
           </div>
           <div className="flex justify-end">
-            <button
-              onClick={() => setSection('upload')}
-              className="flex items-center gap-2 rounded border border-border px-4 py-2 text-sm transition-colors hover:bg-secondary"
-            >
-              다음: 데이터 업로드 <ChevronRight className="h-4 w-4" />
-            </button>
+            <Button variant="outline" onClick={() => setSection('upload')} className="px-4 py-2">
+              데이터 업로드 <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       )}
@@ -242,12 +237,9 @@ export const DataConnectStep = ({ isSample, onNext }: DataConnectStepProps) => {
               <ChevronLeft className="h-4 w-4" />
               기본정보
             </button>
-            <button
-              onClick={() => setSection('mapping')}
-              className="flex items-center gap-2 rounded border border-border px-4 py-2 text-sm transition-colors hover:bg-secondary"
-            >
+            <Button variant="outline" onClick={() => setSection('mapping')} className="px-4 py-2">
               컬럼 매핑 확인 <ChevronRight className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -302,26 +294,26 @@ export const DataConnectStep = ({ isSample, onNext }: DataConnectStepProps) => {
               <ChevronLeft className="h-4 w-4" />
               데이터 업로드
             </button>
-            <button
+            <Button
               onClick={onNext}
               disabled={!canNext}
-              className="flex items-center gap-2 rounded bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+              className="px-5 py-2.5 disabled:cursor-not-allowed disabled:opacity-30"
             >
               사업 상태 분석하기 <ChevronRight className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {section !== 'mapping' && (
         <div className="flex justify-end pt-2">
-          <button
+          <Button
             onClick={onNext}
             disabled={!canNext}
-            className="flex items-center gap-2 rounded bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+            className="px-5 py-2.5 disabled:cursor-not-allowed disabled:opacity-30"
           >
             분석 시작 <ChevronRight className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       )}
     </div>

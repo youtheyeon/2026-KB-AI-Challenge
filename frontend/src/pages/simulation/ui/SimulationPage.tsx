@@ -9,7 +9,7 @@ import { LoanStep } from '@/features/simulation-loan-condition';
 import { CompareStep } from '@/features/simulation-scenario-compare';
 import { DEMO_RATE, STEPS, type LoanCond } from '@/entities/simulation';
 import { useScrollToTop } from '@/shared/lib/useScrollToTop';
-import { ProgressBar } from '@/widgets/simulation-progress-bar';
+import { StepProgressBar } from '@/shared/ui';
 
 import { Header } from './Header';
 import { SimulationResult } from './SimulationResult';
@@ -50,7 +50,7 @@ export const SimulationPage = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
-      <ProgressBar step={step} />
+      <StepProgressBar steps={STEPS} step={step} />
 
       <main className="mx-auto max-w-3xl px-6 py-8">
         {step === 0 && <DataConnectStep isSample={isSample} onNext={next} />}

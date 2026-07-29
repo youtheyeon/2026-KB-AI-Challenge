@@ -13,7 +13,6 @@ export type {
   Bottleneck,
   BottleneckSeverity,
   ColumnMap,
-  IconComponent,
   LoanCond,
   LoanRateMode,
   RiskLevel,
