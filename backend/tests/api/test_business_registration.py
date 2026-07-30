@@ -126,6 +126,31 @@ def test_register_business_rejects_values_larger_than_storage_limit(
     assert response.status_code == 422
 
 
+@pytest.mark.parametrize(
+    "field,maximum_length",
+    [("name", 150), ("region", 255), ("industry", 100)],
+)
+def test_register_business_accepts_trimmed_value_at_storage_limit(
+    monkeypatch,
+    field: str,
+    maximum_length: int,
+) -> None:
+    database = FakeDatabaseSession()
+    monkeypatch.setattr(db_session, "SessionFactory", lambda: database)
+    normalized_value = "가" * maximum_length
+    payload = {
+        "name": "Y카페",
+        "region": "서울 마포구",
+        "industry": "카페",
+        field: f" {normalized_value} ",
+    }
+
+    response = TestClient(app).post("/api/businesses", json=payload)
+
+    assert response.status_code == 201
+    assert response.json()[field] == normalized_value
+
+
 def test_register_business_creates_session_and_sets_cookie(monkeypatch) -> None:
     database = FakeDatabaseSession()
     monkeypatch.setattr(db_session, "SessionFactory", lambda: database)

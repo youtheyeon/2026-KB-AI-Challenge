@@ -5,7 +5,7 @@ from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Cookie, Depends, Response, status
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -14,23 +14,13 @@ from app.domain.business import Business
 from app.domain.demo_session import DemoSession
 from app.domain.enums import DemoSessionStatus
 
-
-def require_non_blank(value: str) -> str:
-    normalized = value.strip()
-    if not normalized:
-        raise ValueError("필수 입력값입니다.")
-    return normalized
-
-
-RequiredBusinessValue = Annotated[str, AfterValidator(require_non_blank)]
-
 router = APIRouter(prefix="/api/businesses", tags=["businesses"])
 
 
 class BusinessRegistrationRequest(BaseModel):
-    name: RequiredBusinessValue = Field(max_length=150)
-    region: RequiredBusinessValue = Field(max_length=255)
-    industry: RequiredBusinessValue = Field(max_length=100)
+    name: str = Field(min_length=1, max_length=150)
+    region: str = Field(min_length=1, max_length=255)
+    industry: str = Field(min_length=1, max_length=100)
     employee_count: int = Field(
         default=0,
         ge=0,
@@ -41,6 +31,13 @@ class BusinessRegistrationRequest(BaseModel):
         default_factory=list,
         alias="primarySalesChannels",
     )
+
+    @field_validator("name", "region", "industry", mode="before")
+    @classmethod
+    def normalize_profile_value(cls, value: object) -> object:
+        if isinstance(value, str):
+            return value.strip()
+        return value
 
 
 class BusinessRegistrationResponse(BaseModel):
