@@ -56,15 +56,12 @@ export type LoanRateMode = 'demo' | 'manual';
 
 export interface LoanCond {
   loanAmount: number;
-  ownFunds: number;
   rateMode: LoanRateMode;
   rate: number;
   period: number;
   grace: number;
   method: string;
   existingMonthly: number;
-  analysisPeriod: number;
-  useDate: string;
 }
 
 export type RiskLevel = '낮음' | '중간' | '높음';
