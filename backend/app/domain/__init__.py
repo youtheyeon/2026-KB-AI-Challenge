@@ -11,6 +11,13 @@ from app.domain.dataset import (
 )
 from app.domain.diagnosis import Bottleneck, Diagnosis, DiagnosisMetric
 from app.domain.execution import Execution, ExecutionAllocation
+from app.domain.outcome import (
+    BottleneckChange,
+    OutcomeComparison,
+    OutcomeComparisonMetric,
+    OutcomeData,
+    ReassessmentSnapshot,
+)
 from app.domain.simulation import (
     LoanCondition,
     Scenario,
@@ -24,6 +31,7 @@ from app.domain.user import User
 
 __all__ = [
     "Bottleneck",
+    "BottleneckChange",
     "Business",
     "BusinessSnapshot",
     "Dataset",
@@ -36,7 +44,11 @@ __all__ = [
     "NormalizedExpense",
     "NormalizedOnlineSale",
     "NormalizedSale",
+    "OutcomeComparison",
+    "OutcomeComparisonMetric",
+    "OutcomeData",
     "PublicDataSnapshot",
+    "ReassessmentSnapshot",
     "Scenario",
     "ScenarioAllocation",
     "ScenarioFinancialResult",
