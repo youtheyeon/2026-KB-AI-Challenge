@@ -21,6 +21,9 @@ export interface Bottleneck {
   desc: string;
   metric: string;
   conf: string;
+  evidenceSourceType: string;
+  evidenceDescription: string;
+  relatedCategories: AllocationCategory[];
 }
 
 export type AllocationCategory = 'MARKETING_ONLINE' | 'EQUIPMENT_INTERIOR' | 'LABOR' | 'INVENTORY';
@@ -45,7 +48,11 @@ export interface Scenario {
   employees: number;
   residualRange: [number, number];
   addFixed: number;
+  breakEvenAdditionalRevenue: number;
+  requiredAdditionalOrders: number;
   riskLevel: RiskLevel;
+  riskReasons: string[];
+  targetMetrics: string[];
   assumptions: string[];
   risks: string[];
   allocationRationale: string;

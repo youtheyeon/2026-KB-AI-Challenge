@@ -1,5 +1,6 @@
 export {
   BOTTLENECKS,
+  CATEGORY_LABELS,
   DEMO_RATE,
   riskColor,
   SAMPLE,
