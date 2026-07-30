@@ -296,7 +296,6 @@ export const ResultCompareStep = ({ onPrev }: ResultCompareStepProps) => {
               </div>
               {COMPARE_ROWS.map((row) => {
                 const cfg = statusCfg[row.status];
-                const StatusIcon = cfg.icon;
                 const isOpen = expandedRow === row.label;
                 return (
                   <div key={row.label} className="border-b border-border last:border-0">
@@ -317,7 +316,6 @@ export const ResultCompareStep = ({ onPrev }: ResultCompareStepProps) => {
                         {row.external}
                       </p>
                       <div className="col-span-3 flex flex-wrap items-center gap-1.5 pt-0.5">
-                        <StatusIcon className={`h-3.5 w-3.5 shrink-0 ${cfg.iconColor}`} />
                         <span
                           className={`rounded border px-1.5 py-0.5 font-mono text-xs ${cfg.badge}`}
                         >

@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, Minus, TrendingUp } from 'lucide-react';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 import { calcMonthly } from '@/entities/simulation';
 
@@ -123,23 +123,15 @@ export const COMPARE_ROWS: CompareRow[] = [
 export const statusCfg: Record<CompareStatus, CompareStatusConfig> = {
   above: {
     badge: 'bg-blue-50 border-blue-200 text-blue-600',
-    icon: TrendingUp,
-    iconColor: 'text-blue-500',
   },
   'in-range': {
     badge: 'bg-green-50 border-green-200 text-green-600',
-    icon: CheckCircle2,
-    iconColor: 'text-green-500',
   },
   miss: {
     badge: 'bg-red-50 border-red-200 text-red-600',
-    icon: AlertTriangle,
-    iconColor: 'text-red-500',
   },
   partial: {
     badge: 'bg-amber-50 border-amber-200 text-amber-700',
-    icon: Minus,
-    iconColor: 'text-amber-500',
   },
 };
 

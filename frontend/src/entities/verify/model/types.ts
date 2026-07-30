@@ -38,8 +38,6 @@ export interface CompareRow {
 
 export interface CompareStatusConfig {
   badge: string;
-  icon: IconComponent;
-  iconColor: string;
 }
 
 export interface ReevalMetric {
