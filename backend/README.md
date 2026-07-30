@@ -84,8 +84,13 @@ uv run ruff format --check .
 ```
 
 PostgreSQL 통합 테스트를 포함하려면 격리된 테스트 DB 주소를 지정합니다.
+통합 테스트는 `public` 스키마를 초기화하므로 데이터베이스 이름이 `_test`로 끝나야 하고
+파괴적 초기화 동의를 명시해야 합니다.
 
 ```bash
-TEST_DATABASE_URL=postgresql+psycopg://postgres@localhost:5432/kb_ai_challenge \
+ALLOW_DESTRUCTIVE_TEST_DATABASE_RESET=1 \
+TEST_DATABASE_URL=postgresql+psycopg://postgres@localhost:5432/kb_ai_challenge_test \
   uv run pytest
 ```
+
+운영 또는 공유 DB 주소는 `TEST_DATABASE_URL`에 사용하지 않습니다.

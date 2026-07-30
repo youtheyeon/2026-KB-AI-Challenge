@@ -99,7 +99,7 @@ def create_running_diagnosis(
     dataset: Dataset,
 ) -> Diagnosis:
     benchmark = load_benchmark()
-    input_data = collect_analysis_input(business, dataset)
+    input_data = _collect_snapshot_input(business, dataset)
     business_snapshot = _get_or_create_business_snapshot(
         database,
         business,
@@ -132,6 +132,47 @@ def create_running_diagnosis(
     return diagnosis
 
 
+def _collect_snapshot_input(
+    business: Business,
+    dataset: Dataset,
+) -> AnalysisInput:
+    if dataset.sales:
+        return collect_analysis_input(business, dataset)
+
+    reference_dates = [expense.transaction_date for expense in dataset.expenses] + [
+        sale.business_date for sale in dataset.online_sales if sale.business_date is not None
+    ]
+    reference_date = max(reference_dates, default=date.today())
+    expenses = [
+        expense
+        for expense in dataset.expenses
+        if _same_month(expense.transaction_date, reference_date)
+    ]
+    online_sales = [
+        sale
+        for sale in dataset.online_sales
+        if sale.business_date is not None and _same_month(sale.business_date, reference_date)
+    ]
+    online_values = _online_values(online_sales)
+    return AnalysisInput(
+        reference_date=reference_date,
+        monthly_sales_amount=0,
+        monthly_expense_amount=sum(expense.total_amount for expense in expenses),
+        material_cost_amount=_expense_total(expenses, ExpenseCategory.MATERIAL),
+        labor_cost_amount=_expense_total(expenses, ExpenseCategory.LABOR),
+        existing_monthly_repayment_amount=0,
+        monthly_order_count=0,
+        employee_count=business.employee_count,
+        online_sales_amount=online_values["sales_amount"],
+        online_gross_order_amount=online_values["gross_order_amount"],
+        online_platform_cost_amount=online_values["platform_cost_amount"],
+        online_refund_amount=online_values["refund_amount"],
+        online_settlement_amount=online_values["settlement_amount"],
+        timed_sales_by_bucket={},
+        timed_sales_coverage=Decimal("0"),
+    )
+
+
 def run_diagnosis(diagnosis_id: int) -> None:
     database = db_session.SessionFactory()
     try:
@@ -144,15 +185,25 @@ def run_diagnosis(diagnosis_id: int) -> None:
                 "진단 백그라운드 작업이 실패했습니다.", extra={"diagnosis_id": diagnosis_id}
             )
             with database.begin():
-                diagnosis = database.get(Diagnosis, diagnosis_id)
-                if diagnosis is not None:
+                diagnosis = database.get(
+                    Diagnosis,
+                    diagnosis_id,
+                    with_for_update=True,
+                )
+                if diagnosis is not None and diagnosis.status is DiagnosisStatus.RUNNING:
                     diagnosis.status = DiagnosisStatus.FAILED
     finally:
         database.close()
 
 
 def _complete_diagnosis(database: Session, diagnosis_id: int) -> None:
-    diagnosis = database.get(Diagnosis, diagnosis_id)
+    diagnosis = database.get(
+        Diagnosis,
+        diagnosis_id,
+        with_for_update=True,
+    )
+    if diagnosis is not None and diagnosis.status is not DiagnosisStatus.RUNNING:
+        return
     if (
         diagnosis is None
         or diagnosis.business is None
@@ -264,7 +315,9 @@ def _online_values(
             for sale in online_sales
         ),
         "refund_amount": sum(sale.refund_amount for sale in online_sales),
-        "settlement_amount": sum(settlement_values) if settlement_values else None,
+        "settlement_amount": (
+            sum(settlement_values) if len(settlement_values) == len(online_sales) else None
+        ),
     }
 
 

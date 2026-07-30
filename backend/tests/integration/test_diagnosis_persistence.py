@@ -6,7 +6,7 @@ from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, select, text
+from sqlalchemy import create_engine, event, func, select, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -23,7 +23,7 @@ from app.domain.dataset import (
     PublicDataSnapshot,
 )
 from app.domain.demo_session import DemoSession
-from app.domain.diagnosis import Diagnosis
+from app.domain.diagnosis import Bottleneck, Diagnosis, DiagnosisMetric
 from app.domain.enums import (
     DatasetStatus,
     DemoSessionStatus,
@@ -148,3 +148,40 @@ def test_diagnosis_background_task_persists_snapshots_metrics_and_bottlenecks(
     result_response = client.get(f"/api/diagnoses/{diagnosis.id}")
     assert result_response.status_code == 200
     assert result_response.json()["status"] == "COMPLETED"
+
+
+def test_diagnosis_failure_rolls_back_partial_results_and_marks_failed(
+    monkeypatch: pytest.MonkeyPatch,
+    postgres_engine: Engine,
+) -> None:
+    monkeypatch.setattr(
+        db_session,
+        "SessionFactory",
+        sessionmaker(bind=postgres_engine, autoflush=False, autocommit=False),
+    )
+    business_id, dataset_id, session_id = create_ready_dataset(postgres_engine)
+    client = TestClient(app)
+    client.cookies.set("demo_session_id", session_id)
+
+    def fail_metric_insert(*_: object) -> None:
+        raise RuntimeError("의도적인 진단 지표 저장 실패")
+
+    event.listen(DiagnosisMetric, "before_insert", fail_metric_insert)
+    try:
+        response = client.post(
+            f"/api/businesses/{business_id}/diagnoses",
+            json={"datasetId": dataset_id},
+        )
+    finally:
+        event.remove(DiagnosisMetric, "before_insert", fail_metric_insert)
+
+    assert response.status_code == 202
+    with Session(postgres_engine) as database:
+        diagnosis = database.scalar(select(Diagnosis))
+        metric_count = database.scalar(select(func.count()).select_from(DiagnosisMetric))
+        bottleneck_count = database.scalar(select(func.count()).select_from(Bottleneck))
+
+    assert diagnosis is not None
+    assert diagnosis.status is DiagnosisStatus.FAILED
+    assert metric_count == 0
+    assert bottleneck_count == 0

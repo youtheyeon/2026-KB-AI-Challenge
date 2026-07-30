@@ -399,7 +399,7 @@ def _time_of_day_findings(
     findings = []
     for bucket in TIME_BUCKETS:
         benchmark_ratio = benchmark.time_of_day_sales_ratios.get(bucket, Decimal("0"))
-        if benchmark_ratio <= Decimal("0.05"):
+        if benchmark_ratio <= 0:
             continue
         actual_ratio = Decimal(input_data.timed_sales_by_bucket.get(bucket, 0)) / Decimal(
             input_data.monthly_sales_amount

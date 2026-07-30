@@ -12,11 +12,13 @@ from app.api.routes import diagnoses as diagnosis_routes
 from app.db import session as db_session
 from app.domain.business import Business
 from app.domain.dataset import BusinessSnapshot, Dataset, PublicDataSnapshot
+from app.domain.demo_session import DemoSession
 from app.domain.diagnosis import Bottleneck, Diagnosis, DiagnosisMetric
 from app.domain.enums import (
     BottleneckSeverity,
     DatasetStatus,
     DataSourceType,
+    DemoSessionStatus,
     DiagnosisEvidenceSource,
     DiagnosisStatus,
 )
@@ -25,6 +27,7 @@ from app.main import app
 SESSION_ID = UUID("21ee64f2-0c95-4b55-a8c0-3943d36ef8f1")
 OTHER_SESSION_ID = UUID("15e72615-d9e0-46d0-a4fa-33f5154d4447")
 CREATED_AT = datetime(2026, 7, 29, 3, 26, tzinfo=UTC)
+ACTIVE_SESSION_EXPIRES_AT = datetime(2100, 1, 1, tzinfo=UTC)
 
 
 def metric(code: str, value: str, unit: str) -> DiagnosisMetric:
@@ -43,10 +46,18 @@ def build_diagnosis(
     *,
     dataset_status: DatasetStatus = DatasetStatus.READY,
     diagnosis_status: DiagnosisStatus = DiagnosisStatus.COMPLETED,
+    session_expires_at: datetime = ACTIVE_SESSION_EXPIRES_AT,
 ) -> tuple[Business, Dataset, Diagnosis]:
+    demo_session = DemoSession(
+        id=SESSION_ID,
+        last_accessed_at=CREATED_AT,
+        expires_at=session_expires_at,
+        status=DemoSessionStatus.ACTIVE,
+    )
     business = Business(
         id=1,
         demo_session_id=SESSION_ID,
+        demo_session=demo_session,
         name="Y카페",
         region="서울 마포구",
         industry="카페",
@@ -112,19 +123,31 @@ def build_diagnosis(
 
 
 class FakeDatabaseSession:
-    def __init__(self, business: Business, dataset: Dataset, diagnosis: Diagnosis) -> None:
+    def __init__(
+        self,
+        business: Business,
+        dataset: Dataset,
+        diagnosis: Diagnosis,
+        *,
+        require_dataset_lock: bool = False,
+    ) -> None:
         self.business = business
         self.dataset = dataset
         self.diagnosis = diagnosis
+        self.require_dataset_lock = require_dataset_lock
 
     @contextmanager
     def begin(self) -> Iterator[None]:
         yield
 
-    def get(self, model: type, identifier: int):
+    def get(self, model: type, identifier: int | UUID, **kwargs: object):
+        if model is DemoSession and identifier == self.business.demo_session.id:
+            return self.business.demo_session
         if model is Business and identifier == self.business.id:
             return self.business
         if model is Dataset and identifier == self.dataset.id:
+            if self.require_dataset_lock:
+                assert kwargs.get("with_for_update") is True
             return self.dataset
         if model is Diagnosis and identifier == self.diagnosis.id:
             return self.diagnosis
@@ -140,12 +163,20 @@ def create_client(
     dataset_status: DatasetStatus = DatasetStatus.READY,
     diagnosis_status: DiagnosisStatus = DiagnosisStatus.COMPLETED,
     session_id: UUID = SESSION_ID,
+    session_expires_at: datetime = ACTIVE_SESSION_EXPIRES_AT,
+    require_dataset_lock: bool = False,
 ) -> tuple[TestClient, Diagnosis, list[int]]:
     business, dataset, diagnosis = build_diagnosis(
         dataset_status=dataset_status,
         diagnosis_status=diagnosis_status,
+        session_expires_at=session_expires_at,
     )
-    database = FakeDatabaseSession(business, dataset, diagnosis)
+    database = FakeDatabaseSession(
+        business,
+        dataset,
+        diagnosis,
+        require_dataset_lock=require_dataset_lock,
+    )
     scheduled: list[int] = []
     monkeypatch.setattr(db_session, "SessionFactory", lambda: database)
     monkeypatch.setattr(
@@ -177,6 +208,20 @@ def test_create_diagnosis_returns_running_and_schedules_background_task(
         "status": "RUNNING",
         "createdAt": "2026-07-29T03:26:00Z",
     }
+    assert scheduled == [20]
+
+
+def test_create_diagnosis_locks_dataset_before_snapshot_creation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, scheduled = create_client(
+        monkeypatch,
+        require_dataset_lock=True,
+    )
+
+    response = client.post("/api/businesses/1/diagnoses", json={"datasetId": 10})
+
+    assert response.status_code == 202
     assert scheduled == [20]
 
 
@@ -279,6 +324,27 @@ def test_get_running_diagnosis_returns_null_results(
     }
 
 
+def test_get_failed_diagnosis_returns_null_results(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, _ = create_client(
+        monkeypatch,
+        diagnosis_status=DiagnosisStatus.FAILED,
+    )
+
+    response = client.get("/api/diagnoses/20")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "diagnosisId": 20,
+        "status": "FAILED",
+        "financialMetrics": None,
+        "activityMetrics": None,
+        "commercialMetrics": None,
+        "bottlenecks": None,
+    }
+
+
 def test_get_diagnosis_hides_another_session_result(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -293,3 +359,22 @@ def test_get_diagnosis_hides_another_session_result(
             "message": "진단 결과를 찾을 수 없습니다.",
         }
     }
+
+
+def test_expired_session_cannot_start_or_read_diagnosis(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, scheduled = create_client(
+        monkeypatch,
+        session_expires_at=datetime(2020, 1, 1, tzinfo=UTC),
+    )
+
+    start_response = client.post(
+        "/api/businesses/1/diagnoses",
+        json={"datasetId": 10},
+    )
+    result_response = client.get("/api/diagnoses/20")
+
+    assert start_response.status_code == 404
+    assert result_response.status_code == 404
+    assert scheduled == []

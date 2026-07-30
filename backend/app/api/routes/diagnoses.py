@@ -1,6 +1,6 @@
 # 사업 상태 분석과 병목 진단의 비동기 실행·조회 API를 제공하는 라우터
 from collections.abc import Awaitable, Callable
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
@@ -21,11 +21,13 @@ from sqlalchemy.orm import Session
 from app.api.routes.businesses import get_db
 from app.domain.business import Business
 from app.domain.dataset import Dataset
+from app.domain.demo_session import DemoSession
 from app.domain.diagnosis import Bottleneck, Diagnosis
 from app.domain.enums import (
     BottleneckSeverity,
     DatasetStatus,
     DataSourceType,
+    DemoSessionStatus,
     DiagnosisStatus,
 )
 from app.services.diagnosis_service import create_running_diagnosis, run_diagnosis
@@ -124,12 +126,14 @@ def start_diagnosis(
 ) -> DiagnosisStartResponse | JSONResponse:
     with database.begin():
         business = database.get(Business, business_id)
-        dataset = database.get(Dataset, request.dataset_id)
-        session_id = _parse_session_id(demo_session_cookie)
+        dataset = database.get(
+            Dataset,
+            request.dataset_id,
+            with_for_update=True,
+        )
         if (
             business is None
-            or session_id is None
-            or business.demo_session_id != session_id
+            or not _owns_active_session(database, business, demo_session_cookie)
             or dataset is None
             or dataset.business is None
             or dataset.business.id != business_id
@@ -170,12 +174,14 @@ def get_diagnosis(
     demo_session_cookie: str | None = Cookie(default=None, alias="demo_session_id"),
 ) -> DiagnosisResultResponse | JSONResponse:
     diagnosis = database.get(Diagnosis, diagnosis_id)
-    session_id = _parse_session_id(demo_session_cookie)
     if (
         diagnosis is None
         or diagnosis.business is None
-        or session_id is None
-        or diagnosis.business.demo_session_id != session_id
+        or not _owns_active_session(
+            database,
+            diagnosis.business,
+            demo_session_cookie,
+        )
     ):
         return error_response(
             status.HTTP_404_NOT_FOUND,
@@ -233,6 +239,23 @@ def _parse_session_id(session_cookie: str | None) -> UUID | None:
         return UUID(session_cookie) if session_cookie else None
     except ValueError:
         return None
+
+
+def _owns_active_session(
+    database: Session,
+    business: Business,
+    session_cookie: str | None,
+) -> bool:
+    session_id = _parse_session_id(session_cookie)
+    if session_id is None or business.demo_session_id != session_id:
+        return False
+
+    demo_session = database.get(DemoSession, session_id)
+    return (
+        demo_session is not None
+        and demo_session.status is DemoSessionStatus.ACTIVE
+        and demo_session.expires_at > datetime.now(UTC)
+    )
 
 
 def _required_metric(values: dict[str, object], code: str) -> object:

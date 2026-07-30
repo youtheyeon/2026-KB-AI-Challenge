@@ -145,3 +145,20 @@ def test_analyze_requires_eighty_percent_timed_sales_coverage() -> None:
 
     assert "TIME_OF_DAY_WEAKNESS" not in {item.code for item in below_threshold.bottlenecks}
     assert "TIME_OF_DAY_WEAKNESS" in {item.code for item in at_threshold.bottlenecks}
+
+
+def test_analyze_compares_positive_low_volume_time_bucket() -> None:
+    result = analyze(
+        replace(
+            input_data(),
+            timed_sales_by_bucket={"11_14": 24_000_000},
+            timed_sales_coverage=Decimal("0.80"),
+        ),
+        benchmark(),
+    )
+
+    assert any(
+        item.title.startswith("00~06")
+        for item in result.bottlenecks
+        if item.code == "TIME_OF_DAY_WEAKNESS"
+    )

@@ -26,7 +26,11 @@ from app.domain.enums import (
 )
 from app.services import diagnosis_service
 from app.services.diagnosis_analysis import DiagnosisAnalysisError, load_benchmark
-from app.services.diagnosis_service import collect_analysis_input, run_diagnosis
+from app.services.diagnosis_service import (
+    collect_analysis_input,
+    create_running_diagnosis,
+    run_diagnosis,
+)
 
 
 def build_business_and_dataset() -> tuple[Business, Dataset]:
@@ -124,8 +128,14 @@ def build_running_diagnosis() -> Diagnosis:
 
 
 class FakeDatabaseSession:
-    def __init__(self, diagnosis: Diagnosis) -> None:
+    def __init__(
+        self,
+        diagnosis: Diagnosis,
+        *,
+        require_diagnosis_lock: bool = False,
+    ) -> None:
         self.diagnosis = diagnosis
+        self.require_diagnosis_lock = require_diagnosis_lock
         self.rollback_called = False
         self.closed = False
 
@@ -133,8 +143,15 @@ class FakeDatabaseSession:
     def begin(self) -> Iterator[None]:
         yield
 
-    def get(self, model: type, identifier: int) -> Diagnosis | None:
+    def get(
+        self,
+        model: type,
+        identifier: int,
+        **kwargs: object,
+    ) -> Diagnosis | None:
         if model is Diagnosis and identifier == self.diagnosis.id:
+            if self.require_diagnosis_lock:
+                assert kwargs.get("with_for_update") is True
             return self.diagnosis
         return None
 
@@ -143,6 +160,41 @@ class FakeDatabaseSession:
 
     def close(self) -> None:
         self.closed = True
+
+
+class FakeCreateDatabaseSession:
+    def __init__(self) -> None:
+        self.added: list[object] = []
+
+    def add(self, instance: object) -> None:
+        self.added.append(instance)
+
+    def flush(self) -> None:
+        diagnosis = next(
+            (item for item in self.added if isinstance(item, Diagnosis)),
+            None,
+        )
+        if diagnosis is not None:
+            diagnosis.id = 20
+
+
+class FailureRaceDatabaseSession(FakeDatabaseSession):
+    def __init__(self, diagnosis: Diagnosis) -> None:
+        super().__init__(diagnosis)
+        self.get_count = 0
+
+    def get(
+        self,
+        model: type,
+        identifier: int,
+        **kwargs: object,
+    ) -> Diagnosis | None:
+        stored = super().get(model, identifier, **kwargs)
+        if stored is not None:
+            self.get_count += 1
+            if self.get_count == 2:
+                stored.status = DiagnosisStatus.COMPLETED
+        return stored
 
 
 def test_collect_analysis_input_uses_latest_sales_month() -> None:
@@ -167,6 +219,47 @@ def test_collect_analysis_input_rejects_dataset_without_sales() -> None:
 
     with pytest.raises(DiagnosisAnalysisError, match="매출 데이터"):
         collect_analysis_input(business, dataset)
+
+
+def test_collect_analysis_input_omits_partial_online_settlement() -> None:
+    business, dataset = build_business_and_dataset()
+    dataset.online_sales.append(
+        NormalizedOnlineSale(
+            business_date=date(2026, 7, 11),
+            sales_amount=1_000_000,
+            gross_order_amount=1_200_000,
+            platform_fee_amount=0,
+            payment_fee_amount=0,
+            merchant_delivery_fee=0,
+            refund_amount=0,
+            settlement_amount=None,
+        )
+    )
+
+    input_data = collect_analysis_input(business, dataset)
+
+    assert input_data.online_settlement_amount is None
+
+
+def test_ready_dataset_without_sales_transitions_to_failed_in_background(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    business, dataset = build_business_and_dataset()
+    dataset.sales = []
+    database = FakeCreateDatabaseSession()
+
+    diagnosis = create_running_diagnosis(database, business, dataset)
+
+    assert diagnosis.id == 20
+    assert diagnosis.status is DiagnosisStatus.RUNNING
+    assert diagnosis.business_snapshot.monthly_net_sales_amount == 0
+
+    background_database = FakeDatabaseSession(diagnosis)
+    monkeypatch.setattr(db_session, "SessionFactory", lambda: background_database)
+
+    run_diagnosis(20)
+
+    assert diagnosis.status is DiagnosisStatus.FAILED
 
 
 def test_run_diagnosis_persists_results_and_marks_completed(
@@ -201,3 +294,42 @@ def test_run_diagnosis_marks_failed_when_analysis_raises(
     assert diagnosis.status is DiagnosisStatus.FAILED
     assert database.rollback_called is True
     assert database.closed is True
+
+
+def test_run_diagnosis_skips_completed_diagnosis_with_row_lock(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    diagnosis = build_running_diagnosis()
+    diagnosis.status = DiagnosisStatus.COMPLETED
+    database = FakeDatabaseSession(
+        diagnosis,
+        require_diagnosis_lock=True,
+    )
+    monkeypatch.setattr(db_session, "SessionFactory", lambda: database)
+
+    def reject_duplicate_analysis(*_: object) -> None:
+        raise AssertionError("완료된 진단을 다시 계산하면 안 됩니다.")
+
+    monkeypatch.setattr(diagnosis_service, "analyze", reject_duplicate_analysis)
+
+    run_diagnosis(20)
+
+    assert diagnosis.status is DiagnosisStatus.COMPLETED
+    assert database.closed is True
+
+
+def test_failed_worker_does_not_overwrite_concurrently_completed_diagnosis(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    diagnosis = build_running_diagnosis()
+    database = FailureRaceDatabaseSession(diagnosis)
+    monkeypatch.setattr(db_session, "SessionFactory", lambda: database)
+
+    def raise_analysis_error(*_: object) -> None:
+        raise DiagnosisAnalysisError("의도적인 분석 실패")
+
+    monkeypatch.setattr(diagnosis_service, "analyze", raise_analysis_error)
+
+    run_diagnosis(20)
+
+    assert diagnosis.status is DiagnosisStatus.COMPLETED
