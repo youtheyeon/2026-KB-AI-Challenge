@@ -328,7 +328,7 @@ git commit -m "feat: 사업 진단 실행 및 조회 API 추가"
 ### Task 4: PostgreSQL 영속화와 전체 검증
 
 **Files:**
-- Create: `backend/tests/integration/test_diagnosis_api.py`
+- Create: `backend/tests/integration/test_diagnosis_persistence.py`
 - Modify: `backend/README.md`
 - Modify: `checklist.md`
 - Modify: `context-notes.md`
@@ -358,7 +358,7 @@ def test_diagnosis_background_task_persists_snapshots_metrics_and_bottlenecks(
 
 - [ ] **Step 2: 격리 DB가 없을 때 통합 테스트가 안전하게 스킵되는지 확인한다**
 
-Run: `cd backend && /Users/keemhoeyune/Desktop/2026-KB-AI-Challenge/backend/.venv/bin/python -m pytest tests/integration/test_diagnosis_api.py -q`
+Run: `cd backend && /Users/keemhoeyune/Desktop/2026-KB-AI-Challenge/backend/.venv/bin/python -m pytest tests/integration/test_diagnosis_persistence.py -q`
 
 Expected: `TEST_DATABASE_URL`이 없으면 스킵, 있으면 통과.
 
@@ -387,6 +387,6 @@ Expected: 출력 없이 종료 코드 0.
 - [ ] **Step 5: 구현 기록을 커밋한다**
 
 ```bash
-git add backend/README.md backend/tests/integration/test_diagnosis_api.py checklist.md context-notes.md
+git add backend/README.md backend/tests/integration/test_diagnosis_persistence.py checklist.md context-notes.md
 git commit -m "test: 사업 진단 API 통합 검증 추가"
 ```

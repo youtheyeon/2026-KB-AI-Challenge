@@ -48,6 +48,33 @@ uv run uvicorn app.main:app --reload
 
 기본 주소는 `http://127.0.0.1:8000`이며 상태 확인 API는 `GET /health`입니다.
 
+## 사업 상태 분석 및 병목 진단 API
+
+컬럼 매핑이 끝나 `READY` 상태인 데이터셋은 다음 API로 진단할 수 있습니다.
+
+```http
+POST /api/businesses/{businessId}/diagnoses
+Content-Type: application/json
+
+{"datasetId": 1}
+```
+
+POST 요청은 진단 레코드와 입력·공공데이터 스냅샷을 저장한 뒤 즉시 `202 RUNNING`을
+반환합니다. 계산은 FastAPI `BackgroundTasks`에서 이어서 수행하며 결과는 다음 API로
+조회합니다.
+
+```http
+GET /api/diagnoses/{diagnosisId}
+```
+
+계산 중에는 `RUNNING`, 성공하면 `COMPLETED`, 실패하면 `FAILED`를 반환합니다.
+`RUNNING`과 `FAILED`에서는 지표와 병목 필드가 `null`입니다. 현재 캐시된 공공데이터에
+유동인구가 없으므로 완료 응답의 `floatingPopulationGrowthRate`도 `null`입니다.
+
+`BackgroundTasks`는 별도 작업 큐가 아니므로 프로세스가 재시작되면 실행 중인 작업이
+유실될 수 있습니다. 단일 EC2 프로세스용 초기 구현이며, 다중 인스턴스나 재시작 복구가
+필요해지면 외부 작업 큐와 재시도 정책으로 교체해야 합니다.
+
 ## 검사
 
 ```bash
