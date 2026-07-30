@@ -1,4 +1,4 @@
-import { CheckCircle2, ChevronLeft, ChevronRight, Upload } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, MapPin, Upload } from 'lucide-react';
 import { useState } from 'react';
 
 import { SAMPLE, UPLOAD_SLOTS, type SlotState } from '@/entities/simulation';
@@ -43,7 +43,7 @@ export const DataConnectStep = ({ isSample, onNext }: DataConnectStepProps) => {
   };
 
   const doneCount = Object.values(slots).filter((v) => v === 'done').length;
-  const reqDone = ['card', 'cost'].every((id) => slots[id] === 'done');
+  const reqDone = ['sales', 'expense'].every((id) => slots[id] === 'done');
   const canNext = Boolean(name && bizType && region && reqDone);
 
   const toggleChannel = (c: string) =>
@@ -209,6 +209,17 @@ export const DataConnectStep = ({ isSample, onNext }: DataConnectStepProps) => {
                 </div>
               );
             })}
+          </div>
+          <div className="flex items-center gap-2 rounded border border-border bg-muted/10 px-4 py-3">
+            <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium">상권 데이터 자동 조회 완료</p>
+              <p className="text-xs text-muted-foreground">
+                {region || '등록된 사업 지역'} 기준으로 공공데이터를 자동 조회했습니다. 별도
+                업로드가 필요하지 않습니다.
+              </p>
+            </div>
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600" />
           </div>
           <div className="space-y-1.5 rounded border border-border bg-muted/10 px-5 py-4">
             <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
