@@ -83,6 +83,16 @@ public class NormalizedExpense {
     ) {
         this.dataset = Objects.requireNonNull(dataset);
         this.sourceFile = Objects.requireNonNull(sourceFile);
+        if (!dataset.containsFile(sourceFile)) {
+            throw new IllegalArgumentException(
+                    "원본 파일은 정규화 행과 같은 데이터셋에 속해야 합니다."
+            );
+        }
+        if (sourceFile.getFileType() != DatasetFileType.EXPENSE) {
+            throw new IllegalArgumentException(
+                    "비용 정규화 행은 비용 파일을 원본으로 사용해야 합니다."
+            );
+        }
         this.transactionDate = Objects.requireNonNull(transactionDate);
         this.counterparty = counterparty;
         this.description = description;

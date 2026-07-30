@@ -18,6 +18,7 @@ import org.sopt.backend.domain.execution.Execution;
 import org.sopt.backend.domain.execution.ExecutionAllocation;
 import org.sopt.backend.domain.execution.ExecutionType;
 import org.sopt.backend.domain.outcome.ComparisonRow;
+import org.sopt.backend.domain.outcome.ComparisonResultStatus;
 import org.sopt.backend.domain.outcome.OutcomeComparison;
 import org.sopt.backend.domain.outcome.OutcomeData;
 import org.sopt.backend.domain.outcome.OutcomeDataStatus;
@@ -26,7 +27,14 @@ import org.sopt.backend.domain.outcome.ReassessmentSnapshot;
 import org.sopt.backend.domain.simulation.AllocationCategory;
 import org.sopt.backend.domain.simulation.LoanCondition;
 import org.sopt.backend.domain.simulation.RepaymentType;
+import org.sopt.backend.domain.simulation.RiskLevel;
+import org.sopt.backend.domain.simulation.Scenario;
+import org.sopt.backend.domain.simulation.ScenarioAllocation;
+import org.sopt.backend.domain.simulation.ScenarioCode;
+import org.sopt.backend.domain.simulation.ScenarioDraftReason;
+import org.sopt.backend.domain.simulation.ScenarioFinancialResult;
 import org.sopt.backend.domain.simulation.Simulation;
+import org.sopt.backend.domain.selection.ScenarioSelection;
 import org.sopt.backend.domain.source.DataSourceType;
 import org.sopt.backend.domain.user.User;
 
@@ -37,6 +45,7 @@ class FinalMvpOutcomeDomainTest {
         Fixture fixture = createFixture();
         Execution execution = Execution.create(
                 fixture.simulation(),
+                fixture.selection(),
                 ExecutionType.MOCK,
                 LocalDate.of(2026, 8, 1),
                 List.of(
@@ -82,7 +91,7 @@ class FinalMvpOutcomeDomainTest {
                         "월 추가 매출 1380000원 이상",
                         "월 추가 매출 1520000원",
                         "140000원",
-                        "CONDITION_MET",
+                        ComparisonResultStatus.CONDITION_MET,
                         "계절성과 상권 변화가 함께 영향을 줄 수 있습니다."
                 )),
                 reassessment
@@ -105,6 +114,14 @@ class FinalMvpOutcomeDomainTest {
                 fixture.latestSnapshot(),
                 outcomeData.getObservedBusinessSnapshot()
         );
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> comparison.getComparisonRows().clear()
+        );
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> reassessment.getResolvedBottleneckTypes().clear()
+        );
     }
 
     @Test
@@ -115,6 +132,7 @@ class FinalMvpOutcomeDomainTest {
                 IllegalArgumentException.class,
                 () -> Execution.create(
                         fixture.simulation(),
+                        fixture.selection(),
                         ExecutionType.CUSTOM,
                         LocalDate.of(2026, 8, 1),
                         List.of(ExecutionAllocation.create(
@@ -122,6 +140,127 @@ class FinalMvpOutcomeDomainTest {
                                 10_000_000L
                         )),
                         0L
+                )
+        );
+    }
+
+    @Test
+    void 다른_시뮬레이션의_선택으로_집행을_생성할_수_없다() {
+        Fixture fixture = createFixture();
+        Fixture other = createFixture();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> Execution.create(
+                        fixture.simulation(),
+                        other.selection(),
+                        ExecutionType.MOCK,
+                        LocalDate.of(2026, 8, 1),
+                        validExecutionAllocations(),
+                        0L
+                )
+        );
+    }
+
+    @Test
+    void 생성된_집행의_배분_목록은_외부에서_수정할_수_없다() {
+        Fixture fixture = createFixture();
+        Execution execution = Execution.create(
+                fixture.simulation(),
+                fixture.selection(),
+                ExecutionType.MOCK,
+                LocalDate.of(2026, 8, 1),
+                validExecutionAllocations(),
+                0L
+        );
+
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> execution.getAllocations().clear()
+        );
+    }
+
+    @Test
+    void 집행_배분_카테고리는_중복될_수_없다() {
+        Fixture fixture = createFixture();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> Execution.create(
+                        fixture.simulation(),
+                        fixture.selection(),
+                        ExecutionType.MOCK,
+                        LocalDate.of(2026, 8, 1),
+                        List.of(
+                                ExecutionAllocation.create(
+                                        AllocationCategory.MARKETING_ONLINE,
+                                        7_500_000L
+                                ),
+                                ExecutionAllocation.create(
+                                        AllocationCategory.MARKETING_ONLINE,
+                                        7_500_000L
+                                )
+                        ),
+                        0L
+                )
+        );
+    }
+
+    @Test
+    void 결과_비교의_재평가는_관측_데이터의_사업_스냅샷과_같아야_한다() {
+        Fixture fixture = createFixture();
+        Execution execution = Execution.create(
+                fixture.simulation(),
+                fixture.selection(),
+                ExecutionType.MOCK,
+                LocalDate.of(2026, 8, 1),
+                validExecutionAllocations(),
+                0L
+        );
+        OutcomeData outcomeData = OutcomeData.create(
+                fixture.simulation(),
+                fixture.dataset(),
+                fixture.latestSnapshot(),
+                DataSourceType.SYNTHETIC_SALES,
+                LocalDate.of(2026, 10, 31),
+                OutcomeDataStatus.READY
+        );
+        BusinessSnapshot differentSnapshot = BusinessSnapshot.create(
+                fixture.latestSnapshot().getBusiness(),
+                fixture.dataset(),
+                LocalDate.of(2026, 11, 30),
+                "business-snapshot-v3",
+                20_000_000L,
+                16_500_000L,
+                500_000L,
+                new BigDecimal("0.44"),
+                15_500L,
+                1_290,
+                new BigDecimal("0.23"),
+                3,
+                DataSourceType.CALCULATED
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> OutcomeComparison.complete(
+                        fixture.simulation(),
+                        execution,
+                        outcomeData,
+                        List.of(new ComparisonRow(
+                                "MONTHLY_NET_SALES",
+                                "월 순매출 19000000원 이상",
+                                "월 순매출 20000000원",
+                                "1000000원",
+                                ComparisonResultStatus.CONDITION_MET,
+                                null
+                        )),
+                        ReassessmentSnapshot.create(
+                                differentSnapshot,
+                                Set.of(),
+                                Set.of(),
+                                Set.of()
+                        )
                 )
         );
     }
@@ -144,6 +283,7 @@ class FinalMvpOutcomeDomainTest {
                 null
         );
         Dataset dataset = Dataset.create(business, "dataset-v2");
+        Dataset outcomeDataset = Dataset.create(business, "outcome-dataset-v1");
         BusinessSnapshot baselineSnapshot = BusinessSnapshot.create(
                 business,
                 dataset,
@@ -161,7 +301,7 @@ class FinalMvpOutcomeDomainTest {
         );
         BusinessSnapshot latestSnapshot = BusinessSnapshot.create(
                 business,
-                dataset,
+                outcomeDataset,
                 LocalDate.of(2026, 10, 31),
                 "business-snapshot-v2",
                 19_520_000L,
@@ -206,11 +346,91 @@ class FinalMvpOutcomeDomainTest {
                 "prompt-v2",
                 LocalDate.of(2026, 6, 30)
         );
-        return new Fixture(simulation, dataset, latestSnapshot);
+        Scenario selectedScenario = simulation.addScenario(
+                ScenarioCode.A,
+                "BOTTLENECK_FOCUSED",
+                "A 시나리오",
+                scenarioAllocations(),
+                List.of(new ScenarioDraftReason(
+                        "TIME_OF_DAY_WEAKNESS",
+                        AllocationCategory.MARKETING_ONLINE,
+                        "진단 병목에 대응하는 방향입니다."
+                )),
+                ScenarioFinancialResult.create(
+                        446_204L,
+                        0L,
+                        100_000L,
+                        0L,
+                        0,
+                        null,
+                        "UNAVAILABLE",
+                        "검증된 추가 순현금 가정이 없습니다.",
+                        RiskLevel.LOW,
+                        List.of("현재 상태 유지 시 잔여 현금이 양수입니다.")
+                ),
+                List.of("MONTHLY_NET_SALES")
+        );
+        ScenarioSelection selection = ScenarioSelection.create(
+                simulation,
+                selectedScenario
+        );
+        return new Fixture(
+                simulation,
+                selection,
+                outcomeDataset,
+                latestSnapshot
+        );
+    }
+
+    private List<ScenarioAllocation> scenarioAllocations() {
+        return List.of(
+                ScenarioAllocation.create(
+                        AllocationCategory.MARKETING_ONLINE,
+                        new BigDecimal("0.25"),
+                        3_750_000L
+                ),
+                ScenarioAllocation.create(
+                        AllocationCategory.EQUIPMENT_INTERIOR,
+                        new BigDecimal("0.25"),
+                        3_750_000L
+                ),
+                ScenarioAllocation.create(
+                        AllocationCategory.LABOR,
+                        new BigDecimal("0.25"),
+                        3_750_000L
+                ),
+                ScenarioAllocation.create(
+                        AllocationCategory.INVENTORY,
+                        new BigDecimal("0.25"),
+                        3_750_000L
+                )
+        );
+    }
+
+    private List<ExecutionAllocation> validExecutionAllocations() {
+        return List.of(
+                ExecutionAllocation.create(
+                        AllocationCategory.MARKETING_ONLINE,
+                        3_750_000L
+                ),
+                ExecutionAllocation.create(
+                        AllocationCategory.EQUIPMENT_INTERIOR,
+                        3_750_000L
+                ),
+                ExecutionAllocation.create(
+                        AllocationCategory.LABOR,
+                        3_750_000L
+                ),
+                ExecutionAllocation.create(
+                        AllocationCategory.INVENTORY,
+                        3_750_000L
+                )
+        );
     }
 
     private record Fixture(
             Simulation simulation,
+            ScenarioSelection selection,
             Dataset dataset,
             BusinessSnapshot latestSnapshot
     ) {

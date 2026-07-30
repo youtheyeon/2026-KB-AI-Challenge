@@ -16,7 +16,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -47,26 +46,17 @@ public class Diagnosis extends BaseTimeEntity {
     @JoinColumn(name = "dataset_id", nullable = false)
     private Dataset dataset;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "business_snapshot_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_snapshot_id", nullable = false)
     private BusinessSnapshot businessSnapshot;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "public_data_snapshot_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "public_data_snapshot_id", nullable = false)
     private PublicDataSnapshot publicDataSnapshot;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private DiagnosisStatus status;
-
-    @Transient
-    private FinancialMetrics financialMetrics;
-
-    @Transient
-    private ActivityMetrics activityMetrics;
-
-    @Transient
-    private CommercialMetrics commercialMetrics;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @jakarta.persistence.CollectionTable(
@@ -97,22 +87,19 @@ public class Diagnosis extends BaseTimeEntity {
     ) {
         this.business = Objects.requireNonNull(business);
         this.dataset = Objects.requireNonNull(dataset);
-        this.businessSnapshot = businessSnapshot;
-        this.publicDataSnapshot = publicDataSnapshot;
+        this.businessSnapshot = Objects.requireNonNull(businessSnapshot);
+        this.publicDataSnapshot = Objects.requireNonNull(publicDataSnapshot);
+        if (dataset.getBusiness() != business
+                || businessSnapshot.getBusiness() != business
+                || businessSnapshot.getDataset() != dataset
+                || publicDataSnapshot.getBusiness() != business) {
+            throw new IllegalArgumentException(
+                    "진단 입력 데이터는 모두 같은 사업체와 데이터셋에 속해야 합니다."
+            );
+        }
         this.diagnosisVersion = Objects.requireNonNull(diagnosisVersion);
         this.benchmarkVersion = Objects.requireNonNull(benchmarkVersion);
         this.status = DiagnosisStatus.RUNNING;
-    }
-
-    public static Diagnosis start(Business business, Dataset dataset) {
-        return new Diagnosis(
-                business,
-                dataset,
-                null,
-                null,
-                "legacy",
-                "legacy"
-        );
     }
 
     public static Diagnosis start(
@@ -126,25 +113,11 @@ public class Diagnosis extends BaseTimeEntity {
         return new Diagnosis(
                 business,
                 dataset,
-                Objects.requireNonNull(businessSnapshot),
-                Objects.requireNonNull(publicDataSnapshot),
+                businessSnapshot,
+                publicDataSnapshot,
                 diagnosisVersion,
                 benchmarkVersion
         );
-    }
-
-    public void complete(
-            FinancialMetrics financialMetrics,
-            ActivityMetrics activityMetrics,
-            CommercialMetrics commercialMetrics,
-            List<Bottleneck> bottlenecks
-    ) {
-        this.financialMetrics = Objects.requireNonNull(financialMetrics);
-        this.activityMetrics = Objects.requireNonNull(activityMetrics);
-        this.commercialMetrics = Objects.requireNonNull(commercialMetrics);
-        this.bottlenecks.clear();
-        this.bottlenecks.addAll(Objects.requireNonNull(bottlenecks));
-        this.status = DiagnosisStatus.COMPLETED;
     }
 
     public void complete(
@@ -156,5 +129,13 @@ public class Diagnosis extends BaseTimeEntity {
         this.bottlenecks.clear();
         this.bottlenecks.addAll(Objects.requireNonNull(bottlenecks));
         this.status = DiagnosisStatus.COMPLETED;
+    }
+
+    public List<DiagnosisMetric> getMetrics() {
+        return List.copyOf(metrics);
+    }
+
+    public List<Bottleneck> getBottlenecks() {
+        return List.copyOf(bottlenecks);
     }
 }

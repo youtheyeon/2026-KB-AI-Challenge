@@ -87,4 +87,16 @@ public class ReassessmentSnapshot {
                 newBottleneckTypes
         );
     }
+
+    public Set<String> getResolvedBottleneckTypes() {
+        return Set.copyOf(resolvedBottleneckTypes);
+    }
+
+    public Set<String> getRemainingBottleneckTypes() {
+        return Set.copyOf(remainingBottleneckTypes);
+    }
+
+    public Set<String> getNewBottleneckTypes() {
+        return Set.copyOf(newBottleneckTypes);
+    }
 }

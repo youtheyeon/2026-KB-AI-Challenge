@@ -2,6 +2,7 @@
 package org.sopt.backend.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -96,10 +97,11 @@ class FinalMvpDiagnosisDomainTest {
         DiagnosisMetric eveningSalesShare = new DiagnosisMetric(
                 "EVENING_SALES_SHARE",
                 new BigDecimal("0.12"),
+                DataSourceType.SYNTHETIC_SALES,
                 new BigDecimal("0.24"),
+                DataSourceType.BENCHMARK,
                 new BigDecimal("-0.12"),
                 "RATIO",
-                DataSourceType.BENCHMARK,
                 "benchmark-2026-07-v2"
         );
         Bottleneck bottleneck = Bottleneck.create(
@@ -119,10 +121,22 @@ class FinalMvpDiagnosisDomainTest {
         assertEquals(DiagnosisStatus.COMPLETED, diagnosis.getStatus());
         assertEquals("benchmark-2026-07-v2", diagnosis.getBenchmarkVersion());
         assertEquals(new BigDecimal("-0.12"), diagnosis.getMetrics().getFirst().getDifferenceValue());
+        assertEquals(
+                DataSourceType.SYNTHETIC_SALES,
+                diagnosis.getMetrics().getFirst().getCurrentSourceType()
+        );
+        assertEquals(
+                DataSourceType.BENCHMARK,
+                diagnosis.getMetrics().getFirst().getComparisonSourceType()
+        );
         assertEquals(BottleneckSeverity.CLEAR, diagnosis.getBottlenecks().getFirst().getSeverity());
         assertEquals(
                 Set.of(AllocationCategory.MARKETING_ONLINE, AllocationCategory.LABOR),
                 diagnosis.getBottlenecks().getFirst().getRelatedCategories()
+        );
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> diagnosis.getMetrics().clear()
         );
     }
 

@@ -1,4 +1,4 @@
-// 데이터셋 분석과 매핑 진행 상태를 정의하는 열거형
+// 데이터셋 업로드와 파싱 및 정규화 진행 상태를 정의하는 열거형
 package org.sopt.backend.domain.dataset;
 
 public enum DatasetStatus {
@@ -7,8 +7,5 @@ public enum DatasetStatus {
     NORMALIZING,
     READY,
     NEEDS_REUPLOAD,
-    ANALYZING,
-    MAPPING_READY,
-    MAPPING_CONFIRMED,
     FAILED
 }

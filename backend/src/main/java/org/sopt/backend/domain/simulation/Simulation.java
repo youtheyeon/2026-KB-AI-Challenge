@@ -15,7 +15,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -49,19 +48,16 @@ public class Simulation extends BaseTimeEntity {
     @JoinColumn(name = "diagnosis_id", nullable = false)
     private Diagnosis diagnosis;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dataset_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "dataset_id", nullable = false)
     private Dataset dataset;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "business_snapshot_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_snapshot_id", nullable = false)
     private BusinessSnapshot businessSnapshot;
 
     @Embedded
     private LoanCondition loanCondition;
-
-    @Transient
-    private Integer predictionMonths;
 
     @Column(nullable = false, length = 30)
     private String status;
@@ -82,26 +78,6 @@ public class Simulation extends BaseTimeEntity {
     @JoinColumn(name = "simulation_id", nullable = false)
     private List<Scenario> scenarios = new ArrayList<>();
 
-    @Transient
-    private List<AllocationPlan> plans = new ArrayList<>();
-
-    private Simulation(
-            Business business,
-            Diagnosis diagnosis,
-            LoanCondition loanCondition,
-            Integer predictionMonths
-    ) {
-        this.business = Objects.requireNonNull(business);
-        this.diagnosis = Objects.requireNonNull(diagnosis);
-        this.loanCondition = Objects.requireNonNull(loanCondition);
-        this.predictionMonths = Objects.requireNonNull(predictionMonths);
-        this.status = "LEGACY";
-        this.allocationGeneratorVersion = "legacy";
-        this.calculationVersion = "legacy";
-        this.promptVersion = "legacy";
-        this.publicDataReferenceDate = LocalDate.of(1970, 1, 1);
-    }
-
     private Simulation(
             Business business,
             Dataset dataset,
@@ -118,20 +94,21 @@ public class Simulation extends BaseTimeEntity {
         this.diagnosis = Objects.requireNonNull(diagnosis);
         this.businessSnapshot = Objects.requireNonNull(businessSnapshot);
         this.loanCondition = Objects.requireNonNull(loanCondition);
+        if (dataset.getBusiness() != business
+                || diagnosis.getBusiness() != business
+                || diagnosis.getDataset() != dataset
+                || diagnosis.getBusinessSnapshot() != businessSnapshot
+                || businessSnapshot.getBusiness() != business
+                || businessSnapshot.getDataset() != dataset) {
+            throw new IllegalArgumentException(
+                    "시뮬레이션 입력은 같은 사업체와 데이터셋에 속해야 합니다."
+            );
+        }
         this.status = "CREATING";
         this.allocationGeneratorVersion = Objects.requireNonNull(allocationGeneratorVersion);
         this.calculationVersion = Objects.requireNonNull(calculationVersion);
         this.promptVersion = Objects.requireNonNull(promptVersion);
         this.publicDataReferenceDate = Objects.requireNonNull(publicDataReferenceDate);
-    }
-
-    public static Simulation create(
-            Business business,
-            Diagnosis diagnosis,
-            LoanCondition loanCondition,
-            Integer predictionMonths
-    ) {
-        return new Simulation(business, diagnosis, loanCondition, predictionMonths);
     }
 
     public static Simulation create(
@@ -193,52 +170,14 @@ public class Simulation extends BaseTimeEntity {
         return List.copyOf(scenarios);
     }
 
-    public AllocationPlan addPlan(
-            PlanCode planCode,
-            String planType,
-            String title,
-            Long totalAmount,
-            List<AllocationItem> items
-    ) {
-        boolean duplicate = plans.stream()
-                .anyMatch(plan -> plan.getPlanCode() == planCode);
-        if (duplicate) {
-            throw new IllegalArgumentException("동일한 배분안 코드는 한 번만 등록할 수 있습니다.");
-        }
-
-        AllocationPlan plan = new AllocationPlan(
-                planCode,
-                planType,
-                title,
-                totalAmount,
-                items
-        );
-        plans.add(plan);
-        return plan;
-    }
-
-    public List<AllocationPlan> getPlans() {
-        return List.copyOf(plans);
-    }
-
     @PrePersist
     @PreUpdate
     private void validatePlanSet() {
-        if (!scenarios.isEmpty()) {
-            Set<ScenarioCode> scenarioCodes = EnumSet.noneOf(ScenarioCode.class);
-            scenarios.forEach(scenario -> scenarioCodes.add(scenario.getScenarioCode()));
-            if (scenarios.size() != ScenarioCode.values().length
-                    || !scenarioCodes.equals(EnumSet.allOf(ScenarioCode.class))) {
-                throw new IllegalStateException("A, B, C 시나리오가 각각 하나씩 필요합니다.");
-            }
-            return;
-        }
-
-        Set<PlanCode> planCodes = EnumSet.noneOf(PlanCode.class);
-        plans.forEach(plan -> planCodes.add(plan.getPlanCode()));
-        if (plans.size() != PlanCode.values().length
-                || !planCodes.equals(EnumSet.allOf(PlanCode.class))) {
-            throw new IllegalStateException("A, B, C 배분안이 각각 하나씩 필요합니다.");
+        Set<ScenarioCode> scenarioCodes = EnumSet.noneOf(ScenarioCode.class);
+        scenarios.forEach(scenario -> scenarioCodes.add(scenario.getScenarioCode()));
+        if (scenarios.size() != ScenarioCode.values().length
+                || !scenarioCodes.equals(EnumSet.allOf(ScenarioCode.class))) {
+            throw new IllegalStateException("A, B, C 시나리오가 각각 하나씩 필요합니다.");
         }
     }
 }

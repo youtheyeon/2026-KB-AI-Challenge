@@ -43,28 +43,20 @@ public class LoanCondition {
         this.termMonths = java.util.Objects.requireNonNull(termMonths);
         this.graceMonths = java.util.Objects.requireNonNull(graceMonths);
         this.repaymentType = java.util.Objects.requireNonNull(repaymentType);
+        if (amount <= 0L) {
+            throw new IllegalArgumentException("대출금액은 0보다 커야 합니다.");
+        }
+        if (annualInterestRate.signum() < 0) {
+            throw new IllegalArgumentException("연 금리는 음수일 수 없습니다.");
+        }
+        if (termMonths <= 0) {
+            throw new IllegalArgumentException("상환기간은 0보다 커야 합니다.");
+        }
+        if (graceMonths < 0 || graceMonths > termMonths) {
+            throw new IllegalArgumentException(
+                    "거치기간은 0 이상이고 상환기간 이하여야 합니다."
+            );
+        }
     }
 
-    public LoanCondition(
-            Long loanAmount,
-            Long ownCapitalAmount,
-            Long existingMonthlyRepaymentAmount,
-            BigDecimal interestRate,
-            Integer repaymentPeriodMonths,
-            Integer gracePeriodMonths,
-            RepaymentType repaymentType,
-            Long monthlyRepaymentAmount
-    ) {
-        this(
-                loanAmount,
-                interestRate,
-                repaymentPeriodMonths,
-                gracePeriodMonths == null ? 0 : gracePeriodMonths,
-                repaymentType
-        );
-    }
-
-    public Long getLoanAmount() {
-        return amount;
-    }
 }

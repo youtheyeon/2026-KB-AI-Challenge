@@ -81,6 +81,16 @@ public class NormalizedSale {
     ) {
         this.dataset = Objects.requireNonNull(dataset);
         this.sourceFile = Objects.requireNonNull(sourceFile);
+        if (!dataset.containsFile(sourceFile)) {
+            throw new IllegalArgumentException(
+                    "원본 파일은 정규화 행과 같은 데이터셋에 속해야 합니다."
+            );
+        }
+        if (sourceFile.getFileType() != DatasetFileType.SALES) {
+            throw new IllegalArgumentException(
+                    "매출 정규화 행은 매출 파일을 원본으로 사용해야 합니다."
+            );
+        }
         this.businessDate = Objects.requireNonNull(businessDate);
         this.transactionTime = transactionTime;
         this.receiptNumber = receiptNumber;

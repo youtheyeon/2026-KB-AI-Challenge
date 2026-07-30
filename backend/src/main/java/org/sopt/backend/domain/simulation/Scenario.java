@@ -102,9 +102,11 @@ public class Scenario {
         this.totalAmount = Objects.requireNonNull(totalAmount);
         validateAllocations(allocations, totalAmount);
         this.allocations.addAll(allocations);
-        this.draftReasons.addAll(Objects.requireNonNull(draftReasons));
+        requireNotEmpty(draftReasons, "시나리오 생성 근거가 필요합니다.");
+        this.draftReasons.addAll(draftReasons);
         this.financialResult = Objects.requireNonNull(financialResult);
-        this.targetMetrics.addAll(Objects.requireNonNull(targetMetrics));
+        requireNotEmpty(targetMetrics, "시나리오 목표 확인지표가 필요합니다.");
+        this.targetMetrics.addAll(targetMetrics);
     }
 
     private void validateAllocations(
@@ -136,5 +138,23 @@ public class Scenario {
         if (amountTotal != expectedTotalAmount) {
             throw new IllegalArgumentException("배분 금액 합계는 대출금액과 같아야 합니다.");
         }
+    }
+
+    private void requireNotEmpty(List<?> values, String message) {
+        if (Objects.requireNonNull(values).isEmpty()) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    public List<ScenarioAllocation> getAllocations() {
+        return List.copyOf(allocations);
+    }
+
+    public List<ScenarioDraftReason> getDraftReasons() {
+        return List.copyOf(draftReasons);
+    }
+
+    public List<String> getTargetMetrics() {
+        return List.copyOf(targetMetrics);
     }
 }

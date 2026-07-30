@@ -98,7 +98,10 @@ public class ScenarioFinancialResult {
         this.paybackStatus = Objects.requireNonNull(paybackStatus);
         this.paybackReason = paybackReason;
         this.riskLevel = Objects.requireNonNull(riskLevel);
-        this.riskReasons.addAll(Objects.requireNonNull(riskReasons));
+        if (Objects.requireNonNull(riskReasons).isEmpty()) {
+            throw new IllegalArgumentException("위험등급의 계산 근거가 필요합니다.");
+        }
+        this.riskReasons.addAll(riskReasons);
         this.sourceType = DataSourceType.CALCULATED;
     }
 
@@ -126,5 +129,9 @@ public class ScenarioFinancialResult {
                 riskLevel,
                 riskReasons
         );
+    }
+
+    public List<String> getRiskReasons() {
+        return List.copyOf(riskReasons);
     }
 }

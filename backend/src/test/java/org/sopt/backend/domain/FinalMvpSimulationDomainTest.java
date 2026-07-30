@@ -52,7 +52,7 @@ class FinalMvpSimulationDomainTest {
                 "DIAGNOSIS_PROPORTIONAL",
                 "진단 비례 대응형",
                 allocations("0.35", "0.25", "0.25", "0.15"),
-                List.of(),
+                draftReasons(),
                 financialResult(),
                 List.of("MATERIAL_COST_RATE")
         );
@@ -61,7 +61,7 @@ class FinalMvpSimulationDomainTest {
                 "EVEN_DISTRIBUTION",
                 "균등 분산형",
                 allocations("0.25", "0.25", "0.25", "0.25"),
-                List.of(),
+                draftReasons(),
                 financialResult(),
                 List.of("MONTHLY_NET_SALES")
         );
@@ -93,7 +93,7 @@ class FinalMvpSimulationDomainTest {
                         "BOTTLENECK_FOCUSED",
                         "잘못된 안",
                         allocations("0.04", "0.46", "0.25", "0.25"),
-                        List.of(),
+                        draftReasons(),
                         financialResult(),
                         List.of()
                 )
@@ -133,9 +133,187 @@ class FinalMvpSimulationDomainTest {
                         "BOTTLENECK_FOCUSED",
                         "금액 불일치 안",
                         invalidAllocations,
+                        draftReasons(),
+                        financialResult(),
+                        List.of("MONTHLY_NET_SALES")
+                )
+        );
+    }
+
+    @Test
+    void 같은_시뮬레이션에_동일한_시나리오_코드를_중복_등록할_수_없다() {
+        Simulation simulation = createSimulation();
+        simulation.addScenario(
+                ScenarioCode.A,
+                "BOTTLENECK_FOCUSED",
+                "첫 번째 A안",
+                allocations("0.25", "0.25", "0.25", "0.25"),
+                draftReasons(),
+                financialResult(),
+                List.of("MONTHLY_NET_SALES")
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> simulation.addScenario(
+                        ScenarioCode.A,
+                        "BOTTLENECK_FOCUSED",
+                        "두 번째 A안",
+                        allocations("0.25", "0.25", "0.25", "0.25"),
+                        draftReasons(),
+                        financialResult(),
+                        List.of("MONTHLY_NET_SALES")
+                )
+        );
+    }
+
+    @Test
+    void 대출금액과_상환기간은_양수여야_하고_거치기간은_상환기간을_넘을_수_없다() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new LoanCondition(
+                        -1L,
+                        new BigDecimal("0.045"),
+                        36,
+                        0,
+                        RepaymentType.EQUAL_PAYMENT
+                )
+        );
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new LoanCondition(
+                        15_000_000L,
+                        new BigDecimal("0.045"),
+                        0,
+                        0,
+                        RepaymentType.EQUAL_PAYMENT
+                )
+        );
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new LoanCondition(
+                        15_000_000L,
+                        new BigDecimal("0.045"),
+                        12,
+                        13,
+                        RepaymentType.EQUAL_PAYMENT
+                )
+        );
+    }
+
+    @Test
+    void 생성된_시나리오의_배분_목록은_외부에서_수정할_수_없다() {
+        Simulation simulation = createSimulation();
+        Scenario scenario = simulation.addScenario(
+                ScenarioCode.A,
+                "BOTTLENECK_FOCUSED",
+                "A 시나리오",
+                allocations("0.25", "0.25", "0.25", "0.25"),
+                draftReasons(),
+                financialResult(),
+                List.of("MONTHLY_NET_SALES")
+        );
+
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> scenario.getAllocations().clear()
+        );
+    }
+
+    @Test
+    void 시나리오에는_생성_근거와_목표_지표가_필요하다() {
+        Simulation simulation = createSimulation();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> simulation.addScenario(
+                        ScenarioCode.A,
+                        "BOTTLENECK_FOCUSED",
+                        "근거 없는 시나리오",
+                        allocations("0.25", "0.25", "0.25", "0.25"),
                         List.of(),
                         financialResult(),
+                        List.of("MONTHLY_NET_SALES")
+                )
+        );
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> simulation.addScenario(
+                        ScenarioCode.A,
+                        "BOTTLENECK_FOCUSED",
+                        "목표 없는 시나리오",
+                        allocations("0.25", "0.25", "0.25", "0.25"),
+                        draftReasons(),
+                        financialResult(),
                         List.of()
+                )
+        );
+    }
+
+    @Test
+    void 배분_금액은_음수일_수_없다() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ScenarioAllocation.create(
+                        AllocationCategory.MARKETING_ONLINE,
+                        new BigDecimal("0.25"),
+                        -1L
+                )
+        );
+    }
+
+    @Test
+    void 위험등급에는_계산_근거가_필요하다() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ScenarioFinancialResult.create(
+                        446_204L,
+                        0L,
+                        100_000L,
+                        0L,
+                        0,
+                        null,
+                        "UNAVAILABLE",
+                        "검증된 추가 순현금 가정이 없습니다.",
+                        RiskLevel.LOW,
+                        List.of()
+                )
+        );
+    }
+
+    @Test
+    void 시뮬레이션_입력은_같은_사업체와_데이터셋에_속해야_한다() {
+        Simulation original = createSimulation();
+        Business otherBusiness = Business.create(
+                User.create("other@example.com", "다른 사용자"),
+                "다른 카페",
+                "서울특별시 종로구",
+                "CAFE_BAKERY",
+                "OFFICE",
+                "UNDER_1_YEAR",
+                "TAKEOUT",
+                1,
+                "UNDER_TEN_MILLION",
+                Set.of("OFFLINE"),
+                null,
+                null,
+                null,
+                null
+        );
+        Dataset otherDataset = Dataset.create(otherBusiness, "other-v1");
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> Simulation.create(
+                        otherBusiness,
+                        otherDataset,
+                        original.getDiagnosis(),
+                        original.getBusinessSnapshot(),
+                        original.getLoanCondition(),
+                        "allocation-v4",
+                        "calculation-v5",
+                        "prompt-v2",
+                        LocalDate.of(2026, 6, 30)
                 )
         );
     }
@@ -250,5 +428,13 @@ class FinalMvpSimulationDomainTest {
                         "추가 매출이 있어야 현금흐름이 0 이상이 됩니다."
                 )
         );
+    }
+
+    private List<ScenarioDraftReason> draftReasons() {
+        return List.of(new ScenarioDraftReason(
+                "TIME_OF_DAY_WEAKNESS",
+                AllocationCategory.MARKETING_ONLINE,
+                "저녁 시간대 매출 비중 차이에 대응하는 방향입니다."
+        ));
     }
 }

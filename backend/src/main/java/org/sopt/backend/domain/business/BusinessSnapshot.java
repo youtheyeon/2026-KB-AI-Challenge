@@ -91,6 +91,11 @@ public class BusinessSnapshot extends BaseTimeEntity {
     ) {
         this.business = Objects.requireNonNull(business);
         this.dataset = Objects.requireNonNull(dataset);
+        if (dataset.getBusiness() != business) {
+            throw new IllegalArgumentException(
+                    "사업 스냅샷의 데이터셋은 같은 사업체에 속해야 합니다."
+            );
+        }
         this.referenceDate = Objects.requireNonNull(referenceDate);
         this.snapshotVersion = Objects.requireNonNull(snapshotVersion);
         this.monthlyNetSalesAmount = Objects.requireNonNull(monthlyNetSalesAmount);

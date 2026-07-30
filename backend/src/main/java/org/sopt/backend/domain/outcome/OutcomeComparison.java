@@ -93,6 +93,12 @@ public class OutcomeComparison extends BaseTimeEntity {
                     "집행 내역과 관측 데이터는 같은 시뮬레이션에 속해야 합니다."
             );
         }
+        if (reassessmentSnapshot.getLatestBusinessSnapshot()
+                != outcomeData.getObservedBusinessSnapshot()) {
+            throw new IllegalArgumentException(
+                    "재평가는 관측 데이터의 사업 스냅샷을 참조해야 합니다."
+            );
+        }
         this.simulation = Objects.requireNonNull(simulation);
         this.execution = Objects.requireNonNull(execution);
         this.outcomeData = Objects.requireNonNull(outcomeData);
@@ -115,5 +121,9 @@ public class OutcomeComparison extends BaseTimeEntity {
                 comparisonRows,
                 reassessmentSnapshot
         );
+    }
+
+    public List<ComparisonRow> getComparisonRows() {
+        return List.copyOf(comparisonRows);
     }
 }

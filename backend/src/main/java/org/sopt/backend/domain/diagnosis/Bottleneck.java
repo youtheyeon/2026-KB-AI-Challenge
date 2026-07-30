@@ -1,4 +1,4 @@
-// 진단과 결과 비교에서 발견한 병목 내용을 저장하는 값 객체
+// 진단에서 발견한 병목과 근거를 저장하는 하위 엔티티
 package org.sopt.backend.domain.diagnosis;
 
 import jakarta.persistence.Column;
@@ -73,24 +73,6 @@ public class Bottleneck {
         this.relatedCategories.addAll(Objects.requireNonNull(relatedCategories));
     }
 
-    public Bottleneck(
-            String code,
-            String title,
-            String priority,
-            String confidence,
-            String evidence,
-            String description
-    ) {
-        this(
-                code == null ? "UNSPECIFIED" : code,
-                description == null ? title : description,
-                BottleneckSeverity.CLEAR,
-                DataSourceType.DOMAIN_ASSUMPTION,
-                evidence == null ? "근거 미지정" : evidence,
-                Set.of()
-        );
-    }
-
     public static Bottleneck create(
             String bottleneckType,
             String detail,
@@ -109,7 +91,7 @@ public class Bottleneck {
         );
     }
 
-    public String getTitle() {
-        return detail;
+    public Set<AllocationCategory> getRelatedCategories() {
+        return Set.copyOf(relatedCategories);
     }
 }

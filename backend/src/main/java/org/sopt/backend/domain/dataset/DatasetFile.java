@@ -65,4 +65,13 @@ public class DatasetFile {
     public void updateRowCount(Integer rowCount) {
         this.rowCount = rowCount;
     }
+
+    boolean hasSupportedFormat() {
+        return switch (fileType) {
+            case SALES -> detectedFormat == DatasetFormat.EASYPOS_SALES;
+            case EXPENSE -> detectedFormat == DatasetFormat.EASYSHOP_EXPENSE_LEDGER;
+            case ONLINE_SALES ->
+                    detectedFormat == DatasetFormat.EASYSHOP_ONLINE_SALES;
+        };
+    }
 }

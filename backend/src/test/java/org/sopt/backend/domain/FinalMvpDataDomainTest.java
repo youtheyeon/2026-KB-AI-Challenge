@@ -3,6 +3,7 @@ package org.sopt.backend.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -89,6 +90,66 @@ class FinalMvpDataDomainTest {
     }
 
     @Test
+    void 같은_데이터셋에_동일한_파일_유형을_중복_등록할_수_없다() {
+        Dataset dataset = Dataset.create(createBusiness(), "dataset-v1");
+        dataset.addFile(
+                DatasetFileType.SALES,
+                "sales-1.xlsx",
+                DatasetFormat.EASYPOS_SALES,
+                DataSourceType.USER_INPUT
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> dataset.addFile(
+                        DatasetFileType.SALES,
+                        "sales-2.xlsx",
+                        DatasetFormat.EASYPOS_SALES,
+                        DataSourceType.USER_INPUT
+                )
+        );
+    }
+
+    @Test
+    void 데이터셋의_파일_목록은_외부에서_수정할_수_없다() {
+        Dataset dataset = Dataset.create(createBusiness(), "dataset-v1");
+        dataset.addFile(
+                DatasetFileType.SALES,
+                "sales.xlsx",
+                DatasetFormat.EASYPOS_SALES,
+                DataSourceType.USER_INPUT
+        );
+
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> dataset.getFiles().clear()
+        );
+    }
+
+    @Test
+    void 지원하지_않는_파일_형식이_있으면_재업로드가_필요하다() {
+        Dataset dataset = Dataset.create(createBusiness(), "dataset-v1");
+        dataset.addFile(
+                DatasetFileType.SALES,
+                "unknown-sales.xlsx",
+                DatasetFormat.UNKNOWN,
+                DataSourceType.USER_INPUT
+        );
+        dataset.addFile(
+                DatasetFileType.EXPENSE,
+                "expense.xlsx",
+                DatasetFormat.EASYSHOP_EXPENSE_LEDGER,
+                DataSourceType.USER_INPUT
+        );
+
+        dataset.startParsing();
+        dataset.startNormalizing();
+        dataset.markReady();
+
+        assertEquals(DatasetStatus.NEEDS_REUPLOAD, dataset.getStatus());
+    }
+
+    @Test
     void 정규화_데이터는_원본_파일과_출처를_보존한다() {
         Dataset dataset = Dataset.create(createBusiness(), "dataset-v1");
         DatasetFile salesFile = dataset.addFile(
@@ -165,6 +226,65 @@ class FinalMvpDataDomainTest {
                 onlineSale.getReconciliationType()
         );
         assertFalse(onlineSale.shouldAddToTotalSales());
+    }
+
+    @Test
+    void 다른_데이터셋의_원본_파일로_정규화_행을_생성할_수_없다() {
+        Dataset sourceDataset = Dataset.create(createBusiness(), "source-v1");
+        DatasetFile sourceFile = sourceDataset.addFile(
+                DatasetFileType.SALES,
+                "sales.xlsx",
+                DatasetFormat.EASYPOS_SALES,
+                DataSourceType.USER_INPUT
+        );
+        Dataset targetDataset = Dataset.create(createBusiness(), "target-v1");
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> NormalizedSale.create(
+                        targetDataset,
+                        sourceFile,
+                        LocalDate.of(2026, 7, 1),
+                        LocalTime.NOON,
+                        "R-001",
+                        "POS-1",
+                        10_000L,
+                        0L,
+                        0L,
+                        10_000L,
+                        "CARD",
+                        "COMPLETED"
+                )
+        );
+    }
+
+    @Test
+    void 매출_정규화_행은_매출_파일만_원본으로_사용할_수_있다() {
+        Dataset dataset = Dataset.create(createBusiness(), "dataset-v1");
+        DatasetFile expenseFile = dataset.addFile(
+                DatasetFileType.EXPENSE,
+                "expense.xlsx",
+                DatasetFormat.EASYSHOP_EXPENSE_LEDGER,
+                DataSourceType.USER_INPUT
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> NormalizedSale.create(
+                        dataset,
+                        expenseFile,
+                        LocalDate.of(2026, 7, 1),
+                        LocalTime.NOON,
+                        "R-001",
+                        "POS-1",
+                        10_000L,
+                        0L,
+                        0L,
+                        10_000L,
+                        "CARD",
+                        "COMPLETED"
+                )
+        );
     }
 
     private Business createBusiness() {

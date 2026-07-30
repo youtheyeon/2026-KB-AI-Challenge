@@ -146,29 +146,8 @@ public class Business extends BaseTimeEntity {
         );
     }
 
-    public static Business create(
-            User user,
-            String businessName,
-            String region,
-            Industry industry,
-            Integer employeeCount,
-            Set<SalesChannel> salesChannels
-    ) {
-        return create(
-                user,
-                businessName,
-                region,
-                industry.name(),
-                "UNSPECIFIED",
-                "UNSPECIFIED",
-                "UNSPECIFIED",
-                employeeCount,
-                "UNSPECIFIED",
-                salesChannels.stream().map(Enum::name).collect(java.util.stream.Collectors.toSet()),
-                null,
-                null,
-                null,
-                null
-        );
+    public Set<String> getPrimarySalesChannels() {
+        return Set.copyOf(primarySalesChannels);
     }
+
 }

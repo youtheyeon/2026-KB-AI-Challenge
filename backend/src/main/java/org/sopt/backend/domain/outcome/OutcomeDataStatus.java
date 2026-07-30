@@ -3,6 +3,5 @@ package org.sopt.backend.domain.outcome;
 
 public enum OutcomeDataStatus {
     READY,
-    MAPPING_READY,
     FAILED
 }

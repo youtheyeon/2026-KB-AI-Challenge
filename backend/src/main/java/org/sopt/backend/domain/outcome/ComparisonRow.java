@@ -1,8 +1,10 @@
-// 예상값과 실제값을 비교한 한 개 지표 행을 저장하는 값 객체
+// 목표 조건과 집행 후 관측값을 비교한 한 개 지표 행을 저장하는 값 객체
 package org.sopt.backend.domain.outcome;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,8 +25,9 @@ public class ComparisonRow {
     @Column(name = "change_value", length = 255)
     private String changeValue;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "result_status", nullable = false, length = 50)
-    private String resultStatus;
+    private ComparisonResultStatus resultStatus;
 
     @Column(name = "external_factors", length = 1000)
     private String externalFactors;
@@ -34,7 +37,7 @@ public class ComparisonRow {
             String targetCondition,
             String observedValue,
             String changeValue,
-            String resultStatus,
+            ComparisonResultStatus resultStatus,
             String externalFactors
     ) {
         this.metricCode = java.util.Objects.requireNonNull(metricCode);

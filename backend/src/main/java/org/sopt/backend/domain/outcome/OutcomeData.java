@@ -13,7 +13,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -50,22 +49,16 @@ public class OutcomeData extends BaseTimeEntity {
     @Column(name = "source_type", nullable = false, length = 50)
     private DataSourceType dataSourceType;
 
-    @Transient
-    private OutcomeSourceType sourceType;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dataset_id")
     private Dataset dataset;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "observed_business_snapshot_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "observed_business_snapshot_id", nullable = false)
     private BusinessSnapshot observedBusinessSnapshot;
 
-    @Column(name = "observed_at")
+    @Column(name = "observed_at", nullable = false)
     private LocalDate observedAt;
-
-    @Transient
-    private OutcomeMetrics metrics;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -85,24 +78,14 @@ public class OutcomeData extends BaseTimeEntity {
         this.dataSourceType = Objects.requireNonNull(dataSourceType);
         this.observedAt = Objects.requireNonNull(observedAt);
         this.status = Objects.requireNonNull(status);
-    }
-
-    private OutcomeData(
-            Simulation simulation,
-            OutcomeSourceType sourceType,
-            Dataset dataset,
-            OutcomeMetrics metrics,
-            OutcomeDataStatus status
-    ) {
-        this.simulation = Objects.requireNonNull(simulation);
-        this.sourceType = Objects.requireNonNull(sourceType);
-        this.dataSourceType = switch (sourceType) {
-            case MOCK -> DataSourceType.SYNTHETIC_SALES;
-            case FILE_UPLOAD, MANUAL_INPUT -> DataSourceType.USER_INPUT;
-        };
-        this.dataset = dataset;
-        this.metrics = metrics;
-        this.status = Objects.requireNonNull(status);
+        if (observedBusinessSnapshot.getBusiness() != simulation.getBusiness()
+                || (dataset != null && dataset.getBusiness() != simulation.getBusiness())
+                || (dataset != null
+                && observedBusinessSnapshot.getDataset() != dataset)) {
+            throw new IllegalArgumentException(
+                    "관측 데이터는 시뮬레이션과 같은 사업체와 데이터셋에 속해야 합니다."
+            );
+        }
     }
 
     public static OutcomeData create(
@@ -121,15 +104,5 @@ public class OutcomeData extends BaseTimeEntity {
                 observedAt,
                 status
         );
-    }
-
-    public static OutcomeData create(
-            Simulation simulation,
-            OutcomeSourceType sourceType,
-            Dataset dataset,
-            OutcomeMetrics metrics,
-            OutcomeDataStatus status
-    ) {
-        return new OutcomeData(simulation, sourceType, dataset, metrics, status);
     }
 }

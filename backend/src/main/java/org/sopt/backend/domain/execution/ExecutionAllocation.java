@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -17,7 +18,13 @@ import org.sopt.backend.domain.simulation.AllocationCategory;
 
 @Getter
 @Entity
-@Table(name = "execution_allocations")
+@Table(
+        name = "execution_allocations",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_execution_allocation_category",
+                columnNames = {"execution_id", "category"}
+        )
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ExecutionAllocation {
 

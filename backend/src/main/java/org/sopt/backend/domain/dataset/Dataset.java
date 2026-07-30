@@ -1,4 +1,4 @@
-// 사업 분석에 사용할 업로드 파일과 컬럼 매핑 상태를 관리하는 엔티티
+// 사업 분석에 사용할 업로드 파일과 기술 매핑 정보를 관리하는 엔티티
 package org.sopt.backend.domain.dataset;
 
 import jakarta.persistence.CascadeType;
@@ -15,7 +15,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -44,9 +43,6 @@ public class Dataset extends BaseTimeEntity {
     @Column(nullable = false, length = 30)
     private DatasetStatus status;
 
-    @Column(name = "confirmed_at")
-    private LocalDateTime confirmedAt;
-
     @Column(name = "dataset_version", nullable = false, length = 100)
     private String datasetVersion;
 
@@ -74,10 +70,6 @@ public class Dataset extends BaseTimeEntity {
         return new Dataset(business, datasetVersion);
     }
 
-    public static Dataset create(Business business) {
-        return new Dataset(business, "legacy");
-    }
-
     public DatasetFile addFile(
             DatasetFileType fileType,
             String fileName,
@@ -99,15 +91,6 @@ public class Dataset extends BaseTimeEntity {
         return file;
     }
 
-    public void addFile(DatasetFileType fileType, String fileName) {
-        addFile(
-                fileType,
-                fileName,
-                DatasetFormat.UNKNOWN,
-                DataSourceType.USER_INPUT
-        );
-    }
-
     public void addAutoMapping(
             DatasetFileType fileType,
             String sourceColumn,
@@ -120,13 +103,6 @@ public class Dataset extends BaseTimeEntity {
                 targetField,
                 confidence
         ));
-        status = DatasetStatus.MAPPING_READY;
-    }
-
-    public void confirmMappings(LocalDateTime confirmedAt) {
-        columnMappings.forEach(ColumnMapping::confirm);
-        this.status = DatasetStatus.MAPPING_CONFIRMED;
-        this.confirmedAt = Objects.requireNonNull(confirmedAt);
     }
 
     public void startParsing() {
@@ -142,10 +118,13 @@ public class Dataset extends BaseTimeEntity {
     public void markReady() {
         requireStatus(DatasetStatus.NORMALIZING);
         boolean hasSales = hasFile(DatasetFileType.SALES);
-        boolean hasExpense = hasFile(DatasetFileType.EXPENSE)
-                || hasFile(DatasetFileType.COST);
+        boolean hasExpense = hasFile(DatasetFileType.EXPENSE);
         if (!hasSales || !hasExpense) {
             throw new IllegalStateException("매출 파일과 비용 파일이 모두 필요합니다.");
+        }
+        if (files.stream().anyMatch(file -> !file.hasSupportedFormat())) {
+            status = DatasetStatus.NEEDS_REUPLOAD;
+            return;
         }
         status = DatasetStatus.READY;
     }
@@ -159,12 +138,23 @@ public class Dataset extends BaseTimeEntity {
     }
 
     public boolean isOnlineSalesAvailable() {
-        return hasFile(DatasetFileType.ONLINE_SALES)
-                || hasFile(DatasetFileType.PLATFORM);
+        return hasFile(DatasetFileType.ONLINE_SALES);
+    }
+
+    public List<DatasetFile> getFiles() {
+        return List.copyOf(files);
+    }
+
+    public List<ColumnMapping> getColumnMappings() {
+        return List.copyOf(columnMappings);
     }
 
     private boolean hasFile(DatasetFileType fileType) {
         return files.stream().anyMatch(file -> file.getFileType() == fileType);
+    }
+
+    boolean containsFile(DatasetFile file) {
+        return files.contains(file);
     }
 
     private void requireStatus(DatasetStatus expected) {
