@@ -68,3 +68,12 @@
 - 로컬 환경에는 Docker가 없어 임시 PostgreSQL 14 서버에서 동일 DDL을 검증하고, CI에서 PostgreSQL 15를 재검증한다.
 - 마이그레이션 부재로 RED를 확인한 뒤 24개 테이블 생성과 upgrade, downgrade, re-upgrade 통합 테스트가 통과했다.
 - `TEST_DATABASE_URL`을 지정한 전체 pytest 34개, Alembic drift 검사, Ruff 검사와 포맷 검사가 통과했다.
+
+## 승인된 후속 보강 결정
+
+- 컬럼 자동 매핑·검수 기능은 제거 가능성이 있어 별도 엔티티를 만들지 않는다.
+- 사용자는 배분 항목을 임의로 추가·수정·삭제하지 않으며 기존 네 고정 카테고리를 유지한다.
+- AI 모델 호출은 후속 연동 범위이지만 저장된 시뮬레이션의 재현성을 위해 비교 지표와 SCB 해석 결과를 `Scenario` JSONB에 보존한다.
+- `LoanCondition`은 독립 엔티티로 바꾸지 않고 자기자금, 기존 월 상환액, 자금 사용 예정일을 추가한다.
+- 실제 상환 현황은 `Execution`이 소유하는 `RepaymentRecord` 이력으로 저장한다.
+- 초기 마이그레이션은 이미 PR에 공개됐으므로 수정하지 않고 후속 Alembic 마이그레이션을 추가한다.

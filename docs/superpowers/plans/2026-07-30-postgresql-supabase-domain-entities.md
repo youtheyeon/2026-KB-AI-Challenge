@@ -126,3 +126,26 @@
 - [ ] README에 로컬 PostgreSQL, 런타임 연결, Alembic 직접 연결, 검증 명령을 설명한다.
 - [ ] `uv run pytest`, `uv run ruff check .`, `uv run ruff format --check .`, `git diff --check`를 통과시킨다.
 - [ ] `feat: PostgreSQL 초기 도메인 스키마 추가`와 `test: 도메인 영속성 검증`으로 의미를 분리해 커밋한다.
+
+### Task 6: 대출 조건·AI 결과·실제 상환 기록 보강
+
+**Files:**
+- Modify: `backend/app/domain/enums.py`
+- Modify: `backend/app/domain/simulation.py`
+- Modify: `backend/app/domain/execution.py`
+- Modify: `backend/app/domain/__init__.py`
+- Create: `backend/alembic/versions/20260730_0002_add_repayment_tracking.py`
+- Modify: `backend/tests/domain/test_simulation.py`
+- Modify: `backend/tests/domain/test_execution.py`
+- Modify: `backend/tests/integration/test_domain_persistence.py`
+
+**Interfaces:**
+- Produces: 확장된 `LoanCondition`, AI 결과 스냅샷 필드, `RepaymentRecord`.
+
+- [ ] 추가 대출 조건과 AI 결과 스냅샷을 요구하는 실패 테스트를 작성한다.
+- [ ] 실제 집행별 상환 기록과 제약을 요구하는 실패 테스트를 작성한다.
+- [ ] 실패 이유가 누락된 모델과 필드 때문인지 확인한다.
+- [ ] 도메인 모델과 문자열 Enum을 최소 구현한다.
+- [ ] 후속 Alembic 마이그레이션과 25개 테이블 통합 검증을 추가한다.
+- [ ] 전체 pytest, Alembic drift, Ruff, `git diff --check`를 통과시킨다.
+- [ ] 의미 단위 커밋 후 `feat/16`과 PR #26에 반영한다.
