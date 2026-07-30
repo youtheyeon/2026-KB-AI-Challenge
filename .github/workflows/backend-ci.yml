@@ -28,14 +28,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Setup Java
-        uses: actions/setup-java@v5
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
-          distribution: temurin
-          java-version: '21'
+          python-version: '3.13'
+          enable-cache: true
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+      - name: Install dependencies
+        run: uv sync --locked --dev
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Check formatting
+        run: uv run ruff format --check .
 
       - name: Test
-        run: ./gradlew test
+        run: uv run pytest
