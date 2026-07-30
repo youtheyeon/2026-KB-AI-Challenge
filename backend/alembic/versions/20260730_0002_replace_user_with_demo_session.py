@@ -1,9 +1,6 @@
 # 이메일 사용자를 익명 데모 세션으로 교체하는 Alembic 마이그레이션
 """replace user with demo session"""
 
-from datetime import UTC, datetime
-from uuid import uuid4
-
 import sqlalchemy as sa
 
 from alembic import op
@@ -49,52 +46,38 @@ def upgrade() -> None:
     )
     op.add_column(
         "businesses",
-        sa.Column("demo_session_id", sa.UUID(), nullable=True),
+        sa.Column(
+            "demo_session_id",
+            sa.UUID(),
+            server_default=sa.text("gen_random_uuid()"),
+            nullable=True,
+        ),
     )
-
-    connection = op.get_bind()
-    migrated_at = datetime.now(UTC)
-    business_ids = list(connection.execute(sa.text("SELECT id FROM businesses")).scalars())
-    for business_id in business_ids:
-        demo_session_id = uuid4()
-        connection.execute(
-            sa.text(
-                """
-                INSERT INTO demo_sessions (
-                    id,
-                    last_accessed_at,
-                    expires_at,
-                    status
-                )
-                VALUES (
-                    :id,
-                    :last_accessed_at,
-                    :expires_at,
-                    'expired'
-                )
-                """
-            ),
-            {
-                "id": demo_session_id,
-                "last_accessed_at": migrated_at,
-                "expires_at": migrated_at,
-            },
+    op.execute(
+        sa.text(
+            """
+            INSERT INTO demo_sessions (
+                id,
+                last_accessed_at,
+                expires_at,
+                status
+            )
+            SELECT
+                demo_session_id,
+                now(),
+                now(),
+                'expired'
+            FROM businesses
+            WHERE demo_session_id IS NOT NULL
+            """
         )
-        connection.execute(
-            sa.text(
-                """
-                UPDATE businesses
-                SET demo_session_id = :demo_session_id
-                WHERE id = :business_id
-                """
-            ),
-            {
-                "demo_session_id": demo_session_id,
-                "business_id": business_id,
-            },
-        )
-
-    op.alter_column("businesses", "demo_session_id", nullable=False)
+    )
+    op.alter_column(
+        "businesses",
+        "demo_session_id",
+        nullable=False,
+        server_default=None,
+    )
     op.create_foreign_key(
         op.f("businesses_demo_session_id_fkey"),
         "businesses",
