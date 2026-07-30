@@ -16,3 +16,16 @@
 - 작업 시작 커밋은 `615a195`이다.
 - 기준 테스트는 `uv run pytest`로 실행했으며 기존 테스트 3개가 통과했다.
 - `uv`는 실행 환경의 `/private/tmp/codex-uv-bin/uv`를 사용한다.
+
+## Task 1 구현 결정
+
+- 런타임과 Alembic 마이그레이션 URL은 각각 `database_url`, `migration_database_url` 환경설정으로 분리한다.
+- 예시와 기본 URL은 로컬 PostgreSQL의 비밀번호 없는 접속 형태만 제공한다. 실제 Supabase 자격 증명은 `.env`에서만 주입한다.
+- `TimestampMixin`은 PostgreSQL 서버 시각 기본값과 갱신 시각을 제공하고, 동기 `SessionFactory`는 `autoflush=False`, `autocommit=False`를 유지한다.
+- Alembic `env.py`는 실행 시 `BACKEND_MIGRATION_DATABASE_URL` 값을 `sqlalchemy.url`에 주입하고 `Base.metadata`를 메타데이터로 사용한다.
+
+## Task 1 검증 기록
+
+- RED. `uv run pytest tests/test_database_config.py`는 `ModuleNotFoundError: No module named 'sqlalchemy'`로 실패해 요구 의존성 부재를 확인했다.
+- GREEN. 의존성 잠금·설치 후 타깃 테스트 3개와 전체 테스트 6개가 통과했다.
+- `uv run alembic -c alembic.ini upgrade head --sql`, `uv run ruff check .`, `uv run ruff format --check .`, `git diff --check`를 통과했다.
