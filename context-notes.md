@@ -21,3 +21,24 @@
 - 사용자의 요청에 따라 추가 서브 에이전트 검토 없이 최종 검증을 직접 수행했다.
 - 최종 검증에서 `.venv/bin/pytest -q`는 51개 통과와 5개 스킵, Ruff 검사와 포맷 검사는 통과했다.
 - OpenAPI에서 `POST /api/businesses`의 `201` 응답과 camelCase 요청 필드를 확인했다.
+
+## 이슈 2 — 2026-07-31
+
+- 이슈 #29만 `feat/29` 브랜치에서 구현하고 `PATCH /api/datasets/{datasetId}/mapping`은 제외한다.
+- 작업 트리의 `.gitignore` 수정과 `docs/project-proposal-plan.md`는 사용자 변경이므로 건드리지 않는다.
+- Notion 원본 페이지는 연결 권한에서 `NOT_FOUND`였으며 GitHub 이슈 #29의 계약을 기준으로 구현한다.
+- 매출과 비용 xlsx는 필수이고 온라인 매출 xlsx는 선택으로 처리한다.
+- 원본 파일은 영구 저장하지 않고 `DatasetFile.storage_path`를 비워 둔다.
+- 자동 컬럼 매핑, 누락 컬럼, 신뢰도, 행 수는 기존 `DatasetFile.file_metadata` JSONB에 저장한다.
+- 새 테이블이나 컬럼 없이 기존 `Dataset`, `DatasetFile`, 정규화 모델을 사용한다.
+- 업로드 요청 안에서 파싱과 정규화를 수행하고 접수 응답은 `202`, 상태 조회는 최종 처리 상태를 반환한다.
+- 매출은 영업일자와 순매출, 비용은 거래일자·비용항목·합계금액, 온라인 매출은 영업일자와 매출금액을 필수 매핑으로 본다.
+- 누락 필수 컬럼은 `needs_reupload`, 손상된 xlsx나 행 변환 실패는 `failed`로 저장한다.
+- 상권 파일 파트는 받지 않으며 외부 공공데이터 클라이언트가 없는 현재 범위에서는 사업자의 지역 정보를 훼손하지 않는다.
+- `python-multipart 0.0.32`, `openpyxl 3.1.5`를 추가하고 `uv.lock`을 갱신했다.
+- 지원 헤더가 일부 또는 전부 누락된 정상 xlsx는 `needs_reupload`, 압축 구조가 손상된 파일은 `failed`로 구분한다.
+- 빠른 API 테스트에서 필수·선택 파일, 정규화, 메타데이터, 실패 상태, 세션 격리를 검증한다.
+- PostgreSQL 통합 테스트는 JSONB 메타데이터와 세 정규화 테이블 저장, 파일 insert 실패 시 롤백을 검증하도록 작성했다.
+- 현재 `TEST_DATABASE_URL`과 Docker 실행 파일이 없고 로컬 55432 포트 연결도 거부돼 PostgreSQL 테스트 7건은 스킵된다.
+- 최종 전 검증에서 전체 테스트는 61개 통과와 7개 스킵이며 Ruff 검사와 multipart OpenAPI 계약 확인은 통과했다.
+- 구현 변경은 `30657c4` 커밋으로 분리했다.
