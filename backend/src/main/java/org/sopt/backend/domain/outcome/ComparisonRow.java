@@ -3,32 +3,45 @@ package org.sopt.backend.domain.outcome;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Embeddable
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 public class ComparisonRow {
 
-    @Column(name = "metric_name", nullable = false, length = 150)
-    private String metricName;
+    @Column(name = "metric_code", nullable = false, length = 150)
+    private String metricCode;
 
-    @Column(name = "scb_area", length = 150)
-    private String scbArea;
+    @Column(name = "target_condition", length = 255)
+    private String targetCondition;
 
-    @Column(name = "predicted_value", length = 100)
-    private String predictedValue;
+    @Column(name = "observed_value", length = 255)
+    private String observedValue;
 
-    @Column(name = "actual_value", length = 100)
-    private String actualValue;
+    @Column(name = "change_value", length = 255)
+    private String changeValue;
 
-    @Column(name = "external_factor", length = 1000)
-    private String externalFactor;
+    @Column(name = "result_status", nullable = false, length = 50)
+    private String resultStatus;
 
-    @Column(name = "comparison_status", length = 50)
-    private String status;
+    @Column(name = "external_factors", length = 1000)
+    private String externalFactors;
+
+    public ComparisonRow(
+            String metricCode,
+            String targetCondition,
+            String observedValue,
+            String changeValue,
+            String resultStatus,
+            String externalFactors
+    ) {
+        this.metricCode = java.util.Objects.requireNonNull(metricCode);
+        this.targetCondition = targetCondition;
+        this.observedValue = observedValue;
+        this.changeValue = changeValue;
+        this.resultStatus = java.util.Objects.requireNonNull(resultStatus);
+        this.externalFactors = externalFactors;
+    }
 }

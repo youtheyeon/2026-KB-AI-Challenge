@@ -1,7 +1,7 @@
 // 결과 비교에 사용할 집행 후 사업 데이터를 저장하는 엔티티
 package org.sopt.backend.domain.outcome;
 
-import jakarta.persistence.Embedded;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -12,16 +12,19 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.Column;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDate;
 import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.backend.domain.common.BaseTimeEntity;
+import org.sopt.backend.domain.business.BusinessSnapshot;
 import org.sopt.backend.domain.dataset.Dataset;
 import org.sopt.backend.domain.simulation.Simulation;
+import org.sopt.backend.domain.source.DataSourceType;
 
 @Getter
 @Entity
@@ -44,19 +47,45 @@ public class OutcomeData extends BaseTimeEntity {
     private Simulation simulation;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "source_type", nullable = false, length = 20)
+    @Column(name = "source_type", nullable = false, length = 50)
+    private DataSourceType dataSourceType;
+
+    @Transient
     private OutcomeSourceType sourceType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dataset_id")
     private Dataset dataset;
 
-    @Embedded
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "observed_business_snapshot_id")
+    private BusinessSnapshot observedBusinessSnapshot;
+
+    @Column(name = "observed_at")
+    private LocalDate observedAt;
+
+    @Transient
     private OutcomeMetrics metrics;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private OutcomeDataStatus status;
+
+    private OutcomeData(
+            Simulation simulation,
+            Dataset dataset,
+            BusinessSnapshot observedBusinessSnapshot,
+            DataSourceType dataSourceType,
+            LocalDate observedAt,
+            OutcomeDataStatus status
+    ) {
+        this.simulation = Objects.requireNonNull(simulation);
+        this.dataset = dataset;
+        this.observedBusinessSnapshot = Objects.requireNonNull(observedBusinessSnapshot);
+        this.dataSourceType = Objects.requireNonNull(dataSourceType);
+        this.observedAt = Objects.requireNonNull(observedAt);
+        this.status = Objects.requireNonNull(status);
+    }
 
     private OutcomeData(
             Simulation simulation,
@@ -67,9 +96,31 @@ public class OutcomeData extends BaseTimeEntity {
     ) {
         this.simulation = Objects.requireNonNull(simulation);
         this.sourceType = Objects.requireNonNull(sourceType);
+        this.dataSourceType = switch (sourceType) {
+            case MOCK -> DataSourceType.SYNTHETIC_SALES;
+            case FILE_UPLOAD, MANUAL_INPUT -> DataSourceType.USER_INPUT;
+        };
         this.dataset = dataset;
         this.metrics = metrics;
         this.status = Objects.requireNonNull(status);
+    }
+
+    public static OutcomeData create(
+            Simulation simulation,
+            Dataset dataset,
+            BusinessSnapshot observedBusinessSnapshot,
+            DataSourceType dataSourceType,
+            LocalDate observedAt,
+            OutcomeDataStatus status
+    ) {
+        return new OutcomeData(
+                simulation,
+                dataset,
+                observedBusinessSnapshot,
+                dataSourceType,
+                observedAt,
+                status
+        );
     }
 
     public static OutcomeData create(
