@@ -1,8 +1,10 @@
-# 사업장 기본 프로필과 소유 사용자 관계를 저장하는 SQLAlchemy 모델
+# 사업장 기본 프로필과 익명 데모 세션 관계를 저장하는 SQLAlchemy 모델
 from decimal import Decimal
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 from sqlalchemy import ARRAY, BigInteger, ForeignKey, Integer, Numeric, String
+from sqlalchemy.dialects.postgresql import UUID as PostgreSQLUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from app.db.base import Base, TimestampMixin
@@ -13,15 +15,18 @@ if TYPE_CHECKING:
         Dataset,
         PublicDataSnapshot,
     )
+    from app.domain.demo_session import DemoSession
     from app.domain.diagnosis import Diagnosis
-    from app.domain.user import User
 
 
 class Business(TimestampMixin, Base):
     __tablename__ = "businesses"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
+    demo_session_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True),
+        ForeignKey("demo_sessions.id", ondelete="RESTRICT"),
+    )
     name: Mapped[str] = mapped_column(String(150), nullable=False)
     region: Mapped[str] = mapped_column(String(255), nullable=False)
     industry: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -38,7 +43,7 @@ class Business(TimestampMixin, Base):
     peak_hour_utilization_rate: Mapped[Decimal | None] = mapped_column(Numeric(7, 4))
     repeat_customer_rate: Mapped[Decimal | None] = mapped_column(Numeric(7, 4))
 
-    user: Mapped["User | None"] = relationship(back_populates="businesses")
+    demo_session: Mapped["DemoSession"] = relationship(back_populates="businesses")
     datasets: Mapped[list["Dataset"]] = relationship(back_populates="business")
     snapshots: Mapped[list["BusinessSnapshot"]] = relationship(back_populates="business")
     public_data_snapshots: Mapped[list["PublicDataSnapshot"]] = relationship(

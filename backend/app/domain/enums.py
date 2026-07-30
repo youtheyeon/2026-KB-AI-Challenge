@@ -2,6 +2,11 @@
 from enum import StrEnum
 
 
+class DemoSessionStatus(StrEnum):
+    ACTIVE = "active"
+    EXPIRED = "expired"
+
+
 class DataSourceType(StrEnum):
     PUBLIC_DATA = "public_data"
     SYNTHETIC_SALES = "synthetic_sales"

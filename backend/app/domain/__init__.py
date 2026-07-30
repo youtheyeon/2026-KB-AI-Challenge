@@ -9,6 +9,7 @@ from app.domain.dataset import (
     NormalizedSale,
     PublicDataSnapshot,
 )
+from app.domain.demo_session import DemoSession
 from app.domain.diagnosis import Bottleneck, Diagnosis, DiagnosisMetric
 from app.domain.execution import Execution, ExecutionAllocation
 from app.domain.outcome import (
@@ -27,7 +28,6 @@ from app.domain.simulation import (
     ScenarioSelection,
     Simulation,
 )
-from app.domain.user import User
 
 __all__ = [
     "Bottleneck",
@@ -36,6 +36,7 @@ __all__ = [
     "BusinessSnapshot",
     "Dataset",
     "DatasetFile",
+    "DemoSession",
     "Diagnosis",
     "DiagnosisMetric",
     "Execution",
@@ -55,5 +56,4 @@ __all__ = [
     "ScenarioReason",
     "ScenarioSelection",
     "Simulation",
-    "User",
 ]

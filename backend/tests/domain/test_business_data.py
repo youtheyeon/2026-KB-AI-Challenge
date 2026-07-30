@@ -1,7 +1,11 @@
 # 사업 데이터 SQLAlchemy 모델의 정규화와 무결성 제약을 검증하는 테스트
+from datetime import UTC, datetime
+
 from sqlalchemy import BigInteger, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PostgreSQLUUID
 
+import app.domain as domain
 from app.domain.business import Business
 from app.domain.dataset import (
     Dataset,
@@ -10,13 +14,27 @@ from app.domain.dataset import (
     PublicDataSnapshot,
 )
 from app.domain.enums import DatasetFileType
-from app.domain.user import User
 
 
-def test_user_normalizes_email_before_persistence() -> None:
-    user = User(email="  Owner@Example.COM ")
+def test_demo_session_replaces_email_user() -> None:
+    assert hasattr(domain, "DemoSession")
+    assert not hasattr(domain, "User")
 
-    assert user.email == "owner@example.com"
+
+def test_demo_session_uses_uuid_and_owns_businesses() -> None:
+    demo_session_class = domain.DemoSession
+    session = demo_session_class(
+        last_accessed_at=datetime(2026, 7, 30, tzinfo=UTC),
+        expires_at=datetime(2026, 7, 30, 2, tzinfo=UTC),
+    )
+    business = Business(name="Y카페", region="서울", industry="카페")
+
+    session.businesses.append(business)
+
+    assert isinstance(demo_session_class.__table__.c.id.type, PostgreSQLUUID)
+    assert business.demo_session is session
+    assert Business.__table__.c.demo_session_id.nullable is False
+    assert not hasattr(Business, "user_id")
 
 
 def test_business_requires_non_empty_profile_fields() -> None:
@@ -77,5 +95,5 @@ def test_public_raw_data_and_file_metadata_use_postgresql_jsonb() -> None:
 
 
 def test_business_data_entities_use_bigint_primary_keys() -> None:
-    for model in (User, Business, Dataset, DatasetFile, NormalizedOnlineSale, PublicDataSnapshot):
+    for model in (Business, Dataset, DatasetFile, NormalizedOnlineSale, PublicDataSnapshot):
         assert isinstance(model.__table__.c.id.type, BigInteger)
