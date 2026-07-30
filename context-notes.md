@@ -42,3 +42,18 @@
 - 현재 `TEST_DATABASE_URL`과 Docker 실행 파일이 없고 로컬 55432 포트 연결도 거부돼 PostgreSQL 테스트 7건은 스킵된다.
 - 최종 전 검증에서 전체 테스트는 61개 통과와 7개 스킵이며 Ruff 검사와 multipart OpenAPI 계약 확인은 통과했다.
 - 구현 변경은 `30657c4` 커밋으로 분리했다.
+
+## 이슈 3 — 2026-07-31
+
+- `POST /api/businesses/{businessId}/diagnoses`와 `GET /api/diagnoses/{diagnosisId}`를 구현한다.
+- 실행 API는 FastAPI `BackgroundTasks`로 `202/RUNNING`을 반환하고 요청 세션과 분리된 DB 세션에서 `COMPLETED` 또는 `FAILED`로 전이한다.
+- 진단 요청 중 공공 API를 호출하지 않고 `ai/raw_data/seoul_cafe_sales_full.json`의 최신 분기에서 만든 고정 벤치마크를 사용한다.
+- 최신 분기는 `20242`, 표본은 326개 상권, 월매출 중앙값은 94,283,406원, 월주문 중앙값은 11,729건이다.
+- 공공데이터 캐시에 유동인구가 없으므로 `floatingPopulationGrowthRate`는 추정하지 않고 `null`로 반환한다.
+- 월별 지표는 데이터셋의 가장 최신 매출 연월을 기준으로 매출·비용·온라인 자료를 동일 기간에서 집계한다.
+- 온라인 자료가 없으면 온라인 매출 비중은 `null`이고 온라인 관련 병목을 만들지 않는다.
+- 기존 `BusinessSnapshot`, `PublicDataSnapshot`, `Diagnosis`, `DiagnosisMetric`, `Bottleneck`을 사용하며 스키마 마이그레이션은 추가하지 않는다.
+- 요청 검증 실패는 진단 실행 경로에서만 `400`으로 변환하고 기존 API의 `422` 계약은 유지한다.
+- 현재 `develop`의 `.gitignore` 수정과 `docs/project-proposal-plan.md`는 사용자 변경이므로 `/tmp/kb-ai-business-diagnosis-api` 격리 워크트리에서 작업한다.
+- 구현 전 기준 검증은 전체 테스트 61개 통과·7개 스킵, Ruff 검사 통과다.
+- 새 동작은 실패 테스트를 먼저 실행해 RED를 확인한 뒤 최소 구현한다.
