@@ -4,5 +4,5 @@ package org.sopt.backend.domain.simulation;
 public enum RepaymentType {
     EQUAL_PAYMENT,
     EQUAL_PRINCIPAL,
-    BULLET
+    BULLET_PAYMENT
 }

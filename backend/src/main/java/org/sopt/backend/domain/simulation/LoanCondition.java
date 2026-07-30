@@ -7,38 +7,64 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import java.math.BigDecimal;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Embeddable
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LoanCondition {
 
     @Column(name = "loan_amount", nullable = false)
-    private Long loanAmount;
+    private Long amount;
 
-    @Column(name = "own_capital_amount")
-    private Long ownCapitalAmount;
+    @Column(name = "annual_interest_rate", nullable = false, precision = 7, scale = 4)
+    private BigDecimal annualInterestRate;
 
-    @Column(name = "existing_monthly_repayment_amount")
-    private Long existingMonthlyRepaymentAmount;
+    @Column(name = "term_months", nullable = false)
+    private Integer termMonths;
 
-    @Column(name = "interest_rate", nullable = false, precision = 7, scale = 3)
-    private BigDecimal interestRate;
-
-    @Column(name = "repayment_period_months", nullable = false)
-    private Integer repaymentPeriodMonths;
-
-    @Column(name = "grace_period_months")
-    private Integer gracePeriodMonths;
+    @Column(name = "grace_months", nullable = false)
+    private Integer graceMonths;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "repayment_type", nullable = false, length = 30)
     private RepaymentType repaymentType;
 
-    @Column(name = "monthly_repayment_amount", nullable = false)
-    private Long monthlyRepaymentAmount;
+    public LoanCondition(
+            Long amount,
+            BigDecimal annualInterestRate,
+            Integer termMonths,
+            Integer graceMonths,
+            RepaymentType repaymentType
+    ) {
+        this.amount = java.util.Objects.requireNonNull(amount);
+        this.annualInterestRate = java.util.Objects.requireNonNull(annualInterestRate);
+        this.termMonths = java.util.Objects.requireNonNull(termMonths);
+        this.graceMonths = java.util.Objects.requireNonNull(graceMonths);
+        this.repaymentType = java.util.Objects.requireNonNull(repaymentType);
+    }
+
+    public LoanCondition(
+            Long loanAmount,
+            Long ownCapitalAmount,
+            Long existingMonthlyRepaymentAmount,
+            BigDecimal interestRate,
+            Integer repaymentPeriodMonths,
+            Integer gracePeriodMonths,
+            RepaymentType repaymentType,
+            Long monthlyRepaymentAmount
+    ) {
+        this(
+                loanAmount,
+                interestRate,
+                repaymentPeriodMonths,
+                gracePeriodMonths == null ? 0 : gracePeriodMonths,
+                repaymentType
+        );
+    }
+
+    public Long getLoanAmount() {
+        return amount;
+    }
 }
