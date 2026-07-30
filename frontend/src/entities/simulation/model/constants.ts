@@ -1,6 +1,6 @@
 import { FileSpreadsheet, FileText, Megaphone, Users, Wrench } from 'lucide-react';
 
-import type { Bottleneck, RiskLevel, Scenario, UploadSlot } from './types';
+import type { AllocationCategory, Bottleneck, RiskLevel, Scenario, UploadSlot } from './types';
 
 export const STEPS = [
   '사업 데이터 연결',
@@ -34,38 +34,29 @@ export const SAMPLE = {
 
 export const UPLOAD_SLOTS: UploadSlot[] = [
   {
-    id: 'card',
-    label: '카드·POS 매출',
-    hint: '카드사 원장 또는 POS 매출 리포트',
-    formats: 'xlsx · csv',
+    id: 'sales',
+    label: '매출자료 (이지포스형)',
+    hint: '매출요약·판매내역·반품내역',
+    formats: 'xlsx',
     icon: FileSpreadsheet,
     badge: '필수',
     bc: 'bg-red-50 text-red-600 border-red-200',
   },
   {
-    id: 'cost',
-    label: '비용 내역',
-    hint: '재료비·인건비·임차료 등 지출 항목',
-    formats: 'xlsx · csv',
+    id: 'expense',
+    label: '비용장부 (이지샵형)',
+    hint: '거래처·비용항목·공급가액·부가세 등 비용 내역',
+    formats: 'xlsx',
     icon: FileText,
     badge: '필수',
     bc: 'bg-red-50 text-red-600 border-red-200',
   },
   {
-    id: 'online',
-    label: '온라인·플랫폼 데이터',
-    hint: '배달 플랫폼 주문·방문·재방문 현황',
-    formats: 'xlsx · csv',
+    id: 'onlineSales',
+    label: '온라인매출 자료 (이지샵형)',
+    hint: '배달플랫폼·PG·오픈마켓 주문 및 정산 내역',
+    formats: 'xlsx',
     icon: FileSpreadsheet,
-    badge: '권장',
-    bc: 'bg-amber-50 text-amber-700 border-amber-200',
-  },
-  {
-    id: 'district',
-    label: '상권 데이터',
-    hint: '인근 인구·경쟁점 상권 분석 리포트',
-    formats: 'xlsx · pdf',
-    icon: FileText,
     badge: '선택',
     bc: 'bg-secondary text-muted-foreground border-border',
   },
@@ -79,6 +70,9 @@ export const BOTTLENECKS: Bottleneck[] = [
     desc: '오프라인 매출 비중 91%로 온라인 주문 증가율이 비교군 대비 낮음. 특정 시간대 주문 집중.',
     metric: '온라인 주문 비중 9% · 비교군 28%',
     conf: '보통',
+    evidenceSourceType: '공공데이터 벤치마크',
+    evidenceDescription: '서울시 카페 업종 시간대별 추정 매출 벤치마크',
+    relatedCategories: ['MARKETING_ONLINE'],
   },
   {
     id: 'customer',
@@ -87,6 +81,9 @@ export const BOTTLENECKS: Bottleneck[] = [
     desc: '재구매율 34%로 업종 평균 48% 대비 낮음. 신규 고객 유입 채널 다변화 필요.',
     metric: '재구매율 34% · 업종 평균 48%',
     conf: '높음',
+    evidenceSourceType: '업계 가정치',
+    evidenceDescription: '카페·베이커리 업종 평균 재구매율 가정치',
+    relatedCategories: ['MARKETING_ONLINE'],
   },
   {
     id: 'cost',
@@ -95,6 +92,9 @@ export const BOTTLENECKS: Bottleneck[] = [
     desc: '재료비 원가율 40%가 업종 평균 35% 대비 5%p 초과. 원자재 가격 변동에 취약.',
     metric: '재료비율 40% · 업종 평균 35%',
     conf: '보통',
+    evidenceSourceType: '시연용 합성 비용 데이터',
+    evidenceDescription: '이지샵형 비용장부 합성 데이터 기준 원가율',
+    relatedCategories: ['INVENTORY', 'EQUIPMENT_INTERIOR'],
   },
   {
     id: 'capacity',
@@ -103,10 +103,20 @@ export const BOTTLENECKS: Bottleneck[] = [
     desc: '주말 피크 시간대 주문 처리 지연 신호. 직원 1인당 처리량 상한 근접.',
     metric: '직원당 주문 처리 210건/월',
     conf: '낮음',
+    evidenceSourceType: '시연용 합성 매출 데이터',
+    evidenceDescription: '이지포스형 매출자료 합성 데이터 기준 시간대별 처리량',
+    relatedCategories: ['LABOR', 'EQUIPMENT_INTERIOR'],
   },
 ];
 
 export const DEMO_RATE = 4.5;
+
+export const CATEGORY_LABELS: Record<AllocationCategory, string> = {
+  MARKETING_ONLINE: '마케팅·온라인',
+  EQUIPMENT_INTERIOR: '설비·인테리어',
+  LABOR: '인력',
+  INVENTORY: '재고',
+};
 
 export const SCENARIOS: Scenario[] = [
   {
@@ -132,7 +142,14 @@ export const SCENARIOS: Scenario[] = [
     employees: 2,
     residualRange: [190, 250],
     addFixed: 80,
+    breakEvenAdditionalRevenue: 350,
+    requiredAdditionalOrders: 49,
     riskLevel: '중간',
+    riskReasons: [
+      '현재 상태 유지 시 월 잔여 현금은 양수이나 여유가 크지 않습니다.',
+      '손익분기를 넘기려면 매월 약 350만원의 추가 매출이 필요합니다.',
+    ],
+    targetMetrics: ['온라인 주문 비중', '저녁 시간대 매출 비중', '신규 고객 유입 수'],
     assumptions: [
       'SNS 광고 전환율 2~4% 가정',
       '온라인 채널 구축 3개월 내 정착',
@@ -167,7 +184,14 @@ export const SCENARIOS: Scenario[] = [
     employees: 2,
     residualRange: [220, 270],
     addFixed: 30,
+    breakEvenAdditionalRevenue: 150,
+    requiredAdditionalOrders: 21,
     riskLevel: '낮음',
+    riskReasons: [
+      '현재 상태 유지 시 월 잔여 현금이 안정적으로 양수입니다.',
+      '월 추가 반복비용이 30만원으로 비교적 낮습니다.',
+    ],
+    targetMetrics: ['재료비 원가율', '피크 시간대 처리량', '월 잉여 현금'],
     assumptions: ['설비 교체로 원가율 개선 달성', '자동화로 피크 처리량 +25%', '설비 감가상각 5년'],
     risks: ['초기 1~2개월 적응 기간 발생', '실제 절감 성과가 추정보다 작을 수 있음'],
     allocationRationale:
@@ -198,7 +222,14 @@ export const SCENARIOS: Scenario[] = [
     employees: 3,
     residualRange: [110, 210],
     addFixed: 180,
+    breakEvenAdditionalRevenue: 650,
+    requiredAdditionalOrders: 92,
     riskLevel: '높음',
+    riskReasons: [
+      '월 추가 반복비용이 180만원으로 상대적으로 큽니다.',
+      '손익분기를 넘기려면 매월 약 650만원의 추가 매출이 필요해 부담이 큽니다.',
+    ],
+    targetMetrics: ['온라인 주문 비중', '재료비 원가율', '직원당 처리량'],
     assumptions: [
       '네 영역 모두 3개월 내 집행 완료',
       '영역별 개선 효과는 점진적으로 발생',
