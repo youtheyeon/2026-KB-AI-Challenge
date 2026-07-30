@@ -1,0 +1,40 @@
+{
+  "scenario_label": "low_online_sales_share",
+  "monthly_revenue": 7500000,
+  "monthly_cogs": 3375000,
+  "monthly_labor_cost": 1350000,
+  "time_of_day_sales": {
+    "TMZON_00_06_SELNG_AMT": 75000,
+    "TMZON_06_11_SELNG_AMT": 1125000,
+    "TMZON_11_14_SELNG_AMT": 2250000,
+    "TMZON_14_17_SELNG_AMT": 1875000,
+    "TMZON_17_21_SELNG_AMT": 1800000,
+    "TMZON_21_24_SELNG_AMT": 375000
+  },
+  "weekday_sales": {
+    "MON_SELNG_AMT": 1116242,
+    "TUES_SELNG_AMT": 1112805,
+    "WED_SELNG_AMT": 988154,
+    "THUR_SELNG_AMT": 1170040,
+    "FRI_SELNG_AMT": 1018860,
+    "SAT_SELNG_AMT": 1027682,
+    "SUN_SELNG_AMT": 1141507
+  },
+  "repeat_customer_rate": 0.38,
+  "seat_count": 10,
+  "avg_daily_customers": 90,
+  "peak_hour_utilization_rate": 0.75,
+  "avg_wait_time_minutes": 4.0,
+  "estimated_lost_customers_per_day": 0,
+  "online_data": {
+    "online_gross_order_amount": 300000,
+    "online_order_count": 97,
+    "online_net_sales_amount": 291000,
+    "online_cancel_refund_amount": 9000,
+    "online_platform_fee": 36000,
+    "online_payment_fee": 9000,
+    "online_merchant_delivery_fee": 6000,
+    "online_settlement_amount": 282000,
+    "reconciliation_type": "INCLUDED_IN_POS_TOTAL"
+  }
+}

@@ -1,0 +1,1626 @@
+[
+  {
+    "trdar_cd": "3110112",
+    "quarter": "20233",
+    "flpop": 779887.0,
+    "opbiz_rt": 25.0,
+    "growth_rate": -0.14324436359376252
+  },
+  {
+    "trdar_cd": "3110112",
+    "quarter": "20234",
+    "flpop": 764026.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.009273889553390072
+  },
+  {
+    "trdar_cd": "3110112",
+    "quarter": "20241",
+    "flpop": 764951.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.19494096719776727
+  },
+  {
+    "trdar_cd": "3110069",
+    "quarter": "20233",
+    "flpop": 2108215.0,
+    "opbiz_rt": 12.0,
+    "growth_rate": 0.31863732120285554
+  },
+  {
+    "trdar_cd": "3110069",
+    "quarter": "20234",
+    "flpop": 2333090.0,
+    "opbiz_rt": 9.0,
+    "growth_rate": -0.25774316498248645
+  },
+  {
+    "trdar_cd": "3110069",
+    "quarter": "20241",
+    "flpop": 2150734.0,
+    "opbiz_rt": 4.0,
+    "growth_rate": 0.5040663675835199
+  },
+  {
+    "trdar_cd": "3110013",
+    "quarter": "20233",
+    "flpop": 118925.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.06417164275747542
+  },
+  {
+    "trdar_cd": "3110013",
+    "quarter": "20234",
+    "flpop": 126018.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.3451901954793637
+  },
+  {
+    "trdar_cd": "3110013",
+    "quarter": "20241",
+    "flpop": 123936.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.16335169918762907
+  },
+  {
+    "trdar_cd": "3110077",
+    "quarter": "20233",
+    "flpop": 523323.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.16598224888523297
+  },
+  {
+    "trdar_cd": "3110077",
+    "quarter": "20234",
+    "flpop": 558103.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.016439805113459133
+  },
+  {
+    "trdar_cd": "3110077",
+    "quarter": "20241",
+    "flpop": 539475.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.06945974421645097
+  },
+  {
+    "trdar_cd": "3110041",
+    "quarter": "20233",
+    "flpop": 308603.0,
+    "opbiz_rt": 7.0,
+    "growth_rate": 0.10591737808178392
+  },
+  {
+    "trdar_cd": "3110041",
+    "quarter": "20234",
+    "flpop": 328662.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.10321534492745733
+  },
+  {
+    "trdar_cd": "3110041",
+    "quarter": "20241",
+    "flpop": 291529.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.347559436907404
+  },
+  {
+    "trdar_cd": "3110091",
+    "quarter": "20233",
+    "flpop": 219334.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.08665642257904185
+  },
+  {
+    "trdar_cd": "3110091",
+    "quarter": "20234",
+    "flpop": 231285.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.003245198260211664
+  },
+  {
+    "trdar_cd": "3110091",
+    "quarter": "20241",
+    "flpop": 221017.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.11082892349881832
+  },
+  {
+    "trdar_cd": "3110104",
+    "quarter": "20241",
+    "flpop": 1210966.0,
+    "opbiz_rt": 75.0,
+    "growth_rate": 0.02461144423617572
+  },
+  {
+    "trdar_cd": "3110038",
+    "quarter": "20233",
+    "flpop": 27831.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.033772339318856835
+  },
+  {
+    "trdar_cd": "3110038",
+    "quarter": "20234",
+    "flpop": 27525.0,
+    "opbiz_rt": 10.0,
+    "growth_rate": -0.17792717369130148
+  },
+  {
+    "trdar_cd": "3110038",
+    "quarter": "20241",
+    "flpop": 25237.0,
+    "opbiz_rt": 9.0,
+    "growth_rate": 0.5093235864947213
+  },
+  {
+    "trdar_cd": "3110076",
+    "quarter": "20233",
+    "flpop": 73933.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.1363504717073277
+  },
+  {
+    "trdar_cd": "3110076",
+    "quarter": "20234",
+    "flpop": 77411.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.06770738284739532
+  },
+  {
+    "trdar_cd": "3110076",
+    "quarter": "20241",
+    "flpop": 80932.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.08963258336296315
+  },
+  {
+    "trdar_cd": "3110079",
+    "quarter": "20233",
+    "flpop": 1959872.0,
+    "opbiz_rt": 10.0,
+    "growth_rate": 0.21399633888489047
+  },
+  {
+    "trdar_cd": "3110079",
+    "quarter": "20234",
+    "flpop": 1950873.0,
+    "opbiz_rt": 3.0,
+    "growth_rate": -0.061934309022313526
+  },
+  {
+    "trdar_cd": "3110079",
+    "quarter": "20241",
+    "flpop": 2164454.0,
+    "opbiz_rt": 14.0,
+    "growth_rate": 0.14717876940847424
+  },
+  {
+    "trdar_cd": "3110081",
+    "quarter": "20233",
+    "flpop": 1654677.0,
+    "opbiz_rt": 16.0,
+    "growth_rate": 0.07320351315162528
+  },
+  {
+    "trdar_cd": "3110081",
+    "quarter": "20234",
+    "flpop": 1582968.0,
+    "opbiz_rt": 6.0,
+    "growth_rate": -0.10916013601202526
+  },
+  {
+    "trdar_cd": "3110081",
+    "quarter": "20241",
+    "flpop": 1527600.0,
+    "opbiz_rt": 3.0,
+    "growth_rate": 0.19470601591426911
+  },
+  {
+    "trdar_cd": "3110074",
+    "quarter": "20233",
+    "flpop": 747111.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.007345041625313788
+  },
+  {
+    "trdar_cd": "3110074",
+    "quarter": "20234",
+    "flpop": 759500.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.06890231718064549
+  },
+  {
+    "trdar_cd": "3110074",
+    "quarter": "20241",
+    "flpop": 652579.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.01712310363180812
+  },
+  {
+    "trdar_cd": "3110110",
+    "quarter": "20233",
+    "flpop": 999282.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.06900182877683872
+  },
+  {
+    "trdar_cd": "3110110",
+    "quarter": "20234",
+    "flpop": 997023.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.060275449724845824
+  },
+  {
+    "trdar_cd": "3110110",
+    "quarter": "20241",
+    "flpop": 1052239.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.23578383813774514
+  },
+  {
+    "trdar_cd": "3110015",
+    "quarter": "20233",
+    "flpop": 71466.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.07718375854763247
+  },
+  {
+    "trdar_cd": "3110015",
+    "quarter": "20234",
+    "flpop": 71912.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.02167181260370032
+  },
+  {
+    "trdar_cd": "3110015",
+    "quarter": "20241",
+    "flpop": 60330.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.006567906814358369
+  },
+  {
+    "trdar_cd": "3110113",
+    "quarter": "20233",
+    "flpop": 156166.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.3244231796277233
+  },
+  {
+    "trdar_cd": "3110113",
+    "quarter": "20234",
+    "flpop": 164802.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.2860655708699729
+  },
+  {
+    "trdar_cd": "3110113",
+    "quarter": "20241",
+    "flpop": 165520.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.13758857481529746
+  },
+  {
+    "trdar_cd": "3110043",
+    "quarter": "20233",
+    "flpop": 757621.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.018653042609236725
+  },
+  {
+    "trdar_cd": "3110043",
+    "quarter": "20234",
+    "flpop": 846712.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.09758771075166095
+  },
+  {
+    "trdar_cd": "3110043",
+    "quarter": "20241",
+    "flpop": 768469.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.16357716017020785
+  },
+  {
+    "trdar_cd": "3110005",
+    "quarter": "20233",
+    "flpop": 110053.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.3970923865407753
+  },
+  {
+    "trdar_cd": "3110005",
+    "quarter": "20234",
+    "flpop": 128743.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.13529830288144995
+  },
+  {
+    "trdar_cd": "3110005",
+    "quarter": "20241",
+    "flpop": 125332.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.6769016056468334
+  },
+  {
+    "trdar_cd": "3110027",
+    "quarter": "20233",
+    "flpop": 385582.0,
+    "opbiz_rt": 11.0,
+    "growth_rate": -0.00046706823538434516
+  },
+  {
+    "trdar_cd": "3110027",
+    "quarter": "20234",
+    "flpop": 403757.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.2233655451949048
+  },
+  {
+    "trdar_cd": "3110027",
+    "quarter": "20241",
+    "flpop": 371701.0,
+    "opbiz_rt": 27.0,
+    "growth_rate": 0.25216357148213525
+  },
+  {
+    "trdar_cd": "3110049",
+    "quarter": "20233",
+    "flpop": 630665.0,
+    "opbiz_rt": 6.0,
+    "growth_rate": 0.14510069319263613
+  },
+  {
+    "trdar_cd": "3110049",
+    "quarter": "20234",
+    "flpop": 631503.0,
+    "opbiz_rt": 18.0,
+    "growth_rate": -0.03765501500858393
+  },
+  {
+    "trdar_cd": "3110049",
+    "quarter": "20241",
+    "flpop": 556094.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.056402894112041316
+  },
+  {
+    "trdar_cd": "3110095",
+    "quarter": "20233",
+    "flpop": 473992.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.08929055672524087
+  },
+  {
+    "trdar_cd": "3110095",
+    "quarter": "20234",
+    "flpop": 484995.0,
+    "opbiz_rt": 7.0,
+    "growth_rate": -0.017511633233008233
+  },
+  {
+    "trdar_cd": "3110095",
+    "quarter": "20241",
+    "flpop": 441861.0,
+    "opbiz_rt": 7.0,
+    "growth_rate": 0.4125245384201065
+  },
+  {
+    "trdar_cd": "3110066",
+    "quarter": "20233",
+    "flpop": 1524865.0,
+    "opbiz_rt": 14.0,
+    "growth_rate": 0.0895760977653196
+  },
+  {
+    "trdar_cd": "3110066",
+    "quarter": "20234",
+    "flpop": 1493710.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.03746992022865228
+  },
+  {
+    "trdar_cd": "3110066",
+    "quarter": "20241",
+    "flpop": 1766746.0,
+    "opbiz_rt": 15.0,
+    "growth_rate": 0.15553684901957499
+  },
+  {
+    "trdar_cd": "3110010",
+    "quarter": "20233",
+    "flpop": 122420.0,
+    "opbiz_rt": 14.0,
+    "growth_rate": 0.10656681309504908
+  },
+  {
+    "trdar_cd": "3110010",
+    "quarter": "20234",
+    "flpop": 131325.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.8813118167265346
+  },
+  {
+    "trdar_cd": "3110010",
+    "quarter": "20241",
+    "flpop": 131584.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 10.94122807909688
+  },
+  {
+    "trdar_cd": "3110035",
+    "quarter": "20233",
+    "flpop": 1352717.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.5607267416065641
+  },
+  {
+    "trdar_cd": "3110035",
+    "quarter": "20234",
+    "flpop": 1383689.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.05928004976431124
+  },
+  {
+    "trdar_cd": "3110035",
+    "quarter": "20241",
+    "flpop": 1394548.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.38303082921629855
+  },
+  {
+    "trdar_cd": "3110007",
+    "quarter": "20233",
+    "flpop": 906104.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.8217568907166316
+  },
+  {
+    "trdar_cd": "3110007",
+    "quarter": "20234",
+    "flpop": 901242.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 1.2819482416312715
+  },
+  {
+    "trdar_cd": "3110007",
+    "quarter": "20241",
+    "flpop": 947450.0,
+    "opbiz_rt": 30.0,
+    "growth_rate": -0.4068306163154786
+  },
+  {
+    "trdar_cd": "3110085",
+    "quarter": "20233",
+    "flpop": 1286160.0,
+    "opbiz_rt": 4.0,
+    "growth_rate": 0.014181439679336152
+  },
+  {
+    "trdar_cd": "3110085",
+    "quarter": "20234",
+    "flpop": 1294798.0,
+    "opbiz_rt": 7.0,
+    "growth_rate": -0.00015954676448526437
+  },
+  {
+    "trdar_cd": "3110085",
+    "quarter": "20241",
+    "flpop": 1296116.0,
+    "opbiz_rt": 14.0,
+    "growth_rate": 0.0330484402807604
+  },
+  {
+    "trdar_cd": "3110102",
+    "quarter": "20233",
+    "flpop": 492715.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.3824853677511681
+  },
+  {
+    "trdar_cd": "3110102",
+    "quarter": "20234",
+    "flpop": 471634.0,
+    "opbiz_rt": 18.0,
+    "growth_rate": -0.12655666553970366
+  },
+  {
+    "trdar_cd": "3110102",
+    "quarter": "20241",
+    "flpop": 460733.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.20303685963588403
+  },
+  {
+    "trdar_cd": "3110060",
+    "quarter": "20233",
+    "flpop": 704569.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.254217865244487
+  },
+  {
+    "trdar_cd": "3110060",
+    "quarter": "20234",
+    "flpop": 725610.0,
+    "opbiz_rt": 10.0,
+    "growth_rate": 0.26366343627799077
+  },
+  {
+    "trdar_cd": "3110060",
+    "quarter": "20241",
+    "flpop": 694866.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.11205748528337724
+  },
+  {
+    "trdar_cd": "3110045",
+    "quarter": "20233",
+    "flpop": 663842.0,
+    "opbiz_rt": 14.0,
+    "growth_rate": -0.2996018726192021
+  },
+  {
+    "trdar_cd": "3110045",
+    "quarter": "20234",
+    "flpop": 496373.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.31876091226837705
+  },
+  {
+    "trdar_cd": "3110045",
+    "quarter": "20241",
+    "flpop": 395893.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.29784132603797875
+  },
+  {
+    "trdar_cd": "3110068",
+    "quarter": "20233",
+    "flpop": 1699305.0,
+    "opbiz_rt": 5.0,
+    "growth_rate": -0.05801013785362165
+  },
+  {
+    "trdar_cd": "3110068",
+    "quarter": "20234",
+    "flpop": 1707778.0,
+    "opbiz_rt": 13.0,
+    "growth_rate": -0.11054206753532753
+  },
+  {
+    "trdar_cd": "3110068",
+    "quarter": "20241",
+    "flpop": 1666400.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.23376174023763854
+  },
+  {
+    "trdar_cd": "3110090",
+    "quarter": "20233",
+    "flpop": 609971.0,
+    "opbiz_rt": 11.0,
+    "growth_rate": -0.27432915517914347
+  },
+  {
+    "trdar_cd": "3110090",
+    "quarter": "20234",
+    "flpop": 716556.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.2767310108745438
+  },
+  {
+    "trdar_cd": "3110090",
+    "quarter": "20241",
+    "flpop": 700319.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.16087899753885676
+  },
+  {
+    "trdar_cd": "3110051",
+    "quarter": "20234",
+    "flpop": 942742.0,
+    "opbiz_rt": 33.0,
+    "growth_rate": -0.06023987167897585
+  },
+  {
+    "trdar_cd": "3110051",
+    "quarter": "20241",
+    "flpop": 951611.0,
+    "opbiz_rt": 25.0,
+    "growth_rate": -0.846154670610869
+  },
+  {
+    "trdar_cd": "3110063",
+    "quarter": "20233",
+    "flpop": 872284.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.2477888982621196
+  },
+  {
+    "trdar_cd": "3110063",
+    "quarter": "20234",
+    "flpop": 846457.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.1028156068836823
+  },
+  {
+    "trdar_cd": "3110063",
+    "quarter": "20241",
+    "flpop": 866024.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.0852509966592669
+  },
+  {
+    "trdar_cd": "3110009",
+    "quarter": "20233",
+    "flpop": 162009.0,
+    "opbiz_rt": 7.0,
+    "growth_rate": -0.5612505419098208
+  },
+  {
+    "trdar_cd": "3110009",
+    "quarter": "20234",
+    "flpop": 166536.0,
+    "opbiz_rt": 14.0,
+    "growth_rate": -0.08414828134514077
+  },
+  {
+    "trdar_cd": "3110009",
+    "quarter": "20241",
+    "flpop": 164016.0,
+    "opbiz_rt": 7.0,
+    "growth_rate": 0.8873520615799418
+  },
+  {
+    "trdar_cd": "3110052",
+    "quarter": "20233",
+    "flpop": 620193.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.3038431123549054
+  },
+  {
+    "trdar_cd": "3110052",
+    "quarter": "20234",
+    "flpop": 636257.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.054604597047996487
+  },
+  {
+    "trdar_cd": "3110083",
+    "quarter": "20233",
+    "flpop": 98754.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.08401885654916028
+  },
+  {
+    "trdar_cd": "3110083",
+    "quarter": "20234",
+    "flpop": 100998.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.11777779772551933
+  },
+  {
+    "trdar_cd": "3110083",
+    "quarter": "20241",
+    "flpop": 98991.0,
+    "opbiz_rt": 25.0,
+    "growth_rate": -0.13405311959110647
+  },
+  {
+    "trdar_cd": "3110019",
+    "quarter": "20233",
+    "flpop": 557426.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.09274302115767875
+  },
+  {
+    "trdar_cd": "3110019",
+    "quarter": "20234",
+    "flpop": 585795.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.055810478165906674
+  },
+  {
+    "trdar_cd": "3110019",
+    "quarter": "20241",
+    "flpop": 567570.0,
+    "opbiz_rt": 5.0,
+    "growth_rate": 0.2879687464930944
+  },
+  {
+    "trdar_cd": "3110096",
+    "quarter": "20233",
+    "flpop": 233226.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.027397832512690193
+  },
+  {
+    "trdar_cd": "3110096",
+    "quarter": "20234",
+    "flpop": 253257.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.02049498697015784
+  },
+  {
+    "trdar_cd": "3110096",
+    "quarter": "20241",
+    "flpop": 237999.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.11924352800431488
+  },
+  {
+    "trdar_cd": "3110014",
+    "quarter": "20233",
+    "flpop": 57976.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.01309315853399764
+  },
+  {
+    "trdar_cd": "3110014",
+    "quarter": "20234",
+    "flpop": 58215.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.19331516064651458
+  },
+  {
+    "trdar_cd": "3110014",
+    "quarter": "20241",
+    "flpop": 51327.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.08052696972175603
+  },
+  {
+    "trdar_cd": "3110056",
+    "quarter": "20233",
+    "flpop": 1564547.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.11570247737960702
+  },
+  {
+    "trdar_cd": "3110056",
+    "quarter": "20234",
+    "flpop": 1586870.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.01308787607325046
+  },
+  {
+    "trdar_cd": "3110056",
+    "quarter": "20241",
+    "flpop": 1536910.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.1486458722877501
+  },
+  {
+    "trdar_cd": "3110084",
+    "quarter": "20233",
+    "flpop": 963546.0,
+    "opbiz_rt": 4.0,
+    "growth_rate": 0.9451595847874936
+  },
+  {
+    "trdar_cd": "3110084",
+    "quarter": "20234",
+    "flpop": 1019132.0,
+    "opbiz_rt": 7.0,
+    "growth_rate": 0.1369438831159681
+  },
+  {
+    "trdar_cd": "3110084",
+    "quarter": "20241",
+    "flpop": 1022188.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.1524730402526803
+  },
+  {
+    "trdar_cd": "3110058",
+    "quarter": "20233",
+    "flpop": 1640931.0,
+    "opbiz_rt": 13.0,
+    "growth_rate": -0.14489572387141478
+  },
+  {
+    "trdar_cd": "3110058",
+    "quarter": "20234",
+    "flpop": 1607023.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.16104343420008885
+  },
+  {
+    "trdar_cd": "3110058",
+    "quarter": "20241",
+    "flpop": 1627960.0,
+    "opbiz_rt": 13.0,
+    "growth_rate": 0.1248440613214758
+  },
+  {
+    "trdar_cd": "3110105",
+    "quarter": "20233",
+    "flpop": 790796.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.21986578498243878
+  },
+  {
+    "trdar_cd": "3110105",
+    "quarter": "20234",
+    "flpop": 811964.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.01846410737659542
+  },
+  {
+    "trdar_cd": "3110105",
+    "quarter": "20241",
+    "flpop": 837038.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.11930556981626925
+  },
+  {
+    "trdar_cd": "3110106",
+    "quarter": "20233",
+    "flpop": 175090.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.6694208859926855
+  },
+  {
+    "trdar_cd": "3110062",
+    "quarter": "20233",
+    "flpop": 816371.0,
+    "opbiz_rt": 3.0,
+    "growth_rate": 0.059899810934722686
+  },
+  {
+    "trdar_cd": "3110062",
+    "quarter": "20234",
+    "flpop": 816208.0,
+    "opbiz_rt": 15.0,
+    "growth_rate": -0.025319616274521912
+  },
+  {
+    "trdar_cd": "3110062",
+    "quarter": "20241",
+    "flpop": 803134.0,
+    "opbiz_rt": 5.0,
+    "growth_rate": 0.1627188636473257
+  },
+  {
+    "trdar_cd": "3110024",
+    "quarter": "20233",
+    "flpop": 258133.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.11510648734799284
+  },
+  {
+    "trdar_cd": "3110024",
+    "quarter": "20234",
+    "flpop": 256949.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.26417694669321423
+  },
+  {
+    "trdar_cd": "3110024",
+    "quarter": "20241",
+    "flpop": 252502.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.09707793620153218
+  },
+  {
+    "trdar_cd": "3110002",
+    "quarter": "20233",
+    "flpop": 547929.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.3331297693195077
+  },
+  {
+    "trdar_cd": "3110002",
+    "quarter": "20234",
+    "flpop": 538956.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.08836637002239728
+  },
+  {
+    "trdar_cd": "3110002",
+    "quarter": "20241",
+    "flpop": 517847.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.001972603671559783
+  },
+  {
+    "trdar_cd": "3110003",
+    "quarter": "20233",
+    "flpop": 552786.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.1978146600648923
+  },
+  {
+    "trdar_cd": "3110003",
+    "quarter": "20234",
+    "flpop": 525956.0,
+    "opbiz_rt": 33.0,
+    "growth_rate": -0.15561628057110757
+  },
+  {
+    "trdar_cd": "3110003",
+    "quarter": "20241",
+    "flpop": 492704.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.4043890946278218
+  },
+  {
+    "trdar_cd": "3110020",
+    "quarter": "20233",
+    "flpop": 1788799.0,
+    "opbiz_rt": 6.0,
+    "growth_rate": 0.45296444275348574
+  },
+  {
+    "trdar_cd": "3110020",
+    "quarter": "20234",
+    "flpop": 2038460.0,
+    "opbiz_rt": 7.0,
+    "growth_rate": -0.18245192546939384
+  },
+  {
+    "trdar_cd": "3110020",
+    "quarter": "20241",
+    "flpop": 1719460.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.13714936003686853
+  },
+  {
+    "trdar_cd": "3110029",
+    "quarter": "20233",
+    "flpop": 3086336.0,
+    "opbiz_rt": 22.0,
+    "growth_rate": 0.7625567789788409
+  },
+  {
+    "trdar_cd": "3110029",
+    "quarter": "20234",
+    "flpop": 2744448.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.7823835168782936
+  },
+  {
+    "trdar_cd": "3110029",
+    "quarter": "20241",
+    "flpop": 2610106.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 1.452382736962029
+  },
+  {
+    "trdar_cd": "3110061",
+    "quarter": "20233",
+    "flpop": 1243465.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.18075681764533177
+  },
+  {
+    "trdar_cd": "3110061",
+    "quarter": "20234",
+    "flpop": 1309950.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.12316776645445066
+  },
+  {
+    "trdar_cd": "3110061",
+    "quarter": "20241",
+    "flpop": 1302731.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.1551286244917674
+  },
+  {
+    "trdar_cd": "3110109",
+    "quarter": "20233",
+    "flpop": 314520.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.21212193142204755
+  },
+  {
+    "trdar_cd": "3110109",
+    "quarter": "20234",
+    "flpop": 328824.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 1.3575949098236826
+  },
+  {
+    "trdar_cd": "3110109",
+    "quarter": "20241",
+    "flpop": 371115.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.40708755429667426
+  },
+  {
+    "trdar_cd": "3110006",
+    "quarter": "20233",
+    "flpop": 7335.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.24720651831361115
+  },
+  {
+    "trdar_cd": "3110006",
+    "quarter": "20234",
+    "flpop": 7917.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.3505026848412565
+  },
+  {
+    "trdar_cd": "3110006",
+    "quarter": "20241",
+    "flpop": 7611.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.04724607194722877
+  },
+  {
+    "trdar_cd": "3110064",
+    "quarter": "20233",
+    "flpop": 1273119.0,
+    "opbiz_rt": 20.0,
+    "growth_rate": -0.16771026250192553
+  },
+  {
+    "trdar_cd": "3110064",
+    "quarter": "20234",
+    "flpop": 1310231.0,
+    "opbiz_rt": 10.0,
+    "growth_rate": 0.004747319954476913
+  },
+  {
+    "trdar_cd": "3110064",
+    "quarter": "20241",
+    "flpop": 1262241.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.18142134213836655
+  },
+  {
+    "trdar_cd": "3110012",
+    "quarter": "20233",
+    "flpop": 606444.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.08446062028669174
+  },
+  {
+    "trdar_cd": "3110012",
+    "quarter": "20234",
+    "flpop": 618069.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.08775110989540538
+  },
+  {
+    "trdar_cd": "3110012",
+    "quarter": "20241",
+    "flpop": 607884.0,
+    "opbiz_rt": 18.0,
+    "growth_rate": 0.2518456572471086
+  },
+  {
+    "trdar_cd": "3110107",
+    "quarter": "20233",
+    "flpop": 70234.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.19736234320579105
+  },
+  {
+    "trdar_cd": "3110107",
+    "quarter": "20234",
+    "flpop": 66533.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.09331003863619472
+  },
+  {
+    "trdar_cd": "3110107",
+    "quarter": "20241",
+    "flpop": 69262.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.21578105263833353
+  },
+  {
+    "trdar_cd": "3110080",
+    "quarter": "20233",
+    "flpop": 1690562.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.49570390646990004
+  },
+  {
+    "trdar_cd": "3110080",
+    "quarter": "20234",
+    "flpop": 1672762.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.17937053752327806
+  },
+  {
+    "trdar_cd": "3110080",
+    "quarter": "20241",
+    "flpop": 1652684.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.9377369975934007
+  },
+  {
+    "trdar_cd": "3110059",
+    "quarter": "20233",
+    "flpop": 565383.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.19716849137199466
+  },
+  {
+    "trdar_cd": "3110059",
+    "quarter": "20234",
+    "flpop": 644157.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.394127155315754
+  },
+  {
+    "trdar_cd": "3110059",
+    "quarter": "20241",
+    "flpop": 638143.0,
+    "opbiz_rt": 17.0,
+    "growth_rate": -0.3928572490912522
+  },
+  {
+    "trdar_cd": "3110021",
+    "quarter": "20233",
+    "flpop": 1276719.0,
+    "opbiz_rt": 11.0,
+    "growth_rate": 0.1469113498537893
+  },
+  {
+    "trdar_cd": "3110021",
+    "quarter": "20234",
+    "flpop": 1486690.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.09050251190187235
+  },
+  {
+    "trdar_cd": "3110021",
+    "quarter": "20241",
+    "flpop": 1349411.0,
+    "opbiz_rt": 11.0,
+    "growth_rate": 0.10829540673920338
+  },
+  {
+    "trdar_cd": "3110057",
+    "quarter": "20233",
+    "flpop": 766352.0,
+    "opbiz_rt": 33.0,
+    "growth_rate": -0.15607554029756612
+  },
+  {
+    "trdar_cd": "3110057",
+    "quarter": "20234",
+    "flpop": 769147.0,
+    "opbiz_rt": 25.0,
+    "growth_rate": 0.2780813873120522
+  },
+  {
+    "trdar_cd": "3110057",
+    "quarter": "20241",
+    "flpop": 788384.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.03656582250156291
+  },
+  {
+    "trdar_cd": "3110093",
+    "quarter": "20233",
+    "flpop": 2423867.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.1364840246916226
+  },
+  {
+    "trdar_cd": "3110093",
+    "quarter": "20234",
+    "flpop": 2376686.0,
+    "opbiz_rt": 11.0,
+    "growth_rate": -0.0350769135328894
+  },
+  {
+    "trdar_cd": "3110093",
+    "quarter": "20241",
+    "flpop": 2158435.0,
+    "opbiz_rt": 6.0,
+    "growth_rate": 0.0197168472694703
+  },
+  {
+    "trdar_cd": "3110075",
+    "quarter": "20233",
+    "flpop": 879599.0,
+    "opbiz_rt": 8.0,
+    "growth_rate": 0.14080783849950354
+  },
+  {
+    "trdar_cd": "3110075",
+    "quarter": "20234",
+    "flpop": 962257.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.13064871334896128
+  },
+  {
+    "trdar_cd": "3110075",
+    "quarter": "20241",
+    "flpop": 877568.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.04827768412618548
+  },
+  {
+    "trdar_cd": "3110115",
+    "quarter": "20233",
+    "flpop": 713401.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.06871524844984953
+  },
+  {
+    "trdar_cd": "3110115",
+    "quarter": "20234",
+    "flpop": 718852.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.017681965709980596
+  },
+  {
+    "trdar_cd": "3110115",
+    "quarter": "20241",
+    "flpop": 755331.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.00782688856291652
+  },
+  {
+    "trdar_cd": "3110118",
+    "quarter": "20233",
+    "flpop": 1130699.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.11967453052177943
+  },
+  {
+    "trdar_cd": "3110118",
+    "quarter": "20234",
+    "flpop": 1367318.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.12446836492648264
+  },
+  {
+    "trdar_cd": "3110118",
+    "quarter": "20241",
+    "flpop": 1403682.0,
+    "opbiz_rt": 14.0,
+    "growth_rate": 0.48065970206975134
+  },
+  {
+    "trdar_cd": "3110016",
+    "quarter": "20233",
+    "flpop": 36182.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.05448937193072184
+  },
+  {
+    "trdar_cd": "3110016",
+    "quarter": "20234",
+    "flpop": 40185.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.0156008342224806
+  },
+  {
+    "trdar_cd": "3110016",
+    "quarter": "20241",
+    "flpop": 38589.0,
+    "opbiz_rt": 14.0,
+    "growth_rate": 0.14774358859119707
+  },
+  {
+    "trdar_cd": "3110028",
+    "quarter": "20233",
+    "flpop": 2359706.0,
+    "opbiz_rt": 7.0,
+    "growth_rate": -0.4539540971867955
+  },
+  {
+    "trdar_cd": "3110028",
+    "quarter": "20234",
+    "flpop": 2311887.0,
+    "opbiz_rt": 7.0,
+    "growth_rate": -0.2953561779122014
+  },
+  {
+    "trdar_cd": "3110028",
+    "quarter": "20241",
+    "flpop": 2128097.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 1.216118966885384
+  },
+  {
+    "trdar_cd": "3110054",
+    "quarter": "20233",
+    "flpop": 1043509.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.14337237346434759
+  },
+  {
+    "trdar_cd": "3110054",
+    "quarter": "20234",
+    "flpop": 1040872.0,
+    "opbiz_rt": 8.0,
+    "growth_rate": -0.2532180146834141
+  },
+  {
+    "trdar_cd": "3110054",
+    "quarter": "20241",
+    "flpop": 1005306.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.6119836018245406
+  },
+  {
+    "trdar_cd": "3110008",
+    "quarter": "20233",
+    "flpop": 1251380.0,
+    "opbiz_rt": 8.0,
+    "growth_rate": 0.03812453870557225
+  },
+  {
+    "trdar_cd": "3110008",
+    "quarter": "20234",
+    "flpop": 1291067.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.1385880197449469
+  },
+  {
+    "trdar_cd": "3110008",
+    "quarter": "20241",
+    "flpop": 1263951.0,
+    "opbiz_rt": 4.0,
+    "growth_rate": 0.21822504209097193
+  },
+  {
+    "trdar_cd": "3110098",
+    "quarter": "20233",
+    "flpop": 87287.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.2837858708081002
+  },
+  {
+    "trdar_cd": "3110098",
+    "quarter": "20234",
+    "flpop": 89348.0,
+    "opbiz_rt": 14.0,
+    "growth_rate": 0.6228083958553077
+  },
+  {
+    "trdar_cd": "3110098",
+    "quarter": "20241",
+    "flpop": 94389.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.2265443313385477
+  },
+  {
+    "trdar_cd": "3110017",
+    "quarter": "20233",
+    "flpop": 449300.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.101766874625691
+  },
+  {
+    "trdar_cd": "3110017",
+    "quarter": "20234",
+    "flpop": 445410.0,
+    "opbiz_rt": 25.0,
+    "growth_rate": -0.10098684112959737
+  },
+  {
+    "trdar_cd": "3110017",
+    "quarter": "20241",
+    "flpop": 418403.0,
+    "opbiz_rt": 33.0,
+    "growth_rate": -0.11123646126298734
+  },
+  {
+    "trdar_cd": "3110037",
+    "quarter": "20233",
+    "flpop": 819565.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.1999300297602679
+  },
+  {
+    "trdar_cd": "3110037",
+    "quarter": "20234",
+    "flpop": 765014.0,
+    "opbiz_rt": 20.0,
+    "growth_rate": 0.7699214344450044
+  },
+  {
+    "trdar_cd": "3110037",
+    "quarter": "20241",
+    "flpop": 764798.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.33735300994671596
+  },
+  {
+    "trdar_cd": "3110103",
+    "quarter": "20233",
+    "flpop": 298467.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.15798125469050842
+  },
+  {
+    "trdar_cd": "3110103",
+    "quarter": "20234",
+    "flpop": 312025.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.10191936460241932
+  },
+  {
+    "trdar_cd": "3110022",
+    "quarter": "20233",
+    "flpop": 533908.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.019066112922553963
+  },
+  {
+    "trdar_cd": "3110022",
+    "quarter": "20234",
+    "flpop": 537293.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.0351532531494706
+  },
+  {
+    "trdar_cd": "3110022",
+    "quarter": "20241",
+    "flpop": 511855.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.07978902804598596
+  },
+  {
+    "trdar_cd": "3110048",
+    "quarter": "20233",
+    "flpop": 920316.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.5304033933715201
+  },
+  {
+    "trdar_cd": "3110048",
+    "quarter": "20234",
+    "flpop": 971594.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.29071598653818587
+  },
+  {
+    "trdar_cd": "3110048",
+    "quarter": "20241",
+    "flpop": 966860.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.19633943531191905
+  },
+  {
+    "trdar_cd": "3110023",
+    "quarter": "20233",
+    "flpop": 405741.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.11116420039159058
+  },
+  {
+    "trdar_cd": "3110023",
+    "quarter": "20234",
+    "flpop": 502305.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.1318915735363781
+  },
+  {
+    "trdar_cd": "3110023",
+    "quarter": "20241",
+    "flpop": 787424.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.2685341745167434
+  },
+  {
+    "trdar_cd": "3110087",
+    "quarter": "20233",
+    "flpop": 217285.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.2928322057480186
+  },
+  {
+    "trdar_cd": "3110087",
+    "quarter": "20234",
+    "flpop": 210234.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.07660891527214657
+  },
+  {
+    "trdar_cd": "3110087",
+    "quarter": "20241",
+    "flpop": 207340.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.13241588703637666
+  },
+  {
+    "trdar_cd": "3110094",
+    "quarter": "20233",
+    "flpop": 65267.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.2915579484863962
+  },
+  {
+    "trdar_cd": "3110094",
+    "quarter": "20234",
+    "flpop": 60315.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 1.1683050707629055
+  },
+  {
+    "trdar_cd": "3110082",
+    "quarter": "20233",
+    "flpop": 367347.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.09033444505136916
+  },
+  {
+    "trdar_cd": "3110082",
+    "quarter": "20234",
+    "flpop": 355107.0,
+    "opbiz_rt": 5.0,
+    "growth_rate": 0.14519905082954276
+  },
+  {
+    "trdar_cd": "3110082",
+    "quarter": "20241",
+    "flpop": 374629.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.040148733240604945
+  },
+  {
+    "trdar_cd": "3110067",
+    "quarter": "20233",
+    "flpop": 2141481.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.12644848538593062
+  },
+  {
+    "trdar_cd": "3110067",
+    "quarter": "20234",
+    "flpop": 2164975.0,
+    "opbiz_rt": 9.0,
+    "growth_rate": -0.042824480809855195
+  },
+  {
+    "trdar_cd": "3110067",
+    "quarter": "20241",
+    "flpop": 1924455.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.1693538722486592
+  },
+  {
+    "trdar_cd": "3110018",
+    "quarter": "20233",
+    "flpop": 449745.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.011242148273293557
+  },
+  {
+    "trdar_cd": "3110018",
+    "quarter": "20234",
+    "flpop": 444521.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.09421582925655812
+  },
+  {
+    "trdar_cd": "3110018",
+    "quarter": "20241",
+    "flpop": 399028.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.24075529638662668
+  },
+  {
+    "trdar_cd": "3110040",
+    "quarter": "20233",
+    "flpop": 162045.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": -0.1389671038814016
+  },
+  {
+    "trdar_cd": "3110040",
+    "quarter": "20234",
+    "flpop": 157699.0,
+    "opbiz_rt": 25.0,
+    "growth_rate": -0.25474323136573185
+  },
+  {
+    "trdar_cd": "3110040",
+    "quarter": "20241",
+    "flpop": 147544.0,
+    "opbiz_rt": 0.0,
+    "growth_rate": 0.42077796262376094
+  }
+]

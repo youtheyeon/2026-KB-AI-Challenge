@@ -1,0 +1,42 @@
+{
+  "other": {
+    "sample_size": 51,
+    "avg_monthly_sales_amt": 197377774,
+    "std_monthly_sales_amt": 208866669,
+    "min_monthly_sales_amt": 373206,
+    "max_monthly_sales_amt": 896230691,
+    "avg_monthly_sales_count": 21187
+  },
+  "university": {
+    "sample_size": 19,
+    "avg_monthly_sales_amt": 313812754,
+    "std_monthly_sales_amt": 473583790,
+    "min_monthly_sales_amt": 9961200,
+    "max_monthly_sales_amt": 1890915589,
+    "avg_monthly_sales_count": 34907
+  },
+  "office": {
+    "sample_size": 11,
+    "avg_monthly_sales_amt": 243307681,
+    "std_monthly_sales_amt": 373088040,
+    "min_monthly_sales_amt": 11245642,
+    "max_monthly_sales_amt": 1323865729,
+    "avg_monthly_sales_count": 24412
+  },
+  "tourist": {
+    "sample_size": 11,
+    "avg_monthly_sales_amt": 207470866,
+    "std_monthly_sales_amt": 194489523,
+    "min_monthly_sales_amt": 3107000,
+    "max_monthly_sales_amt": 512478697,
+    "avg_monthly_sales_count": 18982
+  },
+  "residential": {
+    "sample_size": 3,
+    "avg_monthly_sales_amt": 133685287,
+    "std_monthly_sales_amt": 117072649,
+    "min_monthly_sales_amt": 36632131,
+    "max_monthly_sales_amt": 298377787,
+    "avg_monthly_sales_count": 9007
+  }
+}
