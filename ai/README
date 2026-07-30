@@ -1,0 +1,33 @@
+# 실행 순서 (README)
+
+## 0. 준비
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install requests python-dotenv
+```
+`.env.example`을 `.env`로 이름 바꾸고 인증키 3개(SBIZ, SEOUL, ANTHROPIC) 채워넣기.
+
+## 1. 데이터 수집 (최초 1회, 순서대로)
+```bash
+python3 fetch_benchmark_data.py        # 원본 데이터 수집 테스트
+python3 classify_and_find_codes.py     # 카페 업종코드 탐색 + 상권 분류
+python3 build_final_benchmark.py       # 세그먼트 벤치마크 테이블 생성 (raw_data/ 에 저장됨)
+```
+※ 이 3개는 `raw_data/` 폴더에 결과를 저장하므로, 한 번 실행해두면 이후 스크립트들이 그 결과를 읽어서 씁니다.
+
+## 2. 병목 진단 + 배분안 + 재무계산 + SCB방향 (각각 단독 실행 가능)
+```bash
+python3 mock_pos_data.py               # mock 사용자 데이터 5종 생성
+python3 bottleneck_detector.py         # 병목 진단 테스트
+python3 allocation_draft_generator.py  # A/B/C 배분안 생성 테스트
+python3 financial_calculator.py        # 재무 계산 테스트
+python3 scb_outlook.py                 # SCB 방향성 테스트
+```
+
+## 3. 전체 파이프라인 (LLM 설명까지 다 연결)
+```bash
+python3 llm_explainer.py
+```
+
+## 파일 설명은 AI_시뮬레이터_최종정리.md 참고

@@ -1,0 +1,329 @@
+{
+  "bottleneck_diagnosis": [
+    {
+      "bottleneck_type": "time_of_day_weakness",
+      "title": "11~14시 고객 유입 부족",
+      "detail": "11~14시 매출 비중이 35.0% (벤치마크 42.0%)로 낮음",
+      "comparison_chip": "11~14시 매출비중 35.0% · 벤치마크 42.0%",
+      "evidence_source": "AI 비지도학습(K-means)으로 분류된 유사 소비패턴 상권군 평균",
+      "methodology": "시간대별·요일별 매출 패턴을 기준으로 K-means 클러스터링을 실행해 서울시 카페 상권을 자동으로 그룹화했습니다. 이 사용자는 '11_14시·FRI요일 강세' 특징을 가진 그룹(상권 112개, 예: 독립문역 1번, 성곡미술관, 서울국제고등학교)으로 분류되었으며, 이 그룹 내 평균 시간대 비중과 비교했습니다. 격차가 15% 이상이면 병목, 35% 이상 '뚜렷', 60% 이상 '심각'으로 분류합니다.",
+      "severity": "경미",
+      "suggested_category": "마케팅·온라인채널",
+      "rationale": "특정 시간대 고객 유입이 부족하면, 그 시간대를 타깃으로 한 프로모션이나 배달앱 노출 확대가 대응 방향으로 알려져 있습니다.",
+      "priority_badge": "참고",
+      "confidence_badge": "높음"
+    },
+    {
+      "bottleneck_type": "time_of_day_weakness",
+      "title": "17~21시 고객 유입 부족",
+      "detail": "17~21시 매출 비중이 12.0% (벤치마크 14.8%)로 낮음",
+      "comparison_chip": "17~21시 매출비중 12.0% · 벤치마크 14.8%",
+      "evidence_source": "AI 비지도학습(K-means)으로 분류된 유사 소비패턴 상권군 평균",
+      "methodology": "시간대별·요일별 매출 패턴을 기준으로 K-means 클러스터링을 실행해 서울시 카페 상권을 자동으로 그룹화했습니다. 이 사용자는 '11_14시·FRI요일 강세' 특징을 가진 그룹(상권 112개, 예: 독립문역 1번, 성곡미술관, 서울국제고등학교)으로 분류되었으며, 이 그룹 내 평균 시간대 비중과 비교했습니다. 격차가 15% 이상이면 병목, 35% 이상 '뚜렷', 60% 이상 '심각'으로 분류합니다.",
+      "severity": "경미",
+      "suggested_category": "마케팅·온라인채널",
+      "rationale": "특정 시간대 고객 유입이 부족하면, 그 시간대를 타깃으로 한 프로모션이나 배달앱 노출 확대가 대응 방향으로 알려져 있습니다.",
+      "priority_badge": "참고",
+      "confidence_badge": "높음"
+    },
+    {
+      "bottleneck_type": "high_cost_ratio",
+      "detail": "원가율 62.0% (업계 가정치 42.0%)로 높음",
+      "comparison_chip": "원가율 62.0% · 업계 참고치 42.0%",
+      "evidence_source": "업계 가정치 (실증 데이터 없음)",
+      "methodology": "업계 참고 원가율(매출 대비 42.0%)과 비교했습니다. 이 참고치는 실제 카페 업종 원가 데이터가 아니라 일반 업종 가정치이며, 격차가 5%p 이상이면 병목, 10%p 이상 '뚜렷', 15%p 이상 '심각'으로 분류합니다.",
+      "severity": "심각",
+      "suggested_category": "설비·재고관리",
+      "rationale": "원가율이 높으면 식자재 폐기 감소, 조리효율 개선(설비 교체) 등이 대응 방향으로 알려져 있습니다.",
+      "title": "원가율 상승",
+      "priority_badge": "우선 확인",
+      "confidence_badge": "보통"
+    },
+    {
+      "bottleneck_type": "low_repeat_rate",
+      "detail": "재구매율 19.0% (업계 가정치 35.0%)로 낮음",
+      "comparison_chip": "재구매율 19.0% · 업계 참고치 35.0%",
+      "evidence_source": "업계 가정치 (실증 데이터 없음)",
+      "methodology": "업계 참고 재구매율(35.0%)과 비교했습니다. 이 참고치는 실증 데이터가 아니라 업계 통상 추정치이며, 격차가 10%p 이상이면 병목, 15%p 이상 '뚜렷', 22%p 이상 '심각'으로 분류합니다.",
+      "severity": "뚜렷",
+      "suggested_category": "마케팅·온라인채널",
+      "rationale": "재구매율이 낮으면 멤버십/적립 프로그램, SNS 재방문 유도 등이 대응 방향으로 알려져 있습니다.",
+      "title": "재구매율 저조",
+      "priority_badge": "확인 필요",
+      "confidence_badge": "보통"
+    }
+  ],
+  "ai_cluster_assignment": {
+    "cluster_id": 1,
+    "cluster_member_count": 112,
+    "cluster_dominant_time": "11_14",
+    "cluster_dominant_weekday": "FRI",
+    "cluster_example_trade_areas": [
+      "독립문역 1번",
+      "성곡미술관",
+      "서울국제고등학교",
+      "경신고등학교",
+      "서울대병원"
+    ],
+    "time_of_day_benchmark": {
+      "00_06": 0.0014343365244202687,
+      "06_11": 0.1480658437495941,
+      "11_14": 0.41950579852589576,
+      "14_17": 0.2660900430658321,
+      "17_21": 0.14793895525687675,
+      "21_24": 0.016965022877380966
+    },
+    "distance_to_cluster_center": 0.131
+  },
+  "scenario_results": [
+    {
+      "scenario_id": "A",
+      "label": "병목 집중형",
+      "allocation": {
+        "marketing_online": 0.85,
+        "equipment_interior": 0.05,
+        "labor": 0.05,
+        "inventory": 0.05
+      },
+      "allocation_amounts_won": {
+        "marketing_online": 12750000,
+        "equipment_interior": 750000,
+        "labor": 750000,
+        "inventory": 750000
+      },
+      "loan_amount": 15000000,
+      "target_metrics": [
+        "EVENING_REVENUE",
+        "ORDER_COUNT",
+        "REPEAT_CUSTOMER_RATE"
+      ],
+      "financial_result": {
+        "monthly_loan_payment": 446204,
+        "loan_term_months": 36,
+        "additional_fixed_cost_per_month": 695000,
+        "employee_count_change": 0,
+        "baseline_monthly_profit": 945000,
+        "remaining_cash_after_payment": -196204,
+        "break_even_additional_revenue": 338283,
+        "required_additional_orders": 122,
+        "allowed_revenue_decline": 0,
+        "payback_period": {
+          "months": null,
+          "status": "UNAVAILABLE",
+          "reason": "추가 순현금에 대한 검증된 가정이 없습니다."
+        },
+        "risk_level": "높음",
+        "risk_level_basis": "현재 매출 수준 그대로(추가 성장 없이)도 상환·고정비를 감당할 수 있는지로 판정",
+        "loan_scale_warning": {
+          "loan_to_monthly_revenue_ratio": 2.0,
+          "is_warning": false,
+          "message": null
+        }
+      },
+      "scb_outlook": [
+        {
+          "scb_item": "매출",
+          "direction": "긍정적 방향 가능성",
+          "driven_by": "marketing_online",
+          "allocation_share_pct": 85.0
+        },
+        {
+          "scb_item": "유통플랫폼 성장지수",
+          "direction": "긍정적 방향 가능성 (온라인 채널 확대 시)",
+          "driven_by": "marketing_online",
+          "allocation_share_pct": 85.0
+        },
+        {
+          "scb_item": "고객 인지도",
+          "direction": "긍정적 방향 가능성",
+          "driven_by": "marketing_online",
+          "allocation_share_pct": 85.0
+        },
+        {
+          "scb_item": "사업 지속성",
+          "direction": "긍정적 방향 가능성 (운영 안정성 개선)",
+          "driven_by": "equipment_interior",
+          "allocation_share_pct": 5.0
+        },
+        {
+          "scb_item": "근로자 수",
+          "direction": "직접 증가",
+          "driven_by": "labor",
+          "allocation_share_pct": 5.0
+        }
+      ],
+      "allocation_rationale": "이 배분안은 실제 데이터 기반의 두 가지 주요 병목에 집중합니다. 11~14시 매출 비중이 35.0%(벤치마크 42.0%)로, 17~21시가 12.0%(벤치마크 14.8%)로 모두 저조하며, 재구매율도 19.0%(업계 참고치 35.0%)로 낮은 상황입니다. 이는 고객 유입과 재방문 모두에서 마케팅·온라인채널 강화의 필요성을 보여줍니다. 원가율 상승(62.0% vs 업계 참고치 42.0%)과 운영 효율도 과제이나, 현재는 수익 기반 자체를 확대하는 것이 우선이라는 판단에 마케팅에 85%를 배분하고, 설비·재고·인력 개선은 각 5%로 유지하는 구조입니다.",
+      "scb_growth_outlook": "매출 측면에서 성장 가능성이 높아질 수 있습니다. 시간대별 고객 유입 부족이 온라인 마케팅 강화로 개선되면 저조한 시간대 매출을 끌어올릴 수 있기 때문입니다. 고객 인지도와 유통플랫폼 성장지수도 온라인채널 확대를 통해 긍정적 변화 가능성이 있으며, 이는 재구매율 19.0%라는 낮은 수치를 개선하는 데 기여할 것으로 예상됩니다. 다만 설비·인력 배분이 제한적인 만큼 사업 지속성과 근로자 수 증가는 제약적일 수 있습니다."
+    },
+    {
+      "scenario_id": "B",
+      "label": "진단 비례 대응형",
+      "allocation": {
+        "marketing_online": 0.507,
+        "equipment_interior": 0.393,
+        "labor": 0.05,
+        "inventory": 0.05
+      },
+      "allocation_amounts_won": {
+        "marketing_online": 7605000,
+        "equipment_interior": 5895000,
+        "labor": 750000,
+        "inventory": 750000
+      },
+      "loan_amount": 15000000,
+      "target_metrics": [
+        "EVENING_REVENUE",
+        "ORDER_COUNT",
+        "COGS_RATIO",
+        "GROSS_MARGIN",
+        "REPEAT_CUSTOMER_RATE"
+      ],
+      "financial_result": {
+        "monthly_loan_payment": 446204,
+        "loan_term_months": 36,
+        "additional_fixed_cost_per_month": 489200,
+        "employee_count_change": 0,
+        "baseline_monthly_profit": 945000,
+        "remaining_cash_after_payment": 9596,
+        "break_even_additional_revenue": 0,
+        "required_additional_orders": null,
+        "allowed_revenue_decline": 16545,
+        "payback_period": {
+          "months": null,
+          "status": "UNAVAILABLE",
+          "reason": "추가 순현금에 대한 검증된 가정이 없습니다."
+        },
+        "risk_level": "낮음",
+        "risk_level_basis": "현재 매출 수준 그대로(추가 성장 없이)도 상환·고정비를 감당할 수 있는지로 판정",
+        "loan_scale_warning": {
+          "loan_to_monthly_revenue_ratio": 2.0,
+          "is_warning": false,
+          "message": null
+        }
+      },
+      "scb_outlook": [
+        {
+          "scb_item": "매출",
+          "direction": "긍정적 방향 가능성",
+          "driven_by": "marketing_online",
+          "allocation_share_pct": 50.7
+        },
+        {
+          "scb_item": "유통플랫폼 성장지수",
+          "direction": "긍정적 방향 가능성 (온라인 채널 확대 시)",
+          "driven_by": "marketing_online",
+          "allocation_share_pct": 50.7
+        },
+        {
+          "scb_item": "고객 인지도",
+          "direction": "긍정적 방향 가능성",
+          "driven_by": "marketing_online",
+          "allocation_share_pct": 50.7
+        },
+        {
+          "scb_item": "사업 지속성",
+          "direction": "긍정적 방향 가능성 (운영 안정성 개선)",
+          "driven_by": "equipment_interior",
+          "allocation_share_pct": 39.3
+        },
+        {
+          "scb_item": "근로자 수",
+          "direction": "직접 증가",
+          "driven_by": "labor",
+          "allocation_share_pct": 5.0
+        }
+      ],
+      "allocation_rationale": "이 배분안은 진단된 네 가지 병목에 비례하여 자금을 배치했습니다. 11~14시 매출비중 35.0%(벤치마크 42.0%), 17~21시 12.0%(벤치마크 14.8%)로 나타난 시간대별 고객 유입 부족이 가장 심각하므로, 마케팅·온라인채널에 50.7%를 배분했습니다. 원가율 62.0%(업계 가정치 42.0%)와 재구매율 19.0%(업계 가정치 35.0%) 개선을 위해 설비·재고관리에 39.3%를 할당했습니다. 다만 원가율과 재구매율은 실제 운영 데이터가 아닌 업계 참고치 기반이므로, 실제 연동 후 재평가가 필요합니다. 인력투자는 5%씩 최소 수준으로 배분했습니다.",
+      "scb_growth_outlook": "매출은 온라인채널 강화를 통해 시간대별 고객 유입 부족을 해소하면서 성장 가능성이 높아질 수 있습니다. 유통플랫폼 성장지수는 마케팅 투자가 온라인 채널 확대로 직결될 때 긍정적 변화 가능성이 있으며, 고객 인지도도 디지털 마케팅을 통한 브랜드 노출 증대로 상승 가능성이 있습니다. 사업 지속성은 설비·재고 투자로 운영 안정성이 개선되면서 강화될 수 있고, 근로자 수는 배분된 인력 자금으로 직접 증원 가능성이 있습니다."
+    },
+    {
+      "scenario_id": "C",
+      "label": "균등 분산형 (기준선)",
+      "allocation": {
+        "marketing_online": 0.25,
+        "equipment_interior": 0.25,
+        "labor": 0.25,
+        "inventory": 0.25
+      },
+      "allocation_amounts_won": {
+        "marketing_online": 3750000,
+        "equipment_interior": 3750000,
+        "labor": 3750000,
+        "inventory": 3750000
+      },
+      "loan_amount": 15000000,
+      "target_metrics": [
+        "EVENING_REVENUE",
+        "ORDER_COUNT",
+        "COGS_RATIO",
+        "GROSS_MARGIN",
+        "REPEAT_CUSTOMER_RATE"
+      ],
+      "financial_result": {
+        "monthly_loan_payment": 446204,
+        "loan_term_months": 36,
+        "additional_fixed_cost_per_month": 475000,
+        "employee_count_change": 0,
+        "baseline_monthly_profit": 945000,
+        "remaining_cash_after_payment": 23796,
+        "break_even_additional_revenue": 0,
+        "required_additional_orders": null,
+        "allowed_revenue_decline": 41028,
+        "payback_period": {
+          "months": null,
+          "status": "UNAVAILABLE",
+          "reason": "추가 순현금에 대한 검증된 가정이 없습니다."
+        },
+        "risk_level": "낮음",
+        "risk_level_basis": "현재 매출 수준 그대로(추가 성장 없이)도 상환·고정비를 감당할 수 있는지로 판정",
+        "loan_scale_warning": {
+          "loan_to_monthly_revenue_ratio": 2.0,
+          "is_warning": false,
+          "message": null
+        }
+      },
+      "scb_outlook": [
+        {
+          "scb_item": "매출",
+          "direction": "긍정적 방향 가능성",
+          "driven_by": "marketing_online",
+          "allocation_share_pct": 25.0
+        },
+        {
+          "scb_item": "유통플랫폼 성장지수",
+          "direction": "긍정적 방향 가능성 (온라인 채널 확대 시)",
+          "driven_by": "marketing_online",
+          "allocation_share_pct": 25.0
+        },
+        {
+          "scb_item": "고객 인지도",
+          "direction": "긍정적 방향 가능성",
+          "driven_by": "marketing_online",
+          "allocation_share_pct": 25.0
+        },
+        {
+          "scb_item": "사업 지속성",
+          "direction": "긍정적 방향 가능성 (운영 안정성 개선)",
+          "driven_by": "equipment_interior",
+          "allocation_share_pct": 25.0
+        },
+        {
+          "scb_item": "근로자 수",
+          "direction": "직접 증가",
+          "driven_by": "labor",
+          "allocation_share_pct": 25.0
+        }
+      ],
+      "allocation_rationale": "균등 분산형은 네 가지 영역을 25%씩 배분합니다. 진단 데이터 중 11~14시 매출 비중 35.0%(벤치마크 42.0%)와 17~21시 12.0%(벤치마크 14.8%)로 나타난 시간대별 고객 유입 부족(신뢰도 높음)에 마케팅·온라인 25%를 할당했습니다. 원가율 62.0%(업계 참고치 42.0%)와 재구매율 19.0%(참고치 35.0%)는 신뢰도가 보통으로, 실제 데이터 연동 전 업계 가정치 기반 진단이라는 한계가 있습니다. 이에 설비·재고관리 25%, 인력 25%를 분배하여 운영 전반의 안정성을 함께 강화하는 구조입니다.",
+      "scb_growth_outlook": "매출·고객 인지도·유통플랫폼 성장지수는 마케팅·온라인 25% 배분이 시간대별 고객 유입 부족을 직접 개선하면서 긍정적 방향으로 변화할 가능성이 높아질 수 있습니다. 온라인 채널 강화 및 맞춤형 광고를 통해 저조한 오후·저녁 시간대 트래픽을 증대시킬 수 있기 때문입니다. 사업 지속성은 설비·재고관리 25%로 운영 안정성이 개선되면서 긍정적 변화 가능성이 있으며, 근로자 수는 인력 25% 배분으로 직접 증가할 수 있습니다."
+    }
+  ],
+  "note": "AI는 특정 안을 추천하지 않습니다. 진단 결과와 재무 계산을 참고해 직접 선택하세요.",
+  "versions": {
+    "benchmark_version": "2026-07-v2",
+    "diagnosis_version": "1.1",
+    "allocation_generator_version": "1.1",
+    "calculation_version": "1.1",
+    "prompt_version": "1.0"
+  }
+}

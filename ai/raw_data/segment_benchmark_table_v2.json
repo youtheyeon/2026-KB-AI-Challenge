@@ -1,0 +1,124 @@
+
+{
+  "other__medium": {
+    "sample_size": 247,
+    "median_monthly_sales_amt": 83881633,
+    "p25_monthly_sales_amt": 56679970,
+    "p75_monthly_sales_amt": 113853440,
+    "median_monthly_sales_count": 10617,
+    "fallback_used": false
+  },
+  "university__small": {
+    "sample_size": 96,
+    "median_monthly_sales_amt": 21566216,
+    "p25_monthly_sales_amt": 11700067,
+    "p75_monthly_sales_amt": 28076719,
+    "median_monthly_sales_count": 2106,
+    "fallback_used": false
+  },
+  "other__small": {
+    "sample_size": 270,
+    "median_monthly_sales_amt": 16051018,
+    "p25_monthly_sales_amt": 5880721,
+    "p75_monthly_sales_amt": 24000000,
+    "median_monthly_sales_count": 1870,
+    "fallback_used": false
+  },
+  "office__medium": {
+    "sample_size": 62,
+    "median_monthly_sales_amt": 90601734,
+    "p25_monthly_sales_amt": 58638149,
+    "p75_monthly_sales_amt": 111742665,
+    "median_monthly_sales_count": 10724,
+    "fallback_used": false
+  },
+  "university__large": {
+    "sample_size": 79,
+    "median_monthly_sales_amt": 375749571,
+    "p25_monthly_sales_amt": 184944239,
+    "p75_monthly_sales_amt": 1196587067,
+    "median_monthly_sales_count": 50946,
+    "fallback_used": false
+  },
+  "tourist__medium": {
+    "sample_size": 9,
+    "median_monthly_sales_amt": 167554429,
+    "p25_monthly_sales_amt": 119006707,
+    "p75_monthly_sales_amt": 250359255,
+    "median_monthly_sales_count": 12941,
+    "fallback_used": false
+  },
+  "tourist__large": {
+    "sample_size": 17,
+    "median_monthly_sales_amt": 467949500,
+    "p25_monthly_sales_amt": 429195392,
+    "p75_monthly_sales_amt": 549515033,
+    "median_monthly_sales_count": 34958,
+    "fallback_used": false
+  },
+  "other__large": {
+    "sample_size": 299,
+    "median_monthly_sales_amt": 259218096,
+    "p25_monthly_sales_amt": 163422626,
+    "p75_monthly_sales_amt": 457292734,
+    "median_monthly_sales_count": 35097,
+    "fallback_used": false
+  },
+  "university__medium": {
+    "sample_size": 104,
+    "median_monthly_sales_amt": 80331541,
+    "p25_monthly_sales_amt": 50483248,
+    "p75_monthly_sales_amt": 101987670,
+    "median_monthly_sales_count": 9179,
+    "fallback_used": false
+  },
+  "tourist__small": {
+    "sample_size": 17,
+    "median_monthly_sales_amt": 25651537,
+    "p25_monthly_sales_amt": 12954723,
+    "p75_monthly_sales_amt": 35859323,
+    "median_monthly_sales_count": 2594,
+    "fallback_used": false
+  },
+  "office__small": {
+    "sample_size": 39,
+    "median_monthly_sales_amt": 21000000,
+    "p25_monthly_sales_amt": 15854921,
+    "p75_monthly_sales_amt": 27232180,
+    "median_monthly_sales_count": 2347,
+    "fallback_used": false
+  },
+  "residential__medium": {
+    "sample_size": 11,
+    "median_monthly_sales_amt": 46422673,
+    "p25_monthly_sales_amt": 38411752,
+    "p75_monthly_sales_amt": 95023120,
+    "median_monthly_sales_count": 6408,
+    "fallback_used": false
+  },
+  "office__large": {
+    "sample_size": 47,
+    "median_monthly_sales_amt": 228896825,
+    "p25_monthly_sales_amt": 151817197,
+    "p75_monthly_sales_amt": 799584173,
+    "median_monthly_sales_count": 31927,
+    "fallback_used": false
+  },
+  "residential__large": {
+    "sample_size": 27,
+    "median_monthly_sales_amt": 39159461,
+    "p25_monthly_sales_amt": 32157288,
+    "p75_monthly_sales_amt": 95023120,
+    "median_monthly_sales_count": 5673,
+    "fallback_used": true,
+    "fallback_reason": "세그먼트 표본 4개 < 최소기준 5개"
+  },
+  "residential__small": {
+    "sample_size": 12,
+    "median_monthly_sales_amt": 30409551,
+    "p25_monthly_sales_amt": 23777162,
+    "p75_monthly_sales_amt": 37636744,
+    "median_monthly_sales_count": 2708,
+    "fallback_used": false
+  }
+}
