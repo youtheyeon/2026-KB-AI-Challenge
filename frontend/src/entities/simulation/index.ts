@@ -9,6 +9,7 @@ export {
   UPLOAD_SLOTS,
 } from './model/constants';
 export type {
+  AllocationCategory,
   Bottleneck,
   BottleneckSeverity,
   LoanCond,
