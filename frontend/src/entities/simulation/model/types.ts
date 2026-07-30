@@ -23,7 +23,10 @@ export interface Bottleneck {
   conf: string;
 }
 
+export type AllocationCategory = 'MARKETING_ONLINE' | 'EQUIPMENT_INTERIOR' | 'LABOR' | 'INVENTORY';
+
 export interface ScenarioAllocationItem {
+  category: AllocationCategory;
   item: string;
   amount: number;
   type: string;
