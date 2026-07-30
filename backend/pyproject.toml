@@ -1,0 +1,28 @@
+[project]
+name = "kb-ai-challenge-backend"
+version = "0.1.0"
+description = "KB AI Challenge FastAPI backend"
+requires-python = ">=3.13,<3.15"
+dependencies = [
+    "fastapi>=0.139.0,<1.0",
+    "pydantic-settings>=2.12.0,<3.0",
+    "uvicorn[standard]>=0.40.0,<1.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.7.0,<3.0",
+    "pytest>=9.0.2,<10.0",
+    "ruff>=0.16.0,<1.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "UP"]
