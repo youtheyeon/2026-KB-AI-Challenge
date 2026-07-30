@@ -60,3 +60,11 @@
 - 비교 지표는 목표값, 손익분기값, 관측값만 저장하고 예측값 필드는 두지 않는다.
 - 재평가 스냅샷은 최신 사업 스냅샷과 해결·잔존·신규 병목 변화를 소유한다.
 - 모델 부재 RED 후 타깃 테스트 5개, 당시 전체 테스트 32개가 통과했다.
+
+## Task 5 구현 결정과 검증
+
+- Alembic 자동 생성 결과를 초기 마이그레이션으로 고정하고 이후 스키마 변경도 Alembic만 사용한다.
+- CI는 PostgreSQL 15 격리 서비스를 사용하며 원격 Supabase에는 연결하지 않는다.
+- 로컬 환경에는 Docker가 없어 임시 PostgreSQL 14 서버에서 동일 DDL을 검증하고, CI에서 PostgreSQL 15를 재검증한다.
+- 마이그레이션 부재로 RED를 확인한 뒤 24개 테이블 생성과 upgrade, downgrade, re-upgrade 통합 테스트가 통과했다.
+- `TEST_DATABASE_URL`을 지정한 전체 pytest 34개, Alembic drift 검사, Ruff 검사와 포맷 검사가 통과했다.
