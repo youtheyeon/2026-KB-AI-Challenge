@@ -14,6 +14,7 @@ import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.sopt.backend.domain.source.DataSourceType;
 
 @Getter
 @Entity
@@ -38,12 +39,27 @@ public class DatasetFile {
     @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "detected_format", nullable = false, length = 50)
+    private DatasetFormat detectedFormat;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "source_type", nullable = false, length = 50)
+    private DataSourceType sourceType;
+
     @Column(name = "row_count")
     private Integer rowCount;
 
-    DatasetFile(DatasetFileType fileType, String fileName) {
+    DatasetFile(
+            DatasetFileType fileType,
+            String fileName,
+            DatasetFormat detectedFormat,
+            DataSourceType sourceType
+    ) {
         this.fileType = Objects.requireNonNull(fileType);
         this.fileName = Objects.requireNonNull(fileName);
+        this.detectedFormat = Objects.requireNonNull(detectedFormat);
+        this.sourceType = Objects.requireNonNull(sourceType);
     }
 
     public void updateRowCount(Integer rowCount) {

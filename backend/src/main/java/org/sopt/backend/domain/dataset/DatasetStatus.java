@@ -2,6 +2,11 @@
 package org.sopt.backend.domain.dataset;
 
 public enum DatasetStatus {
+    UPLOADED,
+    PARSING,
+    NORMALIZING,
+    READY,
+    NEEDS_REUPLOAD,
     ANALYZING,
     MAPPING_READY,
     MAPPING_CONFIRMED,

@@ -3,6 +3,8 @@ package org.sopt.backend.domain.dataset;
 
 public enum DatasetFileType {
     SALES,
+    EXPENSE,
+    ONLINE_SALES,
     COST,
     PLATFORM,
     DISTRICT
