@@ -41,3 +41,15 @@ def test_session_factory_uses_the_configured_synchronous_engine() -> None:
     assert SessionFactory.kw["bind"] is engine
     assert SessionFactory.kw["autoflush"] is False
     assert SessionFactory.kw["autocommit"] is False
+
+
+def test_alembic_offline_migrations_accept_url_encoded_credentials(monkeypatch) -> None:
+    from alembic.config import Config
+
+    from alembic import command
+    from app.core import config as app_config
+
+    migration_url = "postgresql+psycopg://migration_user:encoded%40value@localhost:5432/app"
+    monkeypatch.setattr(app_config.settings, "migration_database_url", migration_url)
+
+    command.upgrade(Config("alembic.ini"), "head", sql=True)

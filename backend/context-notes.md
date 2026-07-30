@@ -29,3 +29,8 @@
 - RED. `uv run pytest tests/test_database_config.py`는 `ModuleNotFoundError: No module named 'sqlalchemy'`로 실패해 요구 의존성 부재를 확인했다.
 - GREEN. 의존성 잠금·설치 후 타깃 테스트 3개와 전체 테스트 6개가 통과했다.
 - `uv run alembic -c alembic.ini upgrade head --sql`, `uv run ruff check .`, `uv run ruff format --check .`, `git diff --check`를 통과했다.
+
+## Task 1 리뷰 후속 조치
+
+- Alembic `Config.set_main_option()`은 URL 인코딩된 `%`를 ConfigParser 보간으로 해석하므로, 마이그레이션 URL을 설정하기 전에 `%`를 `%%`로 이스케이프한다.
+- `%40`을 포함한 URL로 실제 Alembic 오프라인 마이그레이션 실행을 검증해 회귀를 방지한다.
