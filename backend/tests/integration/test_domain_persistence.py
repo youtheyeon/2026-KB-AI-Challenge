@@ -3,6 +3,7 @@ import os
 
 import pytest
 from sqlalchemy import BigInteger, create_engine, inspect, text
+from sqlalchemy.dialects.postgresql import UUID as PostgreSQLUUID
 
 import app.domain  # noqa: F401
 from app.db.base import Base
@@ -32,9 +33,10 @@ def test_all_24_entities_create_on_postgresql() -> None:
     inspector = inspect(engine)
     assert len(Base.metadata.tables) == 24
     assert set(inspector.get_table_names()) == set(Base.metadata.tables)
+    assert isinstance(Base.metadata.tables["demo_sessions"].c.id.type, PostgreSQLUUID)
     assert all(
         isinstance(table.c.id.type, BigInteger)
         for table in Base.metadata.sorted_tables
-        if "id" in table.c
+        if "id" in table.c and table.name != "demo_sessions"
     )
     engine.dispose()

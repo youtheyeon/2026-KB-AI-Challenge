@@ -16,7 +16,7 @@
 - 새 Python 소스 파일 첫 줄에는 역할을 설명하는 한국어 주석을 작성한다.
 - 금액은 정수 원 단위, 비율과 금리는 `Decimal`, 날짜는 `date`, 시각은 UTC 기준 timezone-aware `datetime`을 사용한다.
 - DB Enum은 PostgreSQL native enum이 아닌 문자열과 체크 제약으로 저장한다.
-- 기본키는 `BIGINT` 자동 증가 방식을 사용한다.
+- 도메인 기본키는 `BIGINT` 자동 증가 방식을 사용하고 익명 `DemoSession`만 UUID를 사용한다.
 - Alembic만 스키마 변경 도구로 사용한다.
 - 구현은 테스트를 먼저 작성하고 예상한 이유로 실패한 것을 확인한 뒤 진행한다.
 
@@ -53,7 +53,7 @@
 **Files:**
 - Create: `backend/app/domain/__init__.py`
 - Create: `backend/app/domain/enums.py`
-- Create: `backend/app/domain/user.py`
+- Create: `backend/app/domain/demo_session.py`
 - Create: `backend/app/domain/business.py`
 - Create: `backend/app/domain/dataset.py`
 - Create: `backend/app/domain/diagnosis.py`
@@ -61,9 +61,9 @@
 - Test: `backend/tests/domain/test_diagnosis.py`
 
 **Interfaces:**
-- Produces: `User`, `Business`, `Dataset`, `DatasetFile`, `NormalizedSale`, `NormalizedExpense`, `NormalizedOnlineSale`, `PublicDataSnapshot`, `BusinessSnapshot`, `Diagnosis`, `DiagnosisMetric`, `Bottleneck`.
+- Produces: `DemoSession`, `Business`, `Dataset`, `DatasetFile`, `NormalizedSale`, `NormalizedExpense`, `NormalizedOnlineSale`, `PublicDataSnapshot`, `BusinessSnapshot`, `Diagnosis`, `DiagnosisMetric`, `Bottleneck`.
 
-- [ ] 이메일 정규화, 필수 사업 프로필, 파일 유형 유일성, 온라인 매출 정합 기본값을 검증하는 실패 테스트를 작성한다.
+- [ ] 익명 세션 UUID, 필수 사업 프로필, 파일 유형 유일성, 온라인 매출 정합 기본값을 검증하는 실패 테스트를 작성한다.
 - [ ] 동일 사업장·데이터셋 스냅샷과 진단 근거 출처를 검증하는 실패 테스트를 작성한다.
 - [ ] 12개 엔티티와 필요한 문자열 Enum, 관계, 인덱스, 체크 제약을 최소 구현한다.
 - [ ] 공공데이터 원본과 가변 메타데이터는 PostgreSQL `JSONB`로 저장한다.
