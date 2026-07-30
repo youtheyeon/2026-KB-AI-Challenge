@@ -28,11 +28,16 @@ router = APIRouter(prefix="/api/businesses", tags=["businesses"])
 
 
 class BusinessRegistrationRequest(BaseModel):
-    name: RequiredBusinessValue
-    region: RequiredBusinessValue
-    industry: RequiredBusinessValue
-    employee_count: int = Field(default=0, ge=0, alias="employeeCount")
-    primary_sales_channels: list[str] = Field(
+    name: RequiredBusinessValue = Field(max_length=150)
+    region: RequiredBusinessValue = Field(max_length=255)
+    industry: RequiredBusinessValue = Field(max_length=100)
+    employee_count: int = Field(
+        default=0,
+        ge=0,
+        le=2_147_483_647,
+        alias="employeeCount",
+    )
+    primary_sales_channels: list[Annotated[str, Field(max_length=100)]] = Field(
         default_factory=list,
         alias="primarySalesChannels",
     )

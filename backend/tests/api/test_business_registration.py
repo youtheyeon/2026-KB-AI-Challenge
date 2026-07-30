@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.db import session as db_session
@@ -96,6 +97,35 @@ def test_register_business_rejects_negative_employee_count(monkeypatch) -> None:
     assert response.status_code == 422
 
 
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("name", "가" * 151),
+        ("region", "가" * 256),
+        ("industry", "가" * 101),
+        ("employeeCount", 2_147_483_648),
+        ("primarySalesChannels", ["가" * 101]),
+    ],
+)
+def test_register_business_rejects_values_larger_than_storage_limit(
+    monkeypatch,
+    field: str,
+    value: int | str | list[str],
+) -> None:
+    database = FakeDatabaseSession()
+    monkeypatch.setattr(db_session, "SessionFactory", lambda: database)
+    payload = {
+        "name": "Y카페",
+        "region": "서울 마포구",
+        "industry": "카페",
+    }
+    payload[field] = value
+
+    response = TestClient(app).post("/api/businesses", json=payload)
+
+    assert response.status_code == 422
+
+
 def test_register_business_creates_session_and_sets_cookie(monkeypatch) -> None:
     database = FakeDatabaseSession()
     monkeypatch.setattr(db_session, "SessionFactory", lambda: database)
@@ -158,6 +188,29 @@ def test_register_business_replaces_invalid_session_cookie(monkeypatch) -> None:
     assert UUID(response.cookies["demo_session_id"]) in database.demo_sessions
 
 
+def test_register_business_replaces_unknown_valid_session_cookie(monkeypatch) -> None:
+    database = FakeDatabaseSession()
+    unknown_session_id = UUID("fb1646d8-0529-4ea0-b970-832040340607")
+    monkeypatch.setattr(db_session, "SessionFactory", lambda: database)
+
+    client = TestClient(app)
+    client.cookies.set("demo_session_id", str(unknown_session_id))
+    response = client.post(
+        "/api/businesses",
+        json={
+            "name": "Y카페",
+            "region": "서울 마포구",
+            "industry": "카페",
+        },
+    )
+
+    created_session_id = UUID(response.cookies["demo_session_id"])
+
+    assert response.status_code == 201
+    assert created_session_id != unknown_session_id
+    assert set(database.demo_sessions) == {created_session_id}
+
+
 def test_register_business_reuses_valid_demo_session(monkeypatch) -> None:
     database = FakeDatabaseSession()
     session_id = UUID("a7f6c4b5-9ea7-43a3-8c35-2fbfcacbda89")
@@ -214,3 +267,30 @@ def test_register_business_expires_stale_active_session(monkeypatch) -> None:
     assert database.demo_sessions[expired_session_id].status == "expired"
     assert len(database.demo_sessions) == 2
     assert database.businesses[0].demo_session_id != expired_session_id
+
+
+def test_register_business_replaces_inactive_session_before_expiry(monkeypatch) -> None:
+    database = FakeDatabaseSession()
+    inactive_session_id = UUID("ef35ab42-e307-4a9b-967b-656d8f372f80")
+    database.demo_sessions[inactive_session_id] = DemoSession(
+        id=inactive_session_id,
+        last_accessed_at=datetime(2026, 7, 30, tzinfo=UTC),
+        expires_at=datetime(2026, 8, 1, tzinfo=UTC),
+        status="expired",
+    )
+    monkeypatch.setattr(db_session, "SessionFactory", lambda: database)
+
+    client = TestClient(app)
+    client.cookies.set("demo_session_id", str(inactive_session_id))
+    response = client.post(
+        "/api/businesses",
+        json={
+            "name": "Y카페",
+            "region": "서울 마포구",
+            "industry": "카페",
+        },
+    )
+
+    assert response.status_code == 201
+    assert len(database.demo_sessions) == 2
+    assert database.businesses[0].demo_session_id != inactive_session_id
