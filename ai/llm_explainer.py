@@ -58,7 +58,7 @@ def _extract_json(text: str) -> dict:
 def generate_scenario_explanation(scenario_id: str, scenario_label: str, allocation: dict,
                                    diagnosis: list, scb_outlook: list) -> dict:
     if not ANTHROPIC_API_KEY:
-        raise SystemExit(".env 파일에 ANTHROPIC_API_KEY가 없습니다.")
+        raise RuntimeError("ANTHROPIC_API_KEY가 설정되지 않았습니다.")
 
     payload = {
         "시나리오": {"id": scenario_id, "label": scenario_label, "allocation": allocation},
