@@ -11,7 +11,7 @@ from requests import RequestException
 
 from app.domain.enums import RepaymentType
 
-SimulationRunner = Callable[[list[dict], dict, dict], dict[str, Any]]
+SimulationRunner = Callable[..., dict[str, Any]]
 SimulationRunnerLoader = Callable[[], SimulationRunner]
 
 
@@ -22,6 +22,7 @@ class SimulationGenerationError(RuntimeError):
 @dataclass(frozen=True)
 class SimulationEngineRequest:
     findings: tuple[dict, ...]
+    business_history: tuple[dict, ...]
     loan_amount: int
     annual_interest_rate: Decimal
     term_months: int
@@ -54,8 +55,9 @@ class InProcessSimulationEngine:
                     "monthly_revenue": request.baseline_monthly_revenue,
                     "avg_daily_customers": request.average_daily_customers,
                 },
+                business_history=[dict(record) for record in request.business_history],
             )
-        except (ImportError, RequestException, RuntimeError) as error:
+        except (ImportError, RequestException, RuntimeError, TypeError) as error:
             raise SimulationGenerationError("시뮬레이션 결과 생성에 실패했습니다.") from error
 
         if not isinstance(result, dict) or not isinstance(result.get("scenario_results"), list):

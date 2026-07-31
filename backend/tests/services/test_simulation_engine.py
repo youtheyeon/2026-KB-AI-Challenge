@@ -14,6 +14,14 @@ from app.services.simulation_engine import (
 def simulation_request() -> SimulationEngineRequest:
     return SimulationEngineRequest(
         findings=({"bottleneck_type": "high_cost_ratio"},),
+        business_history=(
+            {
+                "round": 1,
+                "findings": [{"bottleneck_type": "high_cost_ratio"}],
+                "pos_data": {"monthly_revenue": 8_100_000},
+                "selected_allocation": {"equipment_interior": 0.6},
+            },
+        ),
         loan_amount=15_000_000,
         annual_interest_rate=Decimal("0.045"),
         term_months=36,
@@ -27,8 +35,13 @@ def simulation_request() -> SimulationEngineRequest:
 def test_engine_translates_request_to_ai_payload() -> None:
     captured = {}
 
-    def fake_runner(findings, loan, pos_data):
-        captured.update(findings=findings, loan=loan, pos_data=pos_data)
+    def fake_runner(findings, loan, pos_data, *, business_history):
+        captured.update(
+            findings=findings,
+            loan=loan,
+            pos_data=pos_data,
+            business_history=business_history,
+        )
         return {"scenario_results": []}
 
     engine = InProcessSimulationEngine(loader=lambda: fake_runner)
@@ -47,6 +60,14 @@ def test_engine_translates_request_to_ai_payload() -> None:
             "monthly_revenue": 7_500_000,
             "avg_daily_customers": 90,
         },
+        "business_history": [
+            {
+                "round": 1,
+                "findings": [{"bottleneck_type": "high_cost_ratio"}],
+                "pos_data": {"monthly_revenue": 8_100_000},
+                "selected_allocation": {"equipment_interior": 0.6},
+            }
+        ],
     }
 
 
@@ -66,7 +87,7 @@ def test_engine_wraps_runtime_error_without_exposing_original_message() -> None:
 
 
 def test_engine_rejects_invalid_result_shape() -> None:
-    engine = InProcessSimulationEngine(loader=lambda: lambda *_: {"unexpected": []})
+    engine = InProcessSimulationEngine(loader=lambda: lambda *_, **__: {"unexpected": []})
 
     with pytest.raises(SimulationGenerationError, match="유효하지 않은 결과"):
         engine.run(simulation_request())
