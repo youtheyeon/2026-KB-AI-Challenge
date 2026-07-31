@@ -1,8 +1,16 @@
 # 실제 집행 이후 관측 결과와 병목 재평가 모델을 검증하는 테스트
+from decimal import Decimal
+
 import pytest
 from sqlalchemy import UniqueConstraint
 
-from app.domain.enums import BottleneckChangeType, OutcomeStatus
+from app.domain.enums import (
+    BottleneckChangeType,
+    OutcomeDataSourceType,
+    OutcomeDataStatus,
+    OutcomeMetricStatus,
+    OutcomeStatus,
+)
 from app.domain.outcome import (
     BottleneckChange,
     OutcomeComparison,
@@ -75,3 +83,46 @@ def test_outcome_resources_are_unique_per_simulation() -> None:
             and tuple(column.name for column in constraint.columns) == ("simulation_id",)
             for constraint in model.__table__.constraints
         )
+
+
+def test_outcome_data_uses_dedicated_source_status_and_manual_metrics() -> None:
+    outcome = OutcomeData(
+        simulation_id=1,
+        observed_business_snapshot_id=2,
+        source_type=OutcomeDataSourceType.MANUAL_INPUT,
+        status=OutcomeDataStatus.READY,
+        monthly_sales_amount=32_000_000,
+        operating_profit_amount=6_200_000,
+        online_order_ratio=Decimal("0.31"),
+        cash_after_repayment_amount=2_800_000,
+    )
+
+    assert outcome.source_type is OutcomeDataSourceType.MANUAL_INPUT
+    assert outcome.status is OutcomeDataStatus.READY
+    assert outcome.online_order_ratio == Decimal("0.31")
+
+
+def test_outcome_metric_status_is_separate_from_overall_status() -> None:
+    metric = OutcomeComparisonMetric(
+        metric_code="MONTHLY_SALES",
+        unit="KRW",
+        status=OutcomeMetricStatus.ABOVE_EXPECTED,
+    )
+
+    assert metric.status is OutcomeMetricStatus.ABOVE_EXPECTED
+
+
+def test_outcome_comparison_keeps_next_round_pos_snapshot() -> None:
+    comparison = OutcomeComparison(
+        simulation_id=1,
+        execution_id=2,
+        outcome_data_id=3,
+        status=OutcomeStatus.MET,
+        next_round_pos_data_snapshot={"monthly_revenue": 8_100_000},
+    )
+
+    assert comparison.next_round_pos_data_snapshot["monthly_revenue"] == 8_100_000
+
+
+def test_bottleneck_change_supports_not_comparable() -> None:
+    assert BottleneckChangeType.NOT_COMPARABLE.value == "not_comparable"

@@ -2,7 +2,7 @@
 import pytest
 
 from app.domain.enums import ExecutionType
-from app.domain.execution import Execution
+from app.domain.execution import Execution, ExecutionAllocation
 from app.domain.simulation import ScenarioSelection
 
 
@@ -35,3 +35,24 @@ def test_execution_amount_and_unused_amount_equal_loan_amount() -> None:
     execution.unused_amount = 100
     with pytest.raises(ValueError, match="대출금액"):
         execution.validate_amounts(loan_amount=1_000)
+
+
+def test_execution_allocation_accepts_free_name_without_category() -> None:
+    allocation = ExecutionAllocation(
+        name="저녁 시간대 광고",
+        category=None,
+        amount=800_000,
+    )
+
+    assert allocation.name == "저녁 시간대 광고"
+    assert allocation.category is None
+
+
+def test_execution_type_uses_confirmed_api_modes() -> None:
+    assert {member.name for member in ExecutionType} == {
+        "SAME_AS_A",
+        "SAME_AS_B",
+        "SAME_AS_C",
+        "MIXED",
+        "CUSTOM",
+    }

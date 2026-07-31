@@ -69,9 +69,10 @@ class ExecutionAllocation(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     execution_id: Mapped[int] = mapped_column(ForeignKey("executions.id", ondelete="CASCADE"))
-    category: Mapped[AllocationCategory] = mapped_column(
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    category: Mapped[AllocationCategory | None] = mapped_column(
         enum_type(AllocationCategory, "execution_allocation_category", 40),
-        nullable=False,
+        nullable=True,
     )
     amount: Mapped[int] = mapped_column(BigInteger, nullable=False)
 

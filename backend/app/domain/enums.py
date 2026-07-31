@@ -101,11 +101,30 @@ class RiskLevel(StrEnum):
 
 
 class ExecutionType(StrEnum):
-    EXACT_SELECTED = "exact_selected"
-    MODIFIED = "modified"
+    SAME_AS_A = "same_as_a"
+    SAME_AS_B = "same_as_b"
+    SAME_AS_C = "same_as_c"
     MIXED = "mixed"
     CUSTOM = "custom"
+
+
+class OutcomeDataSourceType(StrEnum):
     MOCK = "mock"
+    FILE_UPLOAD = "file_upload"
+    MANUAL_INPUT = "manual_input"
+
+
+class OutcomeDataStatus(StrEnum):
+    READY = "ready"
+    MAPPING_READY = "mapping_ready"
+    FAILED = "failed"
+
+
+class OutcomeMetricStatus(StrEnum):
+    ABOVE_EXPECTED = "above_expected"
+    WITHIN_RANGE = "within_range"
+    BELOW_EXPECTED = "below_expected"
+    NOT_COMPARABLE = "not_comparable"
 
 
 class OutcomeStatus(StrEnum):
@@ -119,3 +138,4 @@ class BottleneckChangeType(StrEnum):
     RESOLVED = "resolved"
     REMAINING = "remaining"
     NEW = "new"
+    NOT_COMPARABLE = "not_comparable"
