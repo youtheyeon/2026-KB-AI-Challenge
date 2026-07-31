@@ -11,6 +11,8 @@ from app.domain.business import Business
 from app.domain.dataset import BusinessSnapshot, Dataset, PublicDataSnapshot
 from app.domain.diagnosis import Bottleneck, Diagnosis
 from app.domain.enums import (
+    AllocationCategory,
+    BottleneckChangeType,
     BottleneckSeverity,
     DatasetStatus,
     DataSourceType,
@@ -18,12 +20,25 @@ from app.domain.enums import (
     DiagnosisStatus,
     RepaymentType,
 )
+from app.domain.execution import Execution, ExecutionAllocation
+from app.domain.outcome import BottleneckChange, OutcomeComparison, ReassessmentSnapshot
 from app.domain.simulation import Scenario, ScenarioSelection, Simulation
 from app.services.simulation import SimulationCreationCommand, SimulationService
 from app.services.simulation_engine import SimulationGenerationError
 
 SESSION_ID = UUID("12345678-1234-5678-1234-567812345678")
 SESSION_COOKIE = str(SESSION_ID)
+
+
+class FakeScalarResult:
+    def __init__(self, values) -> None:
+        self.values = list(values)
+
+    def unique(self):
+        return self
+
+    def all(self):
+        return list(self.values)
 
 
 def engine_result() -> dict:
@@ -124,7 +139,7 @@ class FakeDatabase:
         bottleneck = Bottleneck(
             id=201,
             diagnosis_id=31,
-            bottleneck_type="high_cost_ratio",
+            bottleneck_type="HIGH_MATERIAL_COST",
             detail="원가율이 업계 참고치보다 높습니다.",
             severity=BottleneckSeverity.SEVERE,
             evidence_source_type=DataSourceType.DOMAIN_ASSUMPTION,
@@ -149,6 +164,9 @@ class FakeDatabase:
         self.diagnosis = diagnosis
         self.saved_simulation: Simulation | None = None
         self.selection: ScenarioSelection | None = None
+        self.historical_simulations: list[Simulation] = []
+        self.historical_executions: list[Execution] = []
+        self.historical_comparisons: list[OutcomeComparison] = []
         self.rollback_count = 0
 
     def get(self, model, object_id):
@@ -159,6 +177,11 @@ class FakeDatabase:
         if model is Simulation and self.saved_simulation is not None:
             if object_id == self.saved_simulation.id:
                 return self.saved_simulation
+        if model is Simulation:
+            return next(
+                (item for item in self.historical_simulations if item.id == object_id),
+                None,
+            )
         if model is Scenario and self.saved_simulation is not None:
             return next(
                 (
@@ -169,6 +192,15 @@ class FakeDatabase:
                 None,
             )
         return None
+
+    def scalars(self, statement):
+        entity = statement.column_descriptions[0].get("entity")
+        values = {
+            Simulation: self.historical_simulations,
+            Execution: self.historical_executions,
+            OutcomeComparison: self.historical_comparisons,
+        }
+        return FakeScalarResult(values.get(entity, []))
 
     def rollback(self) -> None:
         self.rollback_count += 1
@@ -285,6 +317,92 @@ def test_create_maps_stored_diagnosis_to_immutable_engine_request(
             "suggested_category": "equipment_interior",
         },
     )
+
+
+def test_create_passes_completed_outcomes_as_business_history(
+    service: SimulationService,
+) -> None:
+    database = service.database
+    for round_number, simulation_id in enumerate((41, 42), start=1):
+        historical = Simulation(
+            id=simulation_id,
+            business_id=7,
+            diagnosis_id=31,
+            business_snapshot_id=27,
+            loan_amount=15_000_000,
+            loan_interest_rate=Decimal("0.045"),
+            loan_term_months=36,
+            loan_grace_months=0,
+            loan_repayment_type=RepaymentType.EQUAL_PAYMENT,
+            status="completed",
+        )
+        historical.created_at = datetime(2026, round_number, 1, tzinfo=UTC)
+        execution = Execution(
+            id=70 + round_number,
+            simulation_id=simulation_id,
+            selection_id=400 + round_number,
+            execution_type="custom",
+            total_amount=15_000_000,
+            unused_amount=0,
+            allocations=[
+                ExecutionAllocation(
+                    id=700 + round_number,
+                    name="설비 개선",
+                    category=AllocationCategory.EQUIPMENT_INTERIOR,
+                    amount=9_000_000,
+                ),
+                ExecutionAllocation(
+                    id=710 + round_number,
+                    name="자유 집행",
+                    category=None,
+                    amount=6_000_000,
+                ),
+            ],
+        )
+        comparison = OutcomeComparison(
+            id=80 + round_number,
+            simulation_id=simulation_id,
+            execution_id=execution.id,
+            outcome_data_id=90 + round_number,
+            status="partially_met",
+            next_round_pos_data_snapshot={
+                "monthly_revenue": 8_000_000 + round_number * 100_000,
+                "monthly_cogs": 4_800_000,
+            },
+            reassessment_snapshot=ReassessmentSnapshot(
+                latest_business_snapshot_id=27,
+                previous_diagnosis_id=31,
+                changes=[
+                    BottleneckChange(
+                        bottleneck_type="high_cost_ratio",
+                        change_type=BottleneckChangeType.REMAINING,
+                        detail="원가율 병목이 남아 있습니다.",
+                    ),
+                    BottleneckChange(
+                        bottleneck_type="time_of_day_weakness",
+                        change_type=BottleneckChangeType.RESOLVED,
+                        detail="시간대 병목은 해결됐습니다.",
+                    ),
+                ],
+            ),
+        )
+        comparison.created_at = datetime(2026, round_number, 2, tzinfo=UTC)
+        database.historical_simulations.append(historical)
+        database.historical_executions.append(execution)
+        database.historical_comparisons.append(comparison)
+
+    service.create(valid_command(), SESSION_COOKIE)
+
+    history = service.engine.request.business_history
+    assert [record["round"] for record in history] == [1, 2]
+    assert history[-1]["findings"] == [
+        {
+            "bottleneck_type": "high_cost_ratio",
+            "detail": "원가율 병목이 남아 있습니다.",
+        }
+    ]
+    assert history[-1]["pos_data"]["monthly_revenue"] == 8_200_000
+    assert history[-1]["selected_allocation"] == {"equipment_interior": 0.6}
 
 
 def test_create_does_not_persist_when_engine_fails() -> None:

@@ -18,6 +18,11 @@ def compare_outcomes(
     selected_allocation: dict,
     loan_amount: int,
     breakeven_additional_revenue_target: float = None,
+    comparable_bottleneck_types: set[str] = None,
+    annual_interest_rate: float = 0.045,
+    loan_term_months: int = 36,
+    grace_months: int = 0,
+    repayment_type: str = "equal_payment",
 ) -> dict:
     """
     집행 전(pre) 진단과 집행 후(post) 실제/합성 데이터를 비교해서
@@ -26,18 +31,33 @@ def compare_outcomes(
     반환값은 다음 시뮬레이션(run_simulation)의 입력(pos_data)으로 그대로 재사용 가능하다.
     """
     post_findings = detect_bottlenecks(
-        post_pos_data, time_benchmark, time_benchmark_sample_size=time_benchmark_sample_size
+        post_pos_data,
+        time_benchmark,
+        time_benchmark_sample_size=time_benchmark_sample_size,
+        comparable_bottleneck_types=comparable_bottleneck_types,
     )
 
     pre_types = {f["bottleneck_type"] for f in pre_findings}
     post_types = {f["bottleneck_type"] for f in post_findings}
 
-    resolved = pre_types - post_types
-    persisted = pre_types & post_types
+    comparable = (
+        pre_types | post_types
+        if comparable_bottleneck_types is None
+        else set(comparable_bottleneck_types)
+    )
+    resolved = (pre_types & comparable) - post_types
+    persisted = (pre_types & comparable) & post_types
     newly_emerged = post_types - pre_types
+    not_comparable = pre_types - comparable
 
     post_financial = calculate_financial_projection(
-        selected_allocation, loan_amount, post_pos_data["monthly_revenue"]
+        allocation=selected_allocation,
+        loan_amount=loan_amount,
+        baseline_monthly_revenue=post_pos_data["monthly_revenue"],
+        annual_interest_rate=annual_interest_rate,
+        loan_term_months=loan_term_months,
+        grace_months=grace_months,
+        repayment_type=repayment_type,
     )
 
     status = _classify_breakeven_status(
@@ -48,6 +68,7 @@ def compare_outcomes(
         "resolved_bottlenecks": sorted(resolved),
         "persisted_bottlenecks": sorted(persisted),
         "new_bottlenecks": sorted(newly_emerged),
+        "not_comparable_bottlenecks": sorted(not_comparable),
         "post_execution_findings": post_findings,
         "post_execution_financial_result": post_financial,
         "breakeven_status": status,

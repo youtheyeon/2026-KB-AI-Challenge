@@ -5,13 +5,15 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.errors import ApiError
 from app.domain.business import Business
 from app.domain.diagnosis import Diagnosis
 from app.domain.enums import (
     AllocationCategory,
+    BottleneckChangeType,
     BottleneckSeverity,
     DatasetStatus,
     DataSourceType,
@@ -20,6 +22,8 @@ from app.domain.enums import (
     RiskLevel,
     ScenarioCode,
 )
+from app.domain.execution import Execution
+from app.domain.outcome import OutcomeComparison, ReassessmentSnapshot
 from app.domain.simulation import (
     LoanCondition,
     Scenario,
@@ -29,6 +33,7 @@ from app.domain.simulation import (
     ScenarioSelection,
     Simulation,
 )
+from app.services.ai_contract import to_ai_bottleneck_type
 from app.services.simulation_engine import (
     SimulationEngine,
     SimulationEngineRequest,
@@ -404,6 +409,7 @@ class SimulationService:
             else 0
         )
         findings = tuple(_to_finding(bottleneck) for bottleneck in diagnosis.bottlenecks)
+        business_history = _build_business_history(self.database, command.business_id)
         stored_bottlenecks = tuple(
             _StoredBottleneck(
                 id=bottleneck.id,
@@ -422,6 +428,7 @@ class SimulationService:
             public_data_reference_date=public_snapshot.reference_date,
             engine_request=SimulationEngineRequest(
                 findings=findings,
+                business_history=business_history,
                 loan_amount=command.loan_amount,
                 annual_interest_rate=command.annual_interest_rate,
                 term_months=command.term_months,
@@ -471,6 +478,7 @@ def _parse_session_id(session_cookie: str | None) -> UUID | None:
 
 
 def _to_finding(bottleneck) -> dict:
+    bottleneck_type = to_ai_bottleneck_type(bottleneck.bottleneck_type)
     evidence = bottleneck.evidence_description
     suggested_category = next(
         (
@@ -481,8 +489,8 @@ def _to_finding(bottleneck) -> dict:
         None,
     )
     return {
-        "bottleneck_type": bottleneck.bottleneck_type,
-        "title": TITLE_MAP.get(bottleneck.bottleneck_type, bottleneck.bottleneck_type),
+        "bottleneck_type": bottleneck_type,
+        "title": TITLE_MAP.get(bottleneck_type, bottleneck_type),
         "detail": bottleneck.detail,
         "comparison_chip": bottleneck.detail,
         "evidence_source": evidence,
@@ -491,6 +499,99 @@ def _to_finding(bottleneck) -> dict:
         "confidence_badge": CONFIDENCE_MAP.get(bottleneck.evidence_source_type, "보통"),
         "suggested_category": suggested_category,
     }
+
+
+def _build_business_history(
+    database: Session,
+    business_id: int,
+) -> tuple[dict, ...]:
+    simulations = database.scalars(
+        select(Simulation).where(Simulation.business_id == business_id)
+    ).all()
+    simulations_by_id = {
+        simulation.id: simulation
+        for simulation in simulations
+        if simulation.id is not None
+        and simulation.business_id == business_id
+        and simulation.status.upper() == "COMPLETED"
+    }
+    if not simulations_by_id:
+        return ()
+
+    simulation_ids = list(simulations_by_id)
+    comparisons = (
+        database.scalars(
+            select(OutcomeComparison)
+            .where(OutcomeComparison.simulation_id.in_(simulation_ids))
+            .options(
+                selectinload(OutcomeComparison.reassessment_snapshot).selectinload(
+                    ReassessmentSnapshot.changes
+                )
+            )
+        )
+        .unique()
+        .all()
+    )
+    executions = (
+        database.scalars(
+            select(Execution)
+            .where(Execution.simulation_id.in_(simulation_ids))
+            .options(selectinload(Execution.allocations))
+        )
+        .unique()
+        .all()
+    )
+    executions_by_simulation = {
+        execution.simulation_id: execution
+        for execution in executions
+        if execution.simulation_id in simulations_by_id
+    }
+
+    completed = sorted(
+        (
+            comparison
+            for comparison in comparisons
+            if comparison.simulation_id in simulations_by_id
+            and isinstance(comparison.next_round_pos_data_snapshot, dict)
+            and comparison.reassessment_snapshot is not None
+        ),
+        key=lambda comparison: (
+            comparison.created_at or datetime.min.replace(tzinfo=UTC),
+            comparison.id or 0,
+        ),
+    )
+    history = []
+    for round_number, comparison in enumerate(completed, start=1):
+        simulation = simulations_by_id[comparison.simulation_id]
+        execution = executions_by_simulation.get(comparison.simulation_id)
+        if execution is None:
+            continue
+        findings = [
+            {
+                "bottleneck_type": to_ai_bottleneck_type(change.bottleneck_type),
+                "detail": change.detail,
+            }
+            for change in comparison.reassessment_snapshot.changes
+            if change.change_type
+            in {
+                BottleneckChangeType.REMAINING,
+                BottleneckChangeType.NEW,
+            }
+        ]
+        allocation = {
+            item.category.value: float(Decimal(item.amount) / Decimal(simulation.loan_amount))
+            for item in execution.allocations
+            if item.category is not None
+        }
+        history.append(
+            {
+                "round": round_number,
+                "findings": findings,
+                "pos_data": dict(comparison.next_round_pos_data_snapshot),
+                "selected_allocation": allocation,
+            }
+        )
+    return tuple(history)
 
 
 def _to_scenario(

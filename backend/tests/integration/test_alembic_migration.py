@@ -51,6 +51,23 @@ def test_initial_migration_upgrades_downgrades_and_reupgrades() -> None:
     assert "demo_sessions" in tables
     assert "users" not in tables
     assert "demo_session_id" in {column["name"] for column in inspector.get_columns("businesses")}
+    outcome_columns = {column["name"]: column for column in inspector.get_columns("outcome_data")}
+    assert {
+        "raw_pos_data",
+        "monthly_sales_amount",
+        "operating_profit_amount",
+        "online_order_ratio",
+        "cash_after_repayment_amount",
+    } <= set(outcome_columns)
+    comparison_columns = {
+        column["name"]: column for column in inspector.get_columns("outcome_comparisons")
+    }
+    assert "next_round_pos_data_snapshot" in comparison_columns
+    execution_columns = {
+        column["name"]: column for column in inspector.get_columns("execution_allocations")
+    }
+    assert execution_columns["name"]["nullable"] is False
+    assert execution_columns["category"]["nullable"] is True
 
     run_alembic("downgrade base")
     assert not set(Base.metadata.tables) & set(inspect(engine).get_table_names())

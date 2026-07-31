@@ -60,3 +60,64 @@ def test_llm_explainer_raises_runtime_error_when_api_key_is_missing(monkeypatch)
             diagnosis=[stored_finding()],
             scb_outlook=[],
         )
+
+
+def test_run_allocation_simulation_applies_completed_business_history(monkeypatch) -> None:
+    captured_warnings = []
+
+    def fake_explanation(**kwargs):
+        captured_warnings.append(kwargs["tradeoff_warnings"])
+        return {
+            "allocation_rationale": "이력 반영 배분 근거",
+            "scb_growth_outlook": "정성적 성장 가능성",
+        }
+
+    monkeypatch.setattr(run_simulation, "generate_scenario_explanation", fake_explanation)
+    history = [
+        {
+            "round": 1,
+            "findings": [{"bottleneck_type": "time_of_day_weakness"}],
+            "pos_data": {"monthly_revenue": 7_500_000},
+            "selected_allocation": {"equipment_interior": 0.60},
+        },
+        {
+            "round": 2,
+            "findings": [{"bottleneck_type": "high_cost_ratio"}],
+            "pos_data": {"monthly_revenue": 8_000_000},
+            "selected_allocation": {"equipment_interior": 0.60},
+        },
+        {
+            "round": 3,
+            "findings": [{"bottleneck_type": "high_cost_ratio"}],
+            "pos_data": {"monthly_revenue": 8_200_000},
+            "selected_allocation": {"equipment_interior": 0.60},
+        },
+    ]
+    current_finding = stored_finding() | {
+        "bottleneck_type": "time_of_day_weakness",
+        "suggested_category": "marketing_online",
+    }
+
+    result = run_simulation.run_allocation_simulation(
+        [current_finding],
+        {
+            "amount": 15_000_000,
+            "annual_interest_rate": 0.045,
+            "term_months": 36,
+            "grace_months": 0,
+            "repayment_type": "equal_payment",
+        },
+        {"monthly_revenue": 7_500_000, "avg_daily_customers": 90},
+        business_history=history,
+    )
+
+    scenarios = {item["scenario_id"]: item for item in result["scenario_results"]}
+    assert scenarios["A"]["allocation"]["equipment_interior"] >= 0.15
+    assert scenarios["B"]["allocation"]["equipment_interior"] >= 0.15
+    assert captured_warnings[0] == [
+        {
+            "category": "equipment_interior",
+            "resulting_bottleneck": "high_cost_ratio",
+            "occurred_after_round": 1,
+        }
+    ]

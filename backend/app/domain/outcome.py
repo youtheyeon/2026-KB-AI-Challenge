@@ -12,12 +12,15 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
 from app.domain.enums import (
     BottleneckChangeType,
-    DataSourceType,
+    OutcomeDataSourceType,
+    OutcomeDataStatus,
+    OutcomeMetricStatus,
     OutcomeStatus,
 )
 
@@ -43,13 +46,22 @@ class OutcomeData(TimestampMixin, Base):
     observed_business_snapshot_id: Mapped[int] = mapped_column(
         ForeignKey("business_snapshots.id", ondelete="RESTRICT")
     )
-    source_type: Mapped[DataSourceType] = mapped_column(
-        enum_type(DataSourceType, "outcome_data_source", 40),
+    source_type: Mapped[OutcomeDataSourceType] = mapped_column(
+        enum_type(OutcomeDataSourceType, "outcome_data_source", 40),
         nullable=False,
-        default=DataSourceType.USER_INPUT,
+        default=OutcomeDataSourceType.MANUAL_INPUT,
     )
     observed_at: Mapped[date | None] = mapped_column(Date)
-    status: Mapped[str] = mapped_column(String(30), nullable=False, default="ready")
+    status: Mapped[OutcomeDataStatus] = mapped_column(
+        enum_type(OutcomeDataStatus, "outcome_data_status", 30),
+        nullable=False,
+        default=OutcomeDataStatus.READY,
+    )
+    raw_pos_data: Mapped[dict | None] = mapped_column(JSONB)
+    monthly_sales_amount: Mapped[int | None] = mapped_column(BigInteger)
+    operating_profit_amount: Mapped[int | None] = mapped_column(BigInteger)
+    online_order_ratio: Mapped[Decimal | None] = mapped_column(Numeric(7, 4))
+    cash_after_repayment_amount: Mapped[int | None] = mapped_column(BigInteger)
 
     simulation: Mapped["Simulation"] = relationship()
     dataset: Mapped["Dataset | None"] = relationship()
@@ -85,6 +97,7 @@ class OutcomeComparison(TimestampMixin, Base):
     status: Mapped[OutcomeStatus] = mapped_column(
         enum_type(OutcomeStatus, "outcome_status", 30), nullable=False
     )
+    next_round_pos_data_snapshot: Mapped[dict | None] = mapped_column(JSONB)
 
     metrics: Mapped[list["OutcomeComparisonMetric"]] = relationship(
         back_populates="comparison", cascade="all, delete-orphan"
@@ -116,8 +129,8 @@ class OutcomeComparisonMetric(Base):
     break_even_value: Mapped[Decimal | None] = mapped_column(Numeric(19, 4))
     observed_value: Mapped[Decimal | None] = mapped_column(Numeric(19, 4))
     unit: Mapped[str] = mapped_column(String(50), nullable=False)
-    status: Mapped[OutcomeStatus] = mapped_column(
-        enum_type(OutcomeStatus, "outcome_metric_status", 30), nullable=False
+    status: Mapped[OutcomeMetricStatus] = mapped_column(
+        enum_type(OutcomeMetricStatus, "outcome_metric_status", 30), nullable=False
     )
     note: Mapped[str | None] = mapped_column(Text)
 

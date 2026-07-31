@@ -8,6 +8,7 @@ from app.api.routes.datasets import router as datasets_router
 from app.api.routes.diagnoses import router as diagnoses_router
 from app.api.routes.health import router as health_router
 from app.api.routes.simulations import router as simulations_router
+from app.api.routes.verifications import router as verifications_router
 from app.core.config import settings
 from app.core.errors import ApiError
 
@@ -40,3 +41,4 @@ app.include_router(businesses_router)
 app.include_router(datasets_router)
 app.include_router(diagnoses_router)
 app.include_router(simulations_router)
+app.include_router(verifications_router)
