@@ -365,3 +365,5 @@ def test_openapi_exposes_both_outcome_data_content_types() -> None:
     ]["content"]
 
     assert {"application/json", "multipart/form-data"} <= set(content)
+    assert "$ref" not in content["application/json"]["schema"]
+    assert len(content["application/json"]["schema"]["oneOf"]) == 2

@@ -330,7 +330,49 @@ OUTCOME_DATA_OPENAPI = {
     "requestBody": {
         "required": True,
         "content": {
-            "application/json": {"schema": {"$ref": "#/components/schemas/OutcomeDataJsonRequest"}},
+            "application/json": {
+                "schema": {
+                    "oneOf": [
+                        {
+                            "type": "object",
+                            "required": ["sourceType"],
+                            "properties": {"sourceType": {"type": "string", "enum": ["MOCK"]}},
+                        },
+                        {
+                            "type": "object",
+                            "required": ["sourceType", "metrics"],
+                            "properties": {
+                                "sourceType": {
+                                    "type": "string",
+                                    "enum": ["MANUAL_INPUT"],
+                                },
+                                "metrics": {
+                                    "type": "object",
+                                    "required": [
+                                        "monthlySalesAmount",
+                                        "operatingProfitAmount",
+                                        "onlineOrderRatio",
+                                        "cashAfterRepaymentAmount",
+                                    ],
+                                    "properties": {
+                                        "monthlySalesAmount": {
+                                            "type": "integer",
+                                            "minimum": 1,
+                                        },
+                                        "operatingProfitAmount": {"type": "integer"},
+                                        "onlineOrderRatio": {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 1,
+                                        },
+                                        "cashAfterRepaymentAmount": {"type": "integer"},
+                                    },
+                                },
+                            },
+                        },
+                    ]
+                }
+            },
             "multipart/form-data": {
                 "schema": {
                     "type": "object",
