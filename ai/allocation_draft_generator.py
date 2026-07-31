@@ -69,26 +69,29 @@ def _normalize(allocation: dict) -> dict:
     return {c: round(v / total, 3) for c, v in allocation.items()}
 
 
-def draft_concentrated(findings: list) -> dict:
+def draft_concentrated(findings: list, min_shares: dict = None) -> dict:
     """A안: '병목 집중형' — 가장 심각한 병목 카테고리에 자금을 집중."""
+    min_shares = min_shares or {c: MIN_CATEGORY_SHARE for c in CATEGORIES}
     scores = _severity_score_by_category(findings)
     if not scores:
         return _normalize({c: 1 for c in CATEGORIES})
 
     top_category = max(scores, key=scores.get)
-    allocation = {c: MIN_CATEGORY_SHARE for c in CATEGORIES}
-    allocation[top_category] = 1 - MIN_CATEGORY_SHARE * (len(CATEGORIES) - 1)
+    allocation = dict(min_shares)
+    remaining = 1 - sum(min_shares.values())
+    allocation[top_category] += remaining
     return _normalize(allocation)
 
 
-def draft_balanced(findings: list) -> dict:
+def draft_balanced(findings: list, min_shares: dict = None) -> dict:
     """B안: '진단 비례 대응형' — 발견된 모든 병목의 심각도에 비례해서 배분."""
+    min_shares = min_shares or {c: MIN_CATEGORY_SHARE for c in CATEGORIES}
     scores = _severity_score_by_category(findings)
     if not scores:
         return _normalize({c: 1 for c in CATEGORIES})
 
-    allocation = {c: MIN_CATEGORY_SHARE for c in CATEGORIES}
-    remaining = 1 - MIN_CATEGORY_SHARE * len(CATEGORIES)
+    allocation = dict(min_shares)
+    remaining = 1 - sum(min_shares.values())
     score_total = sum(scores.values())
     for cat, score in scores.items():
         allocation[cat] += remaining * (score / score_total)
@@ -118,30 +121,37 @@ def get_target_metrics_for_scenario(findings: list, allocation: dict) -> list:
     return metrics
 
 
-def generate_scenario_drafts(findings: list) -> list:
+def generate_scenario_drafts(findings: list, min_shares: dict = None) -> list:
     """
     A/B/C 세 개의 배분 초안을 생성한다.
-    각 초안이 '왜 이렇게 나왔는지' 근거(rationale)를 같이 반환해서
-    UI에서 '이건 진단 기반 제안값입니다 (조정 가능)'라고 투명하게 보여줄 수 있게 한다.
+    min_shares가 주어지면(회차 히스토리에서 지속 병목이 발견된 경우), 해당 카테고리의
+    최소 배정 비중이 5% -> 15%로 상향된 상태로 A/B안이 생성된다. (메커니즘 2: 지속 병목 가중치 상향)
+    C안(균등 분산형)은 정의상 '진단과 무관한 기준선'이므로 상향을 적용하지 않는다.
     """
     scores = _severity_score_by_category(findings)
     top_category = max(scores, key=scores.get) if scores else None
+
+    escalated_note = ""
+    if min_shares:
+        escalated_cats = [c for c, v in min_shares.items() if v > MIN_CATEGORY_SHARE]
+        if escalated_cats:
+            escalated_note = f" (참고: {', '.join(escalated_cats)}은(는) 병목이 지속되어 최소 배정 비중이 상향되었습니다.)"
 
     drafts = [
         {
             "scenario_id": "A",
             "label": "병목 집중형",
-            "allocation": draft_concentrated(findings),
+            "allocation": draft_concentrated(findings, min_shares),
             "rationale": (
-                f"가장 심각도가 높은 병목({top_category})에 자금을 집중 배분한 초안입니다."
+                f"가장 심각도가 높은 병목({top_category})에 자금을 집중 배분한 초안입니다.{escalated_note}"
                 if top_category else "발견된 병목이 없어 균등 배분을 기본값으로 제시합니다."
             ),
         },
         {
             "scenario_id": "B",
             "label": "진단 비례 대응형",
-            "allocation": draft_balanced(findings),
-            "rationale": "발견된 모든 병목의 심각도에 비례해서 자금을 나눠 배분한 초안입니다.",
+            "allocation": draft_balanced(findings, min_shares),
+            "rationale": f"발견된 모든 병목의 심각도에 비례해서 자금을 나눠 배분한 초안입니다.{escalated_note}",
         },
         {
             "scenario_id": "C",

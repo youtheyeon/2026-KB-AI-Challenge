@@ -17,22 +17,38 @@ run_simulation.py — AI 엔진 전체를 묶는 단일 진입점
 import json
 
 from bottleneck_detector import detect_bottlenecks_with_ai_clustering
-from allocation_draft_generator import generate_scenario_drafts
+from allocation_draft_generator import generate_scenario_drafts, BOTTLENECK_TO_CATEGORY, CATEGORIES
 from financial_calculator import calculate_financial_projection
 from scb_outlook import generate_scb_outlook
 from llm_explainer import generate_scenario_explanation
+from business_history import (
+    compute_personal_baselines,
+    compute_persistence_counts,
+    compute_escalated_min_shares,
+    compute_tradeoff_warnings,
+)
 
 # 재현성을 위한 버전 정보 (스펙 19번). 로직을 바꿀 때마다 사람이 수동으로 올린다.
 BENCHMARK_VERSION = "2026-07-v2"
-DIAGNOSIS_VERSION = "1.1"  # 온라인 채널 병목 4종 추가
-ALLOCATION_GENERATOR_VERSION = "1.1"  # target_metrics 필드 추가
+DIAGNOSIS_VERSION = "1.2"  # 개인 기준선 치환 메커니즘 추가
+ALLOCATION_GENERATOR_VERSION = "1.2"  # 지속 병목 최소비중 상향 메커니즘 추가
 CALCULATION_VERSION = "1.1"  # 손익분기 3필드 추가
-PROMPT_VERSION = "1.0"
+PROMPT_VERSION = "1.1"  # 부작용(trade-off) 경고 반영
 
 
-def run_allocation_simulation(findings: list[dict], loan: dict, pos_data: dict) -> dict:
-    """저장된 병목 진단을 사용해 A·B·C 배분안과 재무 결과를 생성한다."""
-    drafts = generate_scenario_drafts(findings)
+def run_allocation_simulation(
+    findings: list[dict],
+    loan: dict,
+    pos_data: dict,
+    min_shares: dict = None,
+    tradeoff_warnings: list = None,
+) -> dict:
+    """저장된 병목 진단을 사용해 A·B·C 배분안과 재무 결과를 생성한다.
+
+    min_shares/tradeoff_warnings는 회차 히스토리(business_history.py)에서 파생되는 선순환
+    메커니즘 입력값이다. 둘 다 생략 가능 -- 저장된 findings만으로 1회차와 동일하게 동작한다.
+    """
+    drafts = generate_scenario_drafts(findings, min_shares=min_shares)
 
     loan_amount = loan["amount"]
     baseline_revenue = pos_data["monthly_revenue"]
@@ -61,13 +77,14 @@ def run_allocation_simulation(findings: list[dict], loan: dict, pos_data: dict) 
         # [3-2] SCB 방향성
         scb_result = generate_scb_outlook(d["allocation"])
 
-        # [3-3] LLM 설명 (배분근거 + SCB성장가능성, 시나리오당 1회 호출)
+        # [3-3] LLM 설명 (배분근거 + SCB성장가능성 + 부작용경고, 시나리오당 1회 호출)
         explanation = generate_scenario_explanation(
             scenario_id=d["scenario_id"],
             scenario_label=d["label"],
             allocation=d["allocation"],
             diagnosis=findings,
             scb_outlook=scb_result["scb_outlook"],
+            tradeoff_warnings=tradeoff_warnings,
         )
 
         # 배분 비율을 실제 원 단위 금액으로도 변환 -> 화면/설명에서 "몇 %"뿐 아니라 "몇 원"도 보여주기 위함
@@ -100,17 +117,54 @@ def run_allocation_simulation(findings: list[dict], loan: dict, pos_data: dict) 
     }
 
 
-def run_simulation(profile: dict, loan: dict, pos_data: dict) -> dict:
+def run_simulation(profile: dict, loan: dict, pos_data: dict, business_history: list = None) -> dict:
     """
     profile: {"trade_area_usage_type": "university", "monthly_revenue_band": "500-1000", ...}
     loan: {"amount": 15000000, "annual_interest_rate": 0.045, "term_months": 36}
     pos_data: mock_pos_data.py와 동일한 스키마 (실제 연동 시 이 부분만 실제 데이터로 교체)
+    business_history: 이 사업자의 과거 회차 기록 (business_history.py 참고). None이면 1회차로 간주,
+                      업계 가정치·기본 최소비중을 그대로 사용한다.
 
     반환: 병목 진단 + 시나리오별(A/B/C) 재무결과·SCB설명이 모두 담긴 딕셔너리
+
+    ── 선순환 3대 메커니즘 (회차가 쌓일수록 자동으로 정교해짐, ML 아님, 결정론적 규칙) ──
+      1) 개인 기준선 치환: 3회차부터 원가율/인건비율/재구매율 벤치마크가 본인 과거 실측 평균으로 전환
+      2) 지속 병목 가중치 상향: 같은 병목 2회 연속 발생 시 해당 카테고리 최소비중 5%->15%
+      3) 부작용 이력 추적: 과거 특정 카테고리 배분 이후 새 병목이 발생한 이력을 LLM 설명에 경고로 반영
     """
-    findings, cluster_info = detect_bottlenecks_with_ai_clustering(pos_data)
-    result = run_allocation_simulation(findings, loan, pos_data)
-    return {**result, "ai_cluster_assignment": cluster_info}
+    business_history = business_history or []
+
+    # ── 메커니즘 1: 개인 기준선 (회차 3 이상 쌓였을 때만 작동, 그 전엔 None -> 업계 가정치 유지) ──
+    personal_baselines = compute_personal_baselines(business_history)
+
+    # [1] 병목 진단 -- K-means 클러스터링으로 찾은 '유사 소비패턴 그룹' 대비 진단 + 개인기준선 반영
+    findings, cluster_info = detect_bottlenecks_with_ai_clustering(
+        pos_data, personal_baselines=personal_baselines
+    )
+
+    # ── 메커니즘 2: 지속 병목 가중치 상향 ──
+    persistence_counts = compute_persistence_counts(business_history)
+    escalated_min_shares = compute_escalated_min_shares(persistence_counts, BOTTLENECK_TO_CATEGORY, CATEGORIES)
+
+    # ── 메커니즘 3: 부작용(trade-off) 이력 ──
+    tradeoff_warnings = compute_tradeoff_warnings(business_history, BOTTLENECK_TO_CATEGORY)
+
+    # [2]+[3] 배분안 생성 + 재무/SCB/LLM 설명 (지속 병목 최소비중 상향 + 부작용 경고 반영)
+    result = run_allocation_simulation(
+        findings, loan, pos_data, min_shares=escalated_min_shares, tradeoff_warnings=tradeoff_warnings
+    )
+
+    return {
+        **result,
+        "ai_cluster_assignment": cluster_info,
+        "personalization_status": {
+            "round_number": len(business_history) + 1,
+            "using_personal_baseline": personal_baselines is not None,
+            "personal_baseline_basis_rounds": personal_baselines["based_on_rounds"] if personal_baselines else 0,
+            "escalated_categories": [c for c, v in escalated_min_shares.items() if v > 0.05],
+            "active_tradeoff_warnings": tradeoff_warnings,
+        },
+    }
 
 
 # ─────────────────────────────────────────────
@@ -127,38 +181,56 @@ if __name__ == "__main__":
         "monthly_revenue_band": "500-1000",
     }
     loan = {"amount": 15_000_000, "annual_interest_rate": 0.045, "term_months": 36}
-    pos_data = generate_mock_pos_data(scenario="multi_bottleneck", monthly_revenue=7_500_000)
 
-    result = run_simulation(profile, loan, pos_data)
+    # 1회차: 히스토리 없음 -> 업계 가정치, 기본 최소비중(5%) 그대로
+    pos_data_r1 = generate_mock_pos_data(scenario="high_cost_ratio", monthly_revenue=7_500_000)
+    result_r1 = run_simulation(profile, loan, pos_data_r1, business_history=[])
 
     print("=" * 70)
-    print("AI 클러스터 배정 결과 (K-means 비지도학습)")
+    print("1회차 (히스토리 없음)")
     print("=" * 70)
-    ci = result["ai_cluster_assignment"]
-    print(f"  클러스터 {ci['cluster_id']}번 배정 (구성원 {ci['cluster_member_count']}개 상권)")
-    print(f"  특징: {ci['cluster_dominant_time']}시·{ci['cluster_dominant_weekday']}요일 강세")
-    print(f"  대표 상권: {', '.join(ci['cluster_example_trade_areas'][:3])}")
+    print(f"개인기준선 사용여부: {result_r1['personalization_status']['using_personal_baseline']}")
+    for f in result_r1["bottleneck_diagnosis"]:
+        print(f"  [{f['title']}] 근거: {f['evidence_source']} / 신뢰도 {f['confidence_badge']}")
+
+    # 가짜 히스토리 구성: 원가율 병목이 2회 연속 발생했다고 가정 (2,3회차)
+    fake_history = [
+        {
+            "round": 1,
+            "findings": result_r1["bottleneck_diagnosis"],
+            "pos_data": pos_data_r1,
+            "selected_allocation": {"marketing_online": 0.2, "equipment_interior": 0.6, "labor": 0.1, "inventory": 0.1},
+        },
+        {
+            "round": 2,
+            "findings": [{"bottleneck_type": "high_cost_ratio"}],
+            "pos_data": generate_mock_pos_data(scenario="high_cost_ratio", monthly_revenue=8_000_000),
+            "selected_allocation": {"marketing_online": 0.2, "equipment_interior": 0.6, "labor": 0.1, "inventory": 0.1},
+        },
+        {
+            "round": 3,
+            "findings": [{"bottleneck_type": "high_cost_ratio"}],
+            "pos_data": generate_mock_pos_data(scenario="high_cost_ratio", monthly_revenue=8_200_000),
+            "selected_allocation": {"marketing_online": 0.2, "equipment_interior": 0.6, "labor": 0.1, "inventory": 0.1},
+        },
+    ]
+
+    pos_data_r4 = generate_mock_pos_data(scenario="high_cost_ratio", monthly_revenue=8_400_000)
+    result_r4 = run_simulation(profile, loan, pos_data_r4, business_history=fake_history)
 
     print("\n" + "=" * 70)
-    print("병목 진단 결과")
+    print("4회차 (3회 히스토리 누적 -> 개인기준선 전환 + 지속병목 상향 발동)")
     print("=" * 70)
-    for f in result["bottleneck_diagnosis"]:
-        print(f"  [{f['title']}] {f['priority_badge']} / 신뢰도 {f['confidence_badge']}")
-
-    print("\n" + "=" * 70)
-    print(f"시나리오별 결과 (대출금 총액: {loan['amount']:,}원)")
-    print("=" * 70)
-    for s in result["scenario_results"]:
-        amt_str = ", ".join(f"{cat} {won:,}원({pct*100:.0f}%)"
-                             for cat, won, pct in zip(s["allocation"].keys(), s["allocation_amounts_won"].values(), s["allocation"].values()))
-        print(f"\n[{s['scenario_id']}안 - {s['label']}]")
-        print(f"  배분: {amt_str}")
-        fin = s["financial_result"]
-        print(f"  잔여현금: {fin['remaining_cash_after_payment']:,}원 / 위험도: {fin['risk_level']}")
-        print(f"  배분근거: {s['allocation_rationale'][:80]}...")
-        print(f"  SCB설명: {s['scb_growth_outlook'][:80]}...")
+    status = result_r4["personalization_status"]
+    print(f"개인기준선 사용여부: {status['using_personal_baseline']} ({status['personal_baseline_basis_rounds']}회차 기반)")
+    print(f"최소비중 상향된 카테고리: {status['escalated_categories']}")
+    print(f"부작용 경고 이력: {status['active_tradeoff_warnings']}")
+    for f in result_r4["bottleneck_diagnosis"]:
+        print(f"  [{f['title']}] 근거: {f['evidence_source']} / 신뢰도 {f['confidence_badge']}")
+    for s in result_r4["scenario_results"]:
+        print(f"\n  [{s['scenario_id']}안] 배분: {s['allocation']}")
 
     # 최종 JSON을 파일로도 저장 -> 백엔드 담당자에게 실제 응답 형태 예시로 전달 가능
     with open("./run_simulation_sample_output.json", "w", encoding="utf-8") as f:
-        json.dump(result, f, ensure_ascii=False, indent=2)
+        json.dump(result_r4, f, ensure_ascii=False, indent=2)
     print("\n전체 결과를 run_simulation_sample_output.json 에 저장했습니다.")
