@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 저장된 시뮬레이션의 실제 집행과 사후 데이터를 한 번씩 등록하고, 근거가 있는 지표·병목만 비교해 결과 조회와 선순환 대시보드 API를 제공한다.
+**Goal:** 저장된 시뮬레이션의 실제 집행과 사후 데이터를 한 번씩 등록하고, 근거가 있는 지표·병목만 비교해 결과 조회와 선순환 대시보드 API를 제공하며 완료 이력을 다음 시뮬레이션에 연결한다.
 
-**Architecture:** 새 검증 라우터는 HTTP 계약과 Content-Type 분기만 담당하고, 집행·사후 데이터·결과 비교·대시보드 서비스를 책임별로 분리한다. `OutcomeEngine`이 기존 `ai/`의 Mock 생성기와 결과 추적 함수를 같은 프로세스에서 호출하며, 파일 파싱과 계산 중에는 데이터베이스 트랜잭션을 열어 두지 않고 저장 직전에 행을 잠가 재검증한다.
+**Architecture:** 새 검증 라우터는 HTTP 계약과 Content-Type 분기만 담당하고, 집행·사후 데이터·결과 비교·대시보드 서비스를 책임별로 분리한다. `OutcomeEngine`이 기존 `ai/`의 Mock 생성기와 결과 추적 함수를 같은 프로세스에서 호출하며, 파일 파싱과 계산 중에는 데이터베이스 트랜잭션을 열어 두지 않고 저장 직전에 행을 잠가 재검증한다. 결과 비교가 다음 회차 POS 스냅샷을 저장하고 기존 `SimulationService`가 완료 사이클을 `business_history`로 투영해 지속 병목 상향과 부작용 경고를 다음 AI 배분 생성에 전달한다.
 
 **Tech Stack:** Python 3.13, FastAPI, Pydantic v2, SQLAlchemy 2, Alembic, PostgreSQL, pytest 9, Ruff, openpyxl, 기존 `ai/` Python 엔진.
 
@@ -19,6 +19,9 @@
 - MOCK은 전체 병목, FILE_UPLOAD는 관측 가능한 병목만 재평가하며 MANUAL_INPUT 병목은 `NOT_COMPARABLE`이다.
 - 자유 집행 항목은 카테고리를 추측하지 않고 기존 계산기의 미분류 지출 가정만 `DOMAIN_ASSUMPTION`으로 적용한다.
 - 대시보드 상환치는 실제 납부 기록이 아니므로 `repaymentDataType=ESTIMATED`를 반드시 반환한다.
+- 저장된 완료 진단은 현재 시뮬레이션 병목의 단일 원천으로 유지하고, 결과 이력으로 현재 병목을 다시 진단하지 않는다.
+- 결과 이력은 `ai/business_history.py`의 지속 병목 최소 비중과 부작용 경고에 사용하며 개인 기준선은 향후 진단 경로를 위해 POS 스냅샷만 보존한다.
+- 백엔드 대문자 병목 코드는 AI 경계에서 명시적으로 정규화하고 자유 집행 항목의 카테고리는 추측하지 않는다.
 - 자동 테스트에서는 실제 LLM, 외부 API와 네트워크를 호출하지 않는다.
 - 기존 초기 마이그레이션을 수정하지 않고 `20260731_0003` 후속 마이그레이션을 추가한다.
 - 새 Python 소스 파일 첫 줄에는 역할을 설명하는 한 줄 한국어 주석을 둔다.
@@ -28,12 +31,15 @@
 
 - Modify `backend/app/domain/enums.py` — 집행 모드, 사후 데이터 출처·상태, 지표 판정과 미관측 병목 enum.
 - Modify `backend/app/domain/execution.py` — 자유 집행 이름과 nullable 카테고리.
-- Modify `backend/app/domain/outcome.py` — 수동 지표, 원시 Mock 입력과 전용 상태 타입.
+- Modify `backend/app/domain/outcome.py` — 수동 지표, 원시 Mock 입력, 다음 회차 POS 스냅샷과 전용 상태 타입.
 - Create `backend/alembic/versions/20260731_0003_result_verification_api.py` — 기존 행 변환과 컬럼·제약 변경.
 - Modify `backend/tests/domain/test_execution.py`, `backend/tests/domain/test_outcome.py` — 새 도메인 불변조건.
 - Modify `backend/tests/integration/test_alembic_migration.py` — 후속 마이그레이션 업·다운 검증.
-- Modify `ai/bottleneck_detector.py`, `ai/outcome_tracker.py` — 관측 가능한 병목만 비교하는 선택 인자.
-- Create `backend/tests/ai/test_outcome_tracker.py` — 해결·지속·신규·미관측 분류와 대출 조건 전달 테스트.
+- Modify `ai/bottleneck_detector.py`, `ai/outcome_tracker.py`, `ai/run_simulation.py` — 관측 가능한 병목 비교와 저장 진단 기반 선순환 이력 입력.
+- Create `backend/tests/ai/test_outcome_tracker.py`, `backend/tests/ai/test_business_history.py` — 병목 분류·대출 조건과 이력 신호 테스트.
+- Modify `backend/tests/ai/test_run_allocation_simulation.py` — 이력에서 최소 비중과 경고를 적용하는 회귀 테스트.
+- Modify `backend/app/services/simulation_engine.py`, `backend/app/services/simulation.py` — 병목 코드 정규화와 완료 결과 이력 전달.
+- Modify `backend/tests/services/test_simulation_engine.py`, `backend/tests/services/test_simulation_service.py` — AI 계약 정규화와 후속 회차 입력 테스트.
 - Create `backend/app/services/outcome_engine.py` — Mock 생성·AI 결과 비교 프로토콜과 같은 프로세스 어댑터.
 - Create `backend/tests/services/test_outcome_engine.py` — 어댑터 변환·형상·예외 테스트.
 - Create `backend/app/services/verification.py` — 소유권 공통 검사, 검증 대상 조회와 실제 집행 생성.
@@ -67,7 +73,7 @@
 - Produces: `ExecutionType.SAME_AS_A`, `SAME_AS_B`, `SAME_AS_C`, `MIXED`, `CUSTOM`.
 - Produces: `OutcomeDataSourceType`, `OutcomeDataStatus`, `OutcomeMetricStatus`.
 - Produces: `ExecutionAllocation(name: str, category: AllocationCategory | None, amount: int)`.
-- Produces: `OutcomeData.raw_pos_data` and four nullable manual metric columns.
+- Produces: `OutcomeData.raw_pos_data`, `OutcomeComparison.next_round_pos_data_snapshot` and four nullable manual metric columns.
 - Produces: database revision `20260731_0003` with downgrade to `20260730_0002`.
 
 - [ ] **Step 1: Record the baseline before changing code**
@@ -116,6 +122,17 @@ def test_outcome_metric_status_is_separate_from_overall_status() -> None:
         status=OutcomeMetricStatus.ABOVE_EXPECTED,
     )
     assert metric.status is OutcomeMetricStatus.ABOVE_EXPECTED
+
+
+def test_outcome_comparison_keeps_next_round_pos_snapshot() -> None:
+    comparison = OutcomeComparison(
+        simulation_id=1,
+        execution_id=2,
+        outcome_data_id=3,
+        status=OutcomeStatus.MET,
+        next_round_pos_data_snapshot={"monthly_revenue": 8_100_000},
+    )
+    assert comparison.next_round_pos_data_snapshot["monthly_revenue"] == 8_100_000
 ```
 
 Run: `cd backend && .venv/bin/pytest tests/domain/test_execution.py tests/domain/test_outcome.py -q`
@@ -166,7 +183,7 @@ online_order_ratio: Mapped[Decimal | None] = mapped_column(Numeric(7, 4))
 cash_after_repayment_amount: Mapped[int | None] = mapped_column(BigInteger)
 ```
 
-Change only `OutcomeComparisonMetric.status` to `OutcomeMetricStatus`; leave `OutcomeComparison.status` as `OutcomeStatus`.
+Add `next_round_pos_data_snapshot: Mapped[dict[str, Any] | None] = mapped_column(JSONB)` to `OutcomeComparison`. Change only `OutcomeComparisonMetric.status` to `OutcomeMetricStatus`; leave `OutcomeComparison.status` as `OutcomeStatus`.
 
 Run: `cd backend && .venv/bin/pytest tests/domain/test_execution.py tests/domain/test_outcome.py -q`
 
@@ -236,6 +253,10 @@ assert {
     "online_order_ratio",
     "cash_after_repayment_amount",
 } <= set(columns)
+comparison_columns = {
+    column["name"]: column for column in inspect(engine).get_columns("outcome_comparisons")
+}
+assert "next_round_pos_data_snapshot" in comparison_columns
 execution_columns = {
     column["name"]: column for column in inspect(engine).get_columns("execution_allocations")
 }
@@ -279,12 +300,16 @@ git commit -m "feat: 결과 검증 도메인 계약 확장"
 **Files:**
 - Modify: `ai/bottleneck_detector.py`
 - Modify: `ai/outcome_tracker.py`
+- Modify: `ai/run_simulation.py`
 - Create: `backend/tests/ai/test_outcome_tracker.py`
+- Create: `backend/tests/ai/test_business_history.py`
+- Modify: `backend/tests/ai/test_run_allocation_simulation.py`
 
 **Interfaces:**
 - Produces: `detect_bottlenecks(user_data: dict, time_benchmark: dict, assumptions: dict = INDUSTRY_ASSUMPTIONS, time_benchmark_sample_size: int | None = None, comparable_bottleneck_types: set[str] | None = None) -> list`.
 - Produces: `compare_outcomes(pre_findings: list, pre_pos_data: dict, post_pos_data: dict, time_benchmark: dict, time_benchmark_sample_size: int, selected_allocation: dict, loan_amount: int, breakeven_additional_revenue_target: float | None = None, comparable_bottleneck_types: set[str] | None = None, annual_interest_rate: float = 0.045, loan_term_months: int = 36, grace_months: int = 0, repayment_type: str = "equal_payment") -> dict`.
 - Produces: `not_comparable_bottlenecks` in the comparison result.
+- Produces: `run_allocation_simulation(..., business_history: list | None = None)` while preserving existing callers.
 
 - [ ] **Step 1: Write failing AI behavior tests**
 
@@ -372,11 +397,23 @@ Run: `cd backend && .venv/bin/pytest tests/ai -q`
 
 Expected: all AI tests PASS without network access.
 
-- [ ] **Step 4: Commit the AI comparison change**
+- [ ] **Step 4: Verify and connect deterministic business-history signals**
+
+Add direct tests for `compute_persistence_counts()`, `compute_escalated_min_shares()` and `compute_tradeoff_warnings()` using ordered completed rounds. Add a regression test that passes two consecutive `high_cost_ratio` outcome rounds to `run_allocation_simulation(..., business_history=history)` and asserts A·B scenarios give `equipment_interior` at least `0.15`. Spy on `generate_scenario_explanation()` and assert a recorded trade-off warning is passed unchanged.
+
+Extend `run_allocation_simulation()` with the optional `business_history` argument. When supplied, derive `min_shares` and `tradeoff_warnings` from the existing `business_history.py` functions before generating scenarios. Existing callers without history and explicit internal callers that already supply signals must preserve their behavior.
+
+Do not activate `compute_personal_baselines()` in this function. It requires a diagnosis pass, while this entry point intentionally receives the saved completed diagnosis as its source of truth.
+
+Run: `cd backend && .venv/bin/pytest tests/ai -q`
+
+Expected: all AI tests PASS without a live LLM or network call.
+
+- [ ] **Step 5: Commit the AI comparison and history change**
 
 ```bash
-git add ai/bottleneck_detector.py ai/outcome_tracker.py backend/tests/ai/test_outcome_tracker.py
-git commit -m "feat: 미관측 병목 비교 제외 지원"
+git add ai/bottleneck_detector.py ai/outcome_tracker.py ai/run_simulation.py backend/tests/ai/test_outcome_tracker.py backend/tests/ai/test_business_history.py backend/tests/ai/test_run_allocation_simulation.py
+git commit -m "feat: 결과 비교와 선순환 이력 입력 지원"
 ```
 
 ---
@@ -762,7 +799,7 @@ When an observed or boundary value is unavailable, store `NOT_COMPARABLE` and `N
 
 - [ ] **Step 5: Persist result and bottleneck changes atomically**
 
-After calculation, begin a short transaction and lock simulation, execution and outcome data. Recheck ownership, readiness and duplicates. Save one `OutcomeComparison`, four metrics, one `ReassessmentSnapshot`, and changes with these mappings.
+After calculation, begin a short transaction and lock simulation, execution and outcome data. Recheck ownership, readiness and duplicates. Save one `OutcomeComparison`, four metrics, one `ReassessmentSnapshot`, changes, and `next_round_pos_data_snapshot` with these mappings.
 
 ```python
 CHANGE_TYPE_BY_KEY = {
@@ -774,6 +811,8 @@ CHANGE_TYPE_BY_KEY = {
 ```
 
 Link prior bottleneck IDs for resolved, remaining and not comparable rows. New rows keep both foreign keys null and store the generated finding detail. Map `OutcomeCalculationError` to `502 OUTCOME_CALCULATION_FAILED` and store no comparison graph.
+
+For MOCK and FILE_UPLOAD, validate and persist the engine's `next_round_pos_data_snapshot`. For MANUAL_INPUT, persist only the provided observable values using stable POS keys such as `monthly_revenue`; do not synthesize costs, customer counts or repeat rates. A comparison and its snapshot must commit or roll back together.
 
 - [ ] **Step 6: Project the stored GET response without recalculation**
 
@@ -792,7 +831,80 @@ git commit -m "feat: 결과 비교 생성과 조회 서비스 추가"
 
 ---
 
-### Task 7: Stored-cycle dashboard and repayment estimate
+### Task 7: Feed completed outcome history into the next simulation
+
+**Files:**
+- Modify: `backend/app/services/simulation_engine.py`
+- Modify: `backend/app/services/simulation.py`
+- Modify: `backend/tests/services/test_simulation_engine.py`
+- Modify: `backend/tests/services/test_simulation_service.py`
+
+**Interfaces:**
+- Adds: `SimulationEngineRequest.business_history: tuple[dict[str, Any], ...]`.
+- Adds: `to_ai_bottleneck_type(stored_type: str) -> str` with an explicit backend-to-AI mapping.
+- Adds: `_load_business_history(business_id: int) -> tuple[dict[str, Any], ...]` ordered by completed outcome cycle.
+
+- [ ] **Step 1: Write failing AI-contract and engine tests**
+
+Add a test with a production diagnosis code such as `HIGH_MATERIAL_COST` and assert the engine receives `high_cost_ratio`, not the backend storage code. Extend the fake simulation runner to capture `business_history` and assert the adapter passes it as a keyword argument while an empty tuple preserves first-round behavior.
+
+Use this exact mapping.
+
+```python
+AI_BOTTLENECK_TYPE_BY_STORED_TYPE = {
+    "HIGH_MATERIAL_COST": "high_cost_ratio",
+    "HIGH_LABOR_COST": "high_labor_ratio",
+    "CHANNEL_CONCENTRATION": "low_online_sales_share",
+    "HIGH_PLATFORM_COST": "high_platform_cost_rate",
+    "HIGH_ONLINE_REFUND_RATE": "high_online_cancel_refund_rate",
+    "LOW_NET_SETTLEMENT_RATE": "low_net_settlement_rate",
+    "TIME_OF_DAY_WEAKNESS": "time_of_day_weakness",
+}
+```
+
+Unknown and already-normalized codes must pass through unchanged so saved audit data is not lost.
+
+Run: `cd backend && .venv/bin/pytest tests/services/test_simulation_engine.py tests/services/test_simulation_service.py -q`
+
+Expected: FAIL because the request has no history and production codes are not normalized.
+
+- [ ] **Step 2: Write failing completed-cycle projection tests**
+
+Seed two completed outcome comparisons for the same business and one for another business. Each owned cycle must have an execution, allocations, result changes and `next_round_pos_data_snapshot`. Assert the captured engine request contains only the owned cycles in result creation order.
+
+Each history record must have this shape.
+
+```python
+{
+    "round": 1,
+    "findings": [{"bottleneck_type": "high_cost_ratio"}],
+    "pos_data": {"monthly_revenue": 8_100_000},
+    "selected_allocation": {"equipment_interior": 0.60},
+}
+```
+
+Include only `REMAINING` and `NEW` changes in findings. Compute allocation ratios against the simulation loan amount. Aggregate fixed categories, skip `category=None`, and do not renormalize after skipping free items or unused principal. This preserves the true share of borrowed funds and avoids inventing a category.
+
+- [ ] **Step 3: Implement the history projection and transaction boundary**
+
+During `_prepare()`, load completed comparisons for the owned business with execution allocations, reassessment changes and stored POS snapshots eagerly available. Sort by comparison creation time and ID, then build immutable plain dictionaries before closing the read transaction. Normalize bottleneck codes at the boundary for the current saved diagnosis and history findings.
+
+Add `business_history` to `SimulationEngineRequest` and pass it to `run_allocation_simulation(..., business_history=[...])`. Keep AI/LLM execution outside the database transaction. Do not call `run_simulation()` and do not rerun diagnosis, because the command's completed `Diagnosis` remains the current source of truth.
+
+Run: `cd backend && .venv/bin/pytest tests/ai tests/services/test_simulation_engine.py tests/services/test_simulation_service.py -q`
+
+Expected: PASS with no live LLM or network call.
+
+- [ ] **Step 4: Commit the simulation feedback loop**
+
+```bash
+git add backend/app/services/simulation_engine.py backend/app/services/simulation.py backend/tests/services/test_simulation_engine.py backend/tests/services/test_simulation_service.py
+git commit -m "feat: 결과 이력을 다음 시뮬레이션에 연결"
+```
+
+---
+
+### Task 8: Stored-cycle dashboard and repayment estimate
 
 **Files:**
 - Create: `backend/app/services/dashboard.py`
@@ -833,7 +945,7 @@ For equal payment, use the standard remaining-balance formula with the payment c
 
 - [ ] **Step 3: Project only stored cycle data**
 
-Load owned business simulations with selection and scenarios, then query executions, outcome data and comparisons separately keyed by simulation ID. Load metrics and changes through their existing relationships. Sort cycles by simulation creation time. Build metric trends from stored baseline and observed values, cycle histories from selection·execution·overall result, unresolved bottlenecks from `REMAINING`, `NEW`, `NOT_COMPARABLE`, and next initial conditions from the most recent observed snapshot plus manual fields.
+Load owned business simulations with selection and scenarios, then query executions, outcome data and comparisons separately keyed by simulation ID. Load metrics and changes through their existing relationships. Sort cycles by simulation creation time. Build metric trends from stored baseline and observed values, cycle histories from selection·execution·overall result, unresolved bottlenecks from `REMAINING`, `NEW`, `NOT_COMPARABLE`, and next initial conditions from the most recent `OutcomeComparison.next_round_pos_data_snapshot`. Fall back to observed snapshot and manual fields only for legacy comparisons without the JSONB value.
 
 When no execution exists, return `loan_status=None`. When no outcomes exist, return empty trend·cycle·bottleneck lists and `next_initial_conditions=None`. Do not inject `OutcomeEngine` into this service.
 
@@ -850,7 +962,7 @@ git commit -m "feat: 선순환 대시보드 서비스 추가"
 
 ---
 
-### Task 8: Six HTTP APIs and dual Content-Type contract
+### Task 9: Six HTTP APIs and dual Content-Type contract
 
 **Files:**
 - Create: `backend/app/api/routes/verifications.py`
@@ -1001,7 +1113,7 @@ git commit -m "feat: 결과 검증과 대시보드 API 추가"
 
 ---
 
-### Task 9: PostgreSQL integration and final verification
+### Task 10: PostgreSQL integration and final verification
 
 **Files:**
 - Create: `backend/tests/integration/test_verification_api.py`
@@ -1053,6 +1165,8 @@ assert outcome.status_code == 201
 
 Assert one execution, its free allocation, one outcome data row, four metrics, one reassessment and prior bottlenecks marked not comparable. Assert result GET and dashboard GET return the same stored statuses and `repaymentDataType=ESTIMATED`.
 
+Add a second completed cycle with categorized actual allocations and active post-outcome bottlenecks, then create a later simulation through a fake engine. Assert the engine receives ordered `business_history`, only the current session's business cycles, stored next-round POS snapshots, normalized AI bottleneck codes and actual category ratios. This integration assertion proves the result API closes the loop instead of only displaying history.
+
 - [ ] **Step 2: Add duplicate, isolation and rollback integration cases**
 
 Send each POST twice and assert the second response is `409` with table counts unchanged. Use a second session cookie and assert all six paths hide the first session's resources with `404`.
@@ -1072,14 +1186,14 @@ Expected: all migration and verification integration tests PASS. If PostgreSQL i
 
 ```bash
 cd backend
-.venv/bin/pytest tests/domain/test_execution.py tests/domain/test_outcome.py tests/ai/test_outcome_tracker.py tests/services/test_outcome_engine.py tests/services/test_verification_service.py tests/services/test_outcome_data_service.py tests/services/test_outcome_service.py tests/services/test_dashboard_service.py tests/api/test_verifications.py -q
+.venv/bin/pytest tests/domain/test_execution.py tests/domain/test_outcome.py tests/ai/test_outcome_tracker.py tests/ai/test_business_history.py tests/ai/test_run_allocation_simulation.py tests/services/test_simulation_engine.py tests/services/test_simulation_service.py tests/services/test_outcome_engine.py tests/services/test_verification_service.py tests/services/test_outcome_data_service.py tests/services/test_outcome_service.py tests/services/test_dashboard_service.py tests/api/test_verifications.py -q
 .venv/bin/pytest -q
 .venv/bin/ruff check app tests
 .venv/bin/ruff format --check app tests
 git diff --check
 ```
 
-Expected: focused and full pytest commands have zero failures, Ruff exits `0`, and `git diff --check` prints nothing. Run the Task 8 OpenAPI assertion again and record the exact pass·skip counts in `context-notes.md`.
+Expected: focused and full pytest commands have zero failures, Ruff exits `0`, and `git diff --check` prints nothing. Run the Task 9 OpenAPI assertion again and record the exact pass·skip counts in `context-notes.md`.
 
 - [ ] **Step 5: Review scope and update work records**
 
