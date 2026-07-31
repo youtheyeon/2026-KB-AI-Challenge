@@ -217,8 +217,30 @@ def detect_bottlenecks(
     time_benchmark: dict,
     assumptions: dict = INDUSTRY_ASSUMPTIONS,
     time_benchmark_sample_size: int = None,
+    personal_baselines: dict = None,
 ) -> list:
+    """
+    personal_baselines가 주어지면(회차가 충분히 쌓인 경우), 원가율/인건비율/재구매율
+    비교 기준을 업계 가정치 대신 '이 사업자의 과거 실측 평균'으로 교체한다.
+    이 경우 evidence_source/confidence_badge도 '실측 기반, 신뢰도 높음'으로 바뀐다.
+    """
     findings = []
+
+    # personal_baselines가 있으면 해당 항목만 값 교체 (없는 항목은 업계 가정치 유지)
+    effective_assumptions = dict(assumptions)
+    using_personal = {}
+    if personal_baselines:
+        for key in ("cogs_ratio_benchmark", "labor_ratio_benchmark", "repeat_customer_rate_benchmark"):
+            if key in personal_baselines:
+                effective_assumptions[key] = personal_baselines[key]
+                using_personal[key] = True
+    assumptions = effective_assumptions
+
+    def _evidence_and_confidence(assumption_key: str, base_evidence: str) -> tuple:
+        if using_personal.get(assumption_key):
+            n = personal_baselines["based_on_rounds"]
+            return (f"본인 과거 실측 평균 ({n}회차 누적)", "높음")
+        return (base_evidence, None)  # None이면 호출부에서 기존 EVIDENCE_TO_CONFIDENCE_BADGE로 결정
 
     # (1) 시간대별 병목 -- 실제 데이터 벤치마크 사용 (상대 격차 기준)
     user_revenue = user_data["monthly_revenue"]
@@ -242,53 +264,74 @@ def detect_bottlenecks(
                 "severity": severity,
             })
 
-    # (2) 원가율 -- 가정치 사용 (%p 절대 격차 기준)
+    # (2) 원가율 -- 가정치 또는 개인 기준선 사용 (%p 절대 격차 기준)
     cogs_ratio = user_data["monthly_cogs"] / user_revenue if user_revenue else 0
     cogs_gap = cogs_ratio - assumptions["cogs_ratio_benchmark"]
     severity = classify_severity_3tier(cogs_gap, "high_cost_ratio")
     if severity:
-        findings.append({
+        cogs_evidence, cogs_confidence_override = _evidence_and_confidence(
+            "cogs_ratio_benchmark", "업계 가정치 (실증 데이터 없음)"
+        )
+        benchmark_label = "본인 과거 평균" if using_personal.get("cogs_ratio_benchmark") else "업계 참고치"
+        finding = {
             "bottleneck_type": "high_cost_ratio",
-            "detail": f"원가율 {cogs_ratio*100:.1f}% (업계 가정치 {assumptions['cogs_ratio_benchmark']*100:.1f}%)로 높음",
-            "comparison_chip": f"원가율 {cogs_ratio*100:.1f}% · 업계 참고치 {assumptions['cogs_ratio_benchmark']*100:.1f}%",
-            "evidence_source": "업계 가정치 (실증 데이터 없음)",
+            "detail": f"원가율 {cogs_ratio*100:.1f}% ({benchmark_label} {assumptions['cogs_ratio_benchmark']*100:.1f}%)로 높음",
+            "comparison_chip": f"원가율 {cogs_ratio*100:.1f}% · {benchmark_label} {assumptions['cogs_ratio_benchmark']*100:.1f}%",
+            "evidence_source": cogs_evidence,
             "methodology": METHODOLOGY_TEMPLATE["high_cost_ratio"].format(
                 benchmark_pct=round(assumptions["cogs_ratio_benchmark"] * 100, 1)
             ),
             "severity": severity,
-        })
+        }
+        if cogs_confidence_override:
+            finding["_confidence_override"] = cogs_confidence_override
+        findings.append(finding)
 
-    # (3) 인건비 비중 -- 가정치 사용
+    # (3) 인건비 비중 -- 가정치 또는 개인 기준선 사용
     labor_ratio = user_data["monthly_labor_cost"] / user_revenue if user_revenue else 0
     labor_gap = labor_ratio - assumptions["labor_ratio_benchmark"]
     severity = classify_severity_3tier(labor_gap, "high_labor_ratio")
     if severity:
-        findings.append({
+        labor_evidence, labor_confidence_override = _evidence_and_confidence(
+            "labor_ratio_benchmark", "업계 가정치 (실증 데이터 없음)"
+        )
+        benchmark_label = "본인 과거 평균" if using_personal.get("labor_ratio_benchmark") else "업계 참고치"
+        finding = {
             "bottleneck_type": "high_labor_ratio",
-            "detail": f"인건비 비중 {labor_ratio*100:.1f}% (업계 가정치 {assumptions['labor_ratio_benchmark']*100:.1f}%)로 높음",
-            "comparison_chip": f"인건비 비중 {labor_ratio*100:.1f}% · 업계 참고치 {assumptions['labor_ratio_benchmark']*100:.1f}%",
-            "evidence_source": "업계 가정치 (실증 데이터 없음)",
+            "detail": f"인건비 비중 {labor_ratio*100:.1f}% ({benchmark_label} {assumptions['labor_ratio_benchmark']*100:.1f}%)로 높음",
+            "comparison_chip": f"인건비 비중 {labor_ratio*100:.1f}% · {benchmark_label} {assumptions['labor_ratio_benchmark']*100:.1f}%",
+            "evidence_source": labor_evidence,
             "methodology": METHODOLOGY_TEMPLATE["high_labor_ratio"].format(
                 benchmark_pct=round(assumptions["labor_ratio_benchmark"] * 100, 1)
             ),
             "severity": severity,
-        })
+        }
+        if labor_confidence_override:
+            finding["_confidence_override"] = labor_confidence_override
+        findings.append(finding)
 
-    # (4) 재구매율 -- 가정치 사용
+    # (4) 재구매율 -- 가정치 또는 개인 기준선 사용
     repeat_rate = user_data["repeat_customer_rate"]
     repeat_gap = assumptions["repeat_customer_rate_benchmark"] - repeat_rate
     severity = classify_severity_3tier(repeat_gap, "low_repeat_rate")
     if severity:
-        findings.append({
+        repeat_evidence, repeat_confidence_override = _evidence_and_confidence(
+            "repeat_customer_rate_benchmark", "업계 가정치 (실증 데이터 없음)"
+        )
+        benchmark_label = "본인 과거 평균" if using_personal.get("repeat_customer_rate_benchmark") else "업계 참고치"
+        finding = {
             "bottleneck_type": "low_repeat_rate",
-            "detail": f"재구매율 {repeat_rate*100:.1f}% (업계 가정치 {assumptions['repeat_customer_rate_benchmark']*100:.1f}%)로 낮음",
-            "comparison_chip": f"재구매율 {repeat_rate*100:.1f}% · 업계 참고치 {assumptions['repeat_customer_rate_benchmark']*100:.1f}%",
-            "evidence_source": "업계 가정치 (실증 데이터 없음)",
+            "detail": f"재구매율 {repeat_rate*100:.1f}% ({benchmark_label} {assumptions['repeat_customer_rate_benchmark']*100:.1f}%)로 낮음",
+            "comparison_chip": f"재구매율 {repeat_rate*100:.1f}% · {benchmark_label} {assumptions['repeat_customer_rate_benchmark']*100:.1f}%",
+            "evidence_source": repeat_evidence,
             "methodology": METHODOLOGY_TEMPLATE["low_repeat_rate"].format(
                 benchmark_pct=round(assumptions["repeat_customer_rate_benchmark"] * 100, 1)
             ),
             "severity": severity,
-        })
+        }
+        if repeat_confidence_override:
+            finding["_confidence_override"] = repeat_confidence_override
+        findings.append(finding)
 
     # (5) 좌석/처리용량 -- 사용자 자체 데이터 (mock), 대기시간(분) 기준으로 3단계 판정
     peak_util = user_data["peak_hour_utilization_rate"]
@@ -378,16 +421,20 @@ def detect_bottlenecks(
         finding["rationale"] = prescription.get("rationale")
         finding["title"] = finding.get("title") or DISPLAY_TITLE.get(finding["bottleneck_type"], finding["bottleneck_type"])
         finding["priority_badge"] = SEVERITY_TO_PRIORITY_BADGE.get(finding["severity"])
-        finding["confidence_badge"] = EVIDENCE_TO_CONFIDENCE_BADGE.get(finding["evidence_source"], "보통")
+        finding["confidence_badge"] = finding.pop("_confidence_override", None) or EVIDENCE_TO_CONFIDENCE_BADGE.get(finding["evidence_source"], "보통")
 
     return findings
 
 
-def detect_bottlenecks_with_ai_clustering(pos_data: dict, assumptions: dict = INDUSTRY_ASSUMPTIONS) -> tuple:
+def detect_bottlenecks_with_ai_clustering(
+    pos_data: dict, assumptions: dict = INDUSTRY_ASSUMPTIONS, personal_baselines: dict = None
+) -> tuple:
     """
     기존 detect_bottlenecks()는 '전체 카페 평균'과 비교했다.
     이 함수는 그 대신, cluster_benchmark.py의 K-means 결과를 이용해
     '이 사용자와 소비패턴이 가장 비슷한 상권 그룹의 평균'과 비교한다.
+
+    personal_baselines가 주어지면 원가율/인건비율/재구매율은 개인 실측 평균으로 대체된다.
 
     반환: (findings, cluster_info) -- cluster_info는 어느 클러스터로 배정됐는지 등 메타데이터
     """
@@ -399,6 +446,7 @@ def detect_bottlenecks_with_ai_clustering(pos_data: dict, assumptions: dict = IN
     findings = detect_bottlenecks(
         pos_data, time_benchmark, assumptions,
         time_benchmark_sample_size=cluster_result["cluster_member_count"],
+        personal_baselines=personal_baselines,
     )
 
     # 시간대 병목의 근거 문구를 '전체 평균'이 아니라 '클러스터링 결과' 기준으로 교체
