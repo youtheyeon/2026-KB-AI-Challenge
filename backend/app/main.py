@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.routes.businesses import router as businesses_router
 from app.api.routes.datasets import router as datasets_router
+from app.api.routes.diagnoses import router as diagnoses_router
 from app.api.routes.health import router as health_router
 from app.api.routes.simulations import router as simulations_router
 from app.core.config import settings
@@ -37,4 +38,5 @@ async def handle_validation_error(_: Request, __: RequestValidationError) -> JSO
 app.include_router(health_router)
 app.include_router(businesses_router)
 app.include_router(datasets_router)
+app.include_router(diagnoses_router)
 app.include_router(simulations_router)

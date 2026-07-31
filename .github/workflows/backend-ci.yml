@@ -39,6 +39,7 @@ jobs:
       BACKEND_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/kb_ai_challenge_test
       BACKEND_MIGRATION_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/kb_ai_challenge_test
       TEST_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/kb_ai_challenge_test
+      ALLOW_DESTRUCTIVE_TEST_DATABASE_RESET: '1'
 
     defaults:
       run:
