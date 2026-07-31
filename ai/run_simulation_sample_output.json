@@ -2,110 +2,48 @@
   "bottleneck_diagnosis": [
     {
       "bottleneck_type": "time_of_day_weakness",
-      "title": "11~14시 고객 유입 부족",
-      "detail": "11~14시 매출 비중이 35.0% (벤치마크 42.0%)로 낮음",
-      "comparison_chip": "11~14시 매출비중 35.0% · 벤치마크 42.0%",
+      "title": "14~17시 고객 유입 부족",
+      "detail": "14~17시 매출 비중이 25.0% (벤치마크 30.7%)로 낮음",
+      "comparison_chip": "14~17시 매출비중 25.0% · 벤치마크 30.7%",
       "evidence_source": "AI 비지도학습(K-means)으로 분류된 유사 소비패턴 상권군 평균",
-      "methodology": "시간대별·요일별 매출 패턴을 기준으로 K-means 클러스터링을 실행해 서울시 카페 상권을 자동으로 그룹화했습니다. 이 사용자는 '11_14시·FRI요일 강세' 특징을 가진 그룹(상권 112개, 예: 독립문역 1번, 성곡미술관, 서울국제고등학교)으로 분류되었으며, 이 그룹 내 평균 시간대 비중과 비교했습니다. 격차가 15% 이상이면 병목, 35% 이상 '뚜렷', 60% 이상 '심각'으로 분류합니다.",
+      "methodology": "시간대별·요일별 매출 패턴을 기준으로 K-means 클러스터링을 실행해 서울시 카페 상권을 자동으로 그룹화했습니다. 이 사용자는 '11_14시·SUN요일 강세' 특징을 가진 그룹(상권 212개, 예: 세검정초등학교, 세검정, 부암동주민센터)으로 분류되었으며, 이 그룹 내 평균 시간대 비중과 비교했습니다. 격차가 15% 이상이면 병목, 35% 이상 '뚜렷', 60% 이상 '심각'으로 분류합니다.",
       "severity": "경미",
       "suggested_category": "마케팅·온라인채널",
       "rationale": "특정 시간대 고객 유입이 부족하면, 그 시간대를 타깃으로 한 프로모션이나 배달앱 노출 확대가 대응 방향으로 알려져 있습니다.",
       "priority_badge": "참고",
       "confidence_badge": "높음"
-    },
-    {
-      "bottleneck_type": "time_of_day_weakness",
-      "title": "17~21시 고객 유입 부족",
-      "detail": "17~21시 매출 비중이 12.0% (벤치마크 14.8%)로 낮음",
-      "comparison_chip": "17~21시 매출비중 12.0% · 벤치마크 14.8%",
-      "evidence_source": "AI 비지도학습(K-means)으로 분류된 유사 소비패턴 상권군 평균",
-      "methodology": "시간대별·요일별 매출 패턴을 기준으로 K-means 클러스터링을 실행해 서울시 카페 상권을 자동으로 그룹화했습니다. 이 사용자는 '11_14시·FRI요일 강세' 특징을 가진 그룹(상권 112개, 예: 독립문역 1번, 성곡미술관, 서울국제고등학교)으로 분류되었으며, 이 그룹 내 평균 시간대 비중과 비교했습니다. 격차가 15% 이상이면 병목, 35% 이상 '뚜렷', 60% 이상 '심각'으로 분류합니다.",
-      "severity": "경미",
-      "suggested_category": "마케팅·온라인채널",
-      "rationale": "특정 시간대 고객 유입이 부족하면, 그 시간대를 타깃으로 한 프로모션이나 배달앱 노출 확대가 대응 방향으로 알려져 있습니다.",
-      "priority_badge": "참고",
-      "confidence_badge": "높음"
-    },
-    {
-      "bottleneck_type": "high_cost_ratio",
-      "detail": "원가율 62.0% (업계 가정치 42.0%)로 높음",
-      "comparison_chip": "원가율 62.0% · 업계 참고치 42.0%",
-      "evidence_source": "업계 가정치 (실증 데이터 없음)",
-      "methodology": "업계 참고 원가율(매출 대비 42.0%)과 비교했습니다. 이 참고치는 실제 카페 업종 원가 데이터가 아니라 일반 업종 가정치이며, 격차가 5%p 이상이면 병목, 10%p 이상 '뚜렷', 15%p 이상 '심각'으로 분류합니다.",
-      "severity": "심각",
-      "suggested_category": "설비·재고관리",
-      "rationale": "원가율이 높으면 식자재 폐기 감소, 조리효율 개선(설비 교체) 등이 대응 방향으로 알려져 있습니다.",
-      "title": "원가율 상승",
-      "priority_badge": "우선 확인",
-      "confidence_badge": "보통"
-    },
-    {
-      "bottleneck_type": "low_repeat_rate",
-      "detail": "재구매율 19.0% (업계 가정치 35.0%)로 낮음",
-      "comparison_chip": "재구매율 19.0% · 업계 참고치 35.0%",
-      "evidence_source": "업계 가정치 (실증 데이터 없음)",
-      "methodology": "업계 참고 재구매율(35.0%)과 비교했습니다. 이 참고치는 실증 데이터가 아니라 업계 통상 추정치이며, 격차가 10%p 이상이면 병목, 15%p 이상 '뚜렷', 22%p 이상 '심각'으로 분류합니다.",
-      "severity": "뚜렷",
-      "suggested_category": "마케팅·온라인채널",
-      "rationale": "재구매율이 낮으면 멤버십/적립 프로그램, SNS 재방문 유도 등이 대응 방향으로 알려져 있습니다.",
-      "title": "재구매율 저조",
-      "priority_badge": "확인 필요",
-      "confidence_badge": "보통"
     }
   ],
-  "ai_cluster_assignment": {
-    "cluster_id": 1,
-    "cluster_member_count": 112,
-    "cluster_dominant_time": "11_14",
-    "cluster_dominant_weekday": "FRI",
-    "cluster_example_trade_areas": [
-      "독립문역 1번",
-      "성곡미술관",
-      "서울국제고등학교",
-      "경신고등학교",
-      "서울대병원"
-    ],
-    "time_of_day_benchmark": {
-      "00_06": 0.0014343365244202687,
-      "06_11": 0.1480658437495941,
-      "11_14": 0.41950579852589576,
-      "14_17": 0.2660900430658321,
-      "17_21": 0.14793895525687675,
-      "21_24": 0.016965022877380966
-    },
-    "distance_to_cluster_center": 0.131
-  },
   "scenario_results": [
     {
       "scenario_id": "A",
       "label": "병목 집중형",
       "allocation": {
-        "marketing_online": 0.85,
-        "equipment_interior": 0.05,
+        "marketing_online": 0.75,
+        "equipment_interior": 0.15,
         "labor": 0.05,
         "inventory": 0.05
       },
       "allocation_amounts_won": {
-        "marketing_online": 12750000,
-        "equipment_interior": 750000,
+        "marketing_online": 11250000,
+        "equipment_interior": 2250000,
         "labor": 750000,
         "inventory": 750000
       },
       "loan_amount": 15000000,
       "target_metrics": [
         "EVENING_REVENUE",
-        "ORDER_COUNT",
-        "REPEAT_CUSTOMER_RATE"
+        "ORDER_COUNT"
       ],
       "financial_result": {
         "monthly_loan_payment": 446204,
         "loan_term_months": 36,
-        "additional_fixed_cost_per_month": 695000,
+        "additional_fixed_cost_per_month": 635000,
         "employee_count_change": 0,
-        "baseline_monthly_profit": 945000,
-        "remaining_cash_after_payment": -196204,
-        "break_even_additional_revenue": 338283,
-        "required_additional_orders": 122,
+        "baseline_monthly_profit": 1058400,
+        "remaining_cash_after_payment": -22804,
+        "break_even_additional_revenue": 39317,
+        "required_additional_orders": 13,
         "allowed_revenue_decline": 0,
         "payback_period": {
           "months": null,
@@ -115,7 +53,7 @@
         "risk_level": "높음",
         "risk_level_basis": "현재 매출 수준 그대로(추가 성장 없이)도 상환·고정비를 감당할 수 있는지로 판정",
         "loan_scale_warning": {
-          "loan_to_monthly_revenue_ratio": 2.0,
+          "loan_to_monthly_revenue_ratio": 1.8,
           "is_warning": false,
           "message": null
         }
@@ -125,25 +63,25 @@
           "scb_item": "매출",
           "direction": "긍정적 방향 가능성",
           "driven_by": "marketing_online",
-          "allocation_share_pct": 85.0
+          "allocation_share_pct": 75.0
         },
         {
           "scb_item": "유통플랫폼 성장지수",
           "direction": "긍정적 방향 가능성 (온라인 채널 확대 시)",
           "driven_by": "marketing_online",
-          "allocation_share_pct": 85.0
+          "allocation_share_pct": 75.0
         },
         {
           "scb_item": "고객 인지도",
           "direction": "긍정적 방향 가능성",
           "driven_by": "marketing_online",
-          "allocation_share_pct": 85.0
+          "allocation_share_pct": 75.0
         },
         {
           "scb_item": "사업 지속성",
           "direction": "긍정적 방향 가능성 (운영 안정성 개선)",
           "driven_by": "equipment_interior",
-          "allocation_share_pct": 5.0
+          "allocation_share_pct": 15.0
         },
         {
           "scb_item": "근로자 수",
@@ -152,51 +90,48 @@
           "allocation_share_pct": 5.0
         }
       ],
-      "allocation_rationale": "이 배분안은 실제 데이터 기반의 두 가지 주요 병목에 집중합니다. 11~14시 매출 비중이 35.0%(벤치마크 42.0%)로, 17~21시가 12.0%(벤치마크 14.8%)로 모두 저조하며, 재구매율도 19.0%(업계 참고치 35.0%)로 낮은 상황입니다. 이는 고객 유입과 재방문 모두에서 마케팅·온라인채널 강화의 필요성을 보여줍니다. 원가율 상승(62.0% vs 업계 참고치 42.0%)과 운영 효율도 과제이나, 현재는 수익 기반 자체를 확대하는 것이 우선이라는 판단에 마케팅에 85%를 배분하고, 설비·재고·인력 개선은 각 5%로 유지하는 구조입니다.",
-      "scb_growth_outlook": "매출 측면에서 성장 가능성이 높아질 수 있습니다. 시간대별 고객 유입 부족이 온라인 마케팅 강화로 개선되면 저조한 시간대 매출을 끌어올릴 수 있기 때문입니다. 고객 인지도와 유통플랫폼 성장지수도 온라인채널 확대를 통해 긍정적 변화 가능성이 있으며, 이는 재구매율 19.0%라는 낮은 수치를 개선하는 데 기여할 것으로 예상됩니다. 다만 설비·인력 배분이 제한적인 만큼 사업 지속성과 근로자 수 증가는 제약적일 수 있습니다."
+      "allocation_rationale": "14~17시 매출 비중이 25.0%로 벤치마크 30.7%에 못 미치는 병목(confidence: 높음)을 직접 대응하기 위해 마케팅·온라인채널에 75%를 집중 배분했습니다. 이 시간대 고객 유입 부족을 온라인 채널 강화와 타겟 마케팅으로 해소할 경우, 낮은 점심 이후 매출을 회복할 수 있다는 가정 하에 설계되었습니다. 나머지 15%는 매장 환경 개선으로 방문 고객의 재방문율을 높이고, 5%는 기초 인력 운영을 유지하는 수준으로 배분했습니다.",
+      "scb_growth_outlook": "마케팅·온라인채널 75% 배분으로 매출, 유통플랫폼 성장지수, 고객 인지도 측면에서 긍정적 성장 가능성이 높아질 수 있습니다. 온라인 광고와 플랫폼 노출 강화가 14~17시 검색 및 주문 유입을 증가시키는 직접적 메커니즘으로 작용하기 때문입니다. 장비·인테리어 15% 배분은 사업 지속성 측면에서 매장의 운영 안정성을 개선하여 고객 경험을 뒷받침할 수 있습니다."
     },
     {
       "scenario_id": "B",
       "label": "진단 비례 대응형",
       "allocation": {
-        "marketing_online": 0.507,
-        "equipment_interior": 0.393,
+        "marketing_online": 0.75,
+        "equipment_interior": 0.15,
         "labor": 0.05,
         "inventory": 0.05
       },
       "allocation_amounts_won": {
-        "marketing_online": 7605000,
-        "equipment_interior": 5895000,
+        "marketing_online": 11250000,
+        "equipment_interior": 2250000,
         "labor": 750000,
         "inventory": 750000
       },
       "loan_amount": 15000000,
       "target_metrics": [
         "EVENING_REVENUE",
-        "ORDER_COUNT",
-        "COGS_RATIO",
-        "GROSS_MARGIN",
-        "REPEAT_CUSTOMER_RATE"
+        "ORDER_COUNT"
       ],
       "financial_result": {
         "monthly_loan_payment": 446204,
         "loan_term_months": 36,
-        "additional_fixed_cost_per_month": 489200,
+        "additional_fixed_cost_per_month": 635000,
         "employee_count_change": 0,
-        "baseline_monthly_profit": 945000,
-        "remaining_cash_after_payment": 9596,
-        "break_even_additional_revenue": 0,
-        "required_additional_orders": null,
-        "allowed_revenue_decline": 16545,
+        "baseline_monthly_profit": 1058400,
+        "remaining_cash_after_payment": -22804,
+        "break_even_additional_revenue": 39317,
+        "required_additional_orders": 13,
+        "allowed_revenue_decline": 0,
         "payback_period": {
           "months": null,
           "status": "UNAVAILABLE",
           "reason": "추가 순현금에 대한 검증된 가정이 없습니다."
         },
-        "risk_level": "낮음",
+        "risk_level": "높음",
         "risk_level_basis": "현재 매출 수준 그대로(추가 성장 없이)도 상환·고정비를 감당할 수 있는지로 판정",
         "loan_scale_warning": {
-          "loan_to_monthly_revenue_ratio": 2.0,
+          "loan_to_monthly_revenue_ratio": 1.8,
           "is_warning": false,
           "message": null
         }
@@ -206,25 +141,25 @@
           "scb_item": "매출",
           "direction": "긍정적 방향 가능성",
           "driven_by": "marketing_online",
-          "allocation_share_pct": 50.7
+          "allocation_share_pct": 75.0
         },
         {
           "scb_item": "유통플랫폼 성장지수",
           "direction": "긍정적 방향 가능성 (온라인 채널 확대 시)",
           "driven_by": "marketing_online",
-          "allocation_share_pct": 50.7
+          "allocation_share_pct": 75.0
         },
         {
           "scb_item": "고객 인지도",
           "direction": "긍정적 방향 가능성",
           "driven_by": "marketing_online",
-          "allocation_share_pct": 50.7
+          "allocation_share_pct": 75.0
         },
         {
           "scb_item": "사업 지속성",
           "direction": "긍정적 방향 가능성 (운영 안정성 개선)",
           "driven_by": "equipment_interior",
-          "allocation_share_pct": 39.3
+          "allocation_share_pct": 15.0
         },
         {
           "scb_item": "근로자 수",
@@ -233,8 +168,8 @@
           "allocation_share_pct": 5.0
         }
       ],
-      "allocation_rationale": "이 배분안은 진단된 네 가지 병목에 비례하여 자금을 배치했습니다. 11~14시 매출비중 35.0%(벤치마크 42.0%), 17~21시 12.0%(벤치마크 14.8%)로 나타난 시간대별 고객 유입 부족이 가장 심각하므로, 마케팅·온라인채널에 50.7%를 배분했습니다. 원가율 62.0%(업계 가정치 42.0%)와 재구매율 19.0%(업계 가정치 35.0%) 개선을 위해 설비·재고관리에 39.3%를 할당했습니다. 다만 원가율과 재구매율은 실제 운영 데이터가 아닌 업계 참고치 기반이므로, 실제 연동 후 재평가가 필요합니다. 인력투자는 5%씩 최소 수준으로 배분했습니다.",
-      "scb_growth_outlook": "매출은 온라인채널 강화를 통해 시간대별 고객 유입 부족을 해소하면서 성장 가능성이 높아질 수 있습니다. 유통플랫폼 성장지수는 마케팅 투자가 온라인 채널 확대로 직결될 때 긍정적 변화 가능성이 있으며, 고객 인지도도 디지털 마케팅을 통한 브랜드 노출 증대로 상승 가능성이 있습니다. 사업 지속성은 설비·재고 투자로 운영 안정성이 개선되면서 강화될 수 있고, 근로자 수는 배분된 인력 자금으로 직접 증원 가능성이 있습니다."
+      "allocation_rationale": "14~17시 고객 유입 부족 병목(매출 비중 25.0% vs 벤치마크 30.7%, 높은 신뢰도)에 직접 대응하기 위해 마케팅·온라인채널에 75%를 집중 배분했습니다. 이 시간대 유입 격차 5.7%포인트를 온라인 채널 강화와 타겟 마케팅으로 메우는 것이 우선입니다. 나머지 15%는 매장 운영 환경 개선으로 고객 체류시간을 높이고, 5%씩 인력과 재고에 배분하여 기본 운영 역량을 유지합니다.",
+      "scb_growth_outlook": "온라인 마케팅 강화(75% 배분)로 14~17시 고객 유입이 개선되면, 전체 매출 증대와 고객 인지도 제고 측면에서 성장 가능성이 높아질 수 있습니다. 디지털 채널 접근성 강화는 지속적인 고객 재방문을 유도하고 유통플랫폼 성장지수 상승으로 이어집니다. 동시에 매장 시설 개선(15%)은 방문 고객의 서비스 경험을 향상시켜 사업 지속성 측면에서 긍정적 영향을 미칠 수 있습니다."
     },
     {
       "scenario_id": "C",
@@ -254,21 +189,18 @@
       "loan_amount": 15000000,
       "target_metrics": [
         "EVENING_REVENUE",
-        "ORDER_COUNT",
-        "COGS_RATIO",
-        "GROSS_MARGIN",
-        "REPEAT_CUSTOMER_RATE"
+        "ORDER_COUNT"
       ],
       "financial_result": {
         "monthly_loan_payment": 446204,
         "loan_term_months": 36,
         "additional_fixed_cost_per_month": 475000,
         "employee_count_change": 0,
-        "baseline_monthly_profit": 945000,
-        "remaining_cash_after_payment": 23796,
+        "baseline_monthly_profit": 1058400,
+        "remaining_cash_after_payment": 137196,
         "break_even_additional_revenue": 0,
         "required_additional_orders": null,
-        "allowed_revenue_decline": 41028,
+        "allowed_revenue_decline": 236545,
         "payback_period": {
           "months": null,
           "status": "UNAVAILABLE",
@@ -277,7 +209,7 @@
         "risk_level": "낮음",
         "risk_level_basis": "현재 매출 수준 그대로(추가 성장 없이)도 상환·고정비를 감당할 수 있는지로 판정",
         "loan_scale_warning": {
-          "loan_to_monthly_revenue_ratio": 2.0,
+          "loan_to_monthly_revenue_ratio": 1.8,
           "is_warning": false,
           "message": null
         }
@@ -314,16 +246,47 @@
           "allocation_share_pct": 25.0
         }
       ],
-      "allocation_rationale": "균등 분산형은 네 가지 영역을 25%씩 배분합니다. 진단 데이터 중 11~14시 매출 비중 35.0%(벤치마크 42.0%)와 17~21시 12.0%(벤치마크 14.8%)로 나타난 시간대별 고객 유입 부족(신뢰도 높음)에 마케팅·온라인 25%를 할당했습니다. 원가율 62.0%(업계 참고치 42.0%)와 재구매율 19.0%(참고치 35.0%)는 신뢰도가 보통으로, 실제 데이터 연동 전 업계 가정치 기반 진단이라는 한계가 있습니다. 이에 설비·재고관리 25%, 인력 25%를 분배하여 운영 전반의 안정성을 함께 강화하는 구조입니다.",
-      "scb_growth_outlook": "매출·고객 인지도·유통플랫폼 성장지수는 마케팅·온라인 25% 배분이 시간대별 고객 유입 부족을 직접 개선하면서 긍정적 방향으로 변화할 가능성이 높아질 수 있습니다. 온라인 채널 강화 및 맞춤형 광고를 통해 저조한 오후·저녁 시간대 트래픽을 증대시킬 수 있기 때문입니다. 사업 지속성은 설비·재고관리 25%로 운영 안정성이 개선되면서 긍정적 변화 가능성이 있으며, 근로자 수는 인력 25% 배분으로 직접 증가할 수 있습니다."
+      "allocation_rationale": "14~17시 매출 비중이 25.0%로 벤치마크 30.7%보다 5.7%p 낮은 점(높음 신뢰도)을 마케팅·온라인채널 25% 배분으로 대응합니다. 낮은 오후 시간대 고객 유입을 온라인 채널 강화와 타겟팅을 통해 개선하고자 합니다. 동시에 장비·인테리어, 인건비, 재고 각 25%씩 균등 배분하여 운영 전반의 기초 체력을 함께 갖추는 구조입니다.",
+      "scb_growth_outlook": "마케팅·온라인채널 강화로 매출, 유통플랫폼 성장지수, 고객 인지도 측면에서 성장 가능성이 높아질 수 있습니다. 온라인 채널 확대 시 낮은 오후 시간대 고객을 지역 외부에서도 유입할 수 있는 경로가 추가되기 때문입니다. 장비·인테리어 개선과 인건비 배분은 각각 사업 지속성과 근로자 수 측면에서 긍정적 연결고리를 형성할 것으로 예상됩니다."
     }
   ],
   "note": "AI는 특정 안을 추천하지 않습니다. 진단 결과와 재무 계산을 참고해 직접 선택하세요.",
   "versions": {
     "benchmark_version": "2026-07-v2",
-    "diagnosis_version": "1.1",
-    "allocation_generator_version": "1.1",
+    "diagnosis_version": "1.2",
+    "allocation_generator_version": "1.2",
     "calculation_version": "1.1",
-    "prompt_version": "1.0"
+    "prompt_version": "1.1"
+  },
+  "ai_cluster_assignment": {
+    "cluster_id": 0,
+    "cluster_member_count": 212,
+    "cluster_dominant_time": "11_14",
+    "cluster_dominant_weekday": "SUN",
+    "cluster_example_trade_areas": [
+      "세검정초등학교",
+      "세검정",
+      "부암동주민센터",
+      "사직공원(한국사회과학도서관)",
+      "배화여자대학교(박노수미술관)"
+    ],
+    "time_of_day_benchmark": {
+      "00_06": 0.0017089927638514885,
+      "06_11": 0.0990289212598406,
+      "11_14": 0.3130346006499241,
+      "14_17": 0.3066582720888758,
+      "17_21": 0.24437012477126208,
+      "21_24": 0.03519908846624596
+    },
+    "distance_to_cluster_center": 0.1169
+  },
+  "personalization_status": {
+    "round_number": 4,
+    "using_personal_baseline": true,
+    "personal_baseline_basis_rounds": 3,
+    "escalated_categories": [
+      "equipment_interior"
+    ],
+    "active_tradeoff_warnings": []
   }
 }

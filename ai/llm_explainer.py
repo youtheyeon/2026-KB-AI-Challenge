@@ -46,6 +46,9 @@ SYSTEM_PROMPT = """당신은 소상공인 자금 배분 시뮬레이터의 시�
 - 입력에 없는 숫자를 만들지 마세요.
 - 호칭("사장님," 등), 감탄사, 격려 멘트 쓰지 마세요. 담백한 서비스 안내문 톤.
 - 반드시 JSON 형식만 출력하세요 (마크다운 코드블록도 쓰지 마세요).
+- 입력에 "tradeoff_warnings"가 있고, 이 시나리오의 배분 카테고리와 관련된 경고가 있다면,
+  allocation_rationale 마지막에 "과거 이 카테고리에 배분한 이후 OO 병목이 발생한 이력이 있습니다"
+  형태로 자연스럽게 한 문장 추가하세요. 없으면 언급하지 마세요.
 """
 
 
@@ -56,9 +59,16 @@ def _extract_json(text: str) -> dict:
 
 
 def generate_scenario_explanation(scenario_id: str, scenario_label: str, allocation: dict,
-                                   diagnosis: list, scb_outlook: list) -> dict:
+                                   diagnosis: list, scb_outlook: list, tradeoff_warnings: list = None) -> dict:
     if not ANTHROPIC_API_KEY:
         raise RuntimeError("ANTHROPIC_API_KEY가 설정되지 않았습니다.")
+
+    # 이 시나리오가 실제로 유의미하게 배정한 카테고리와 관련된 경고만 필터링해서 전달
+    # (관련 없는 카테고리의 과거 경고까지 섞으면 LLM이 엉뚱하게 연결지을 위험이 있음)
+    relevant_warnings = []
+    if tradeoff_warnings:
+        funded_categories = {cat for cat, pct in allocation.items() if pct > 0.05}
+        relevant_warnings = [w for w in tradeoff_warnings if w["category"] in funded_categories]
 
     payload = {
         "시나리오": {"id": scenario_id, "label": scenario_label, "allocation": allocation},
@@ -69,6 +79,7 @@ def generate_scenario_explanation(scenario_id: str, scenario_label: str, allocat
             } for d in diagnosis
         ],
         "scb_outlook": scb_outlook,
+        "tradeoff_warnings": relevant_warnings,
     }
     user_prompt = f"아래 데이터를 바탕으로 위 규칙에 맞는 JSON을 작성하세요.\n\n{json.dumps(payload, ensure_ascii=False, indent=2)}"
 
