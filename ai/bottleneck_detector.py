@@ -218,6 +218,7 @@ def detect_bottlenecks(
     assumptions: dict = INDUSTRY_ASSUMPTIONS,
     time_benchmark_sample_size: int = None,
     personal_baselines: dict = None,
+    comparable_bottleneck_types: set[str] = None,
 ) -> list:
     """
     personal_baselines가 주어지면(회차가 충분히 쌓인 경우), 원가율/인건비율/재구매율
@@ -225,6 +226,12 @@ def detect_bottlenecks(
     이 경우 evidence_source/confidence_badge도 '실측 기반, 신뢰도 높음'으로 바뀐다.
     """
     findings = []
+
+    def can_compare(bottleneck_type: str) -> bool:
+        return (
+            comparable_bottleneck_types is None
+            or bottleneck_type in comparable_bottleneck_types
+        )
 
     # personal_baselines가 있으면 해당 항목만 값 교체 (없는 항목은 업계 가정치 유지)
     effective_assumptions = dict(assumptions)
@@ -244,30 +251,34 @@ def detect_bottlenecks(
 
     # (1) 시간대별 병목 -- 실제 데이터 벤치마크 사용 (상대 격차 기준)
     user_revenue = user_data["monthly_revenue"]
-    for b in TIME_BUCKETS:
-        user_amt = user_data["time_of_day_sales"].get(f"TMZON_{b}_SELNG_AMT", 0)
-        user_share = user_amt / user_revenue if user_revenue else 0
-        bench_share = time_benchmark.get(b, 0)
-        if bench_share <= 0.05:
-            continue  # 원래 비중이 작은 시간대(예: 새벽)는 격차가 커도 의미 없음 -> 제외
-        relative_gap = (bench_share - user_share) / bench_share  # 양수면 사용자가 벤치마크보다 낮음
-        severity = classify_severity_3tier(relative_gap, "time_of_day_weakness")
-        if severity:
-            n_text = f"{time_benchmark_sample_size:,}" if time_benchmark_sample_size else "다수"
-            findings.append({
-                "bottleneck_type": "time_of_day_weakness",
-                "title": f"{b.replace('_', '~')}시 고객 유입 부족",  # 시간대별로 구분되는 제목 (여러 시간대 동시 발견 시 중복처럼 보이지 않게)
-                "detail": f"{b.replace('_', '~')}시 매출 비중이 {user_share*100:.1f}% (벤치마크 {bench_share*100:.1f}%)로 낮음",
-                "comparison_chip": f"{b.replace('_', '~')}시 매출비중 {user_share*100:.1f}% · 벤치마크 {bench_share*100:.1f}%",
-                "evidence_source": "실제 서울시 카페 매출 데이터 기반 벤치마크",
-                "methodology": METHODOLOGY_TEMPLATE["time_of_day_weakness"].format(sample_size=n_text),
-                "severity": severity,
-            })
+    if can_compare("time_of_day_weakness"):
+        for b in TIME_BUCKETS:
+            user_amt = user_data["time_of_day_sales"].get(f"TMZON_{b}_SELNG_AMT", 0)
+            user_share = user_amt / user_revenue if user_revenue else 0
+            bench_share = time_benchmark.get(b, 0)
+            if bench_share <= 0.05:
+                continue  # 원래 비중이 작은 시간대(예: 새벽)는 격차가 커도 의미 없음 -> 제외
+            relative_gap = (bench_share - user_share) / bench_share
+            severity = classify_severity_3tier(relative_gap, "time_of_day_weakness")
+            if severity:
+                n_text = f"{time_benchmark_sample_size:,}" if time_benchmark_sample_size else "다수"
+                findings.append({
+                    "bottleneck_type": "time_of_day_weakness",
+                    "title": f"{b.replace('_', '~')}시 고객 유입 부족",
+                    "detail": f"{b.replace('_', '~')}시 매출 비중이 {user_share*100:.1f}% (벤치마크 {bench_share*100:.1f}%)로 낮음",
+                    "comparison_chip": f"{b.replace('_', '~')}시 매출비중 {user_share*100:.1f}% · 벤치마크 {bench_share*100:.1f}%",
+                    "evidence_source": "실제 서울시 카페 매출 데이터 기반 벤치마크",
+                    "methodology": METHODOLOGY_TEMPLATE["time_of_day_weakness"].format(sample_size=n_text),
+                    "severity": severity,
+                })
 
     # (2) 원가율 -- 가정치 또는 개인 기준선 사용 (%p 절대 격차 기준)
-    cogs_ratio = user_data["monthly_cogs"] / user_revenue if user_revenue else 0
-    cogs_gap = cogs_ratio - assumptions["cogs_ratio_benchmark"]
-    severity = classify_severity_3tier(cogs_gap, "high_cost_ratio")
+    if can_compare("high_cost_ratio"):
+        cogs_ratio = user_data["monthly_cogs"] / user_revenue if user_revenue else 0
+        cogs_gap = cogs_ratio - assumptions["cogs_ratio_benchmark"]
+        severity = classify_severity_3tier(cogs_gap, "high_cost_ratio")
+    else:
+        severity = None
     if severity:
         cogs_evidence, cogs_confidence_override = _evidence_and_confidence(
             "cogs_ratio_benchmark", "업계 가정치 (실증 데이터 없음)"
@@ -288,9 +299,12 @@ def detect_bottlenecks(
         findings.append(finding)
 
     # (3) 인건비 비중 -- 가정치 또는 개인 기준선 사용
-    labor_ratio = user_data["monthly_labor_cost"] / user_revenue if user_revenue else 0
-    labor_gap = labor_ratio - assumptions["labor_ratio_benchmark"]
-    severity = classify_severity_3tier(labor_gap, "high_labor_ratio")
+    if can_compare("high_labor_ratio"):
+        labor_ratio = user_data["monthly_labor_cost"] / user_revenue if user_revenue else 0
+        labor_gap = labor_ratio - assumptions["labor_ratio_benchmark"]
+        severity = classify_severity_3tier(labor_gap, "high_labor_ratio")
+    else:
+        severity = None
     if severity:
         labor_evidence, labor_confidence_override = _evidence_and_confidence(
             "labor_ratio_benchmark", "업계 가정치 (실증 데이터 없음)"
@@ -311,9 +325,12 @@ def detect_bottlenecks(
         findings.append(finding)
 
     # (4) 재구매율 -- 가정치 또는 개인 기준선 사용
-    repeat_rate = user_data["repeat_customer_rate"]
-    repeat_gap = assumptions["repeat_customer_rate_benchmark"] - repeat_rate
-    severity = classify_severity_3tier(repeat_gap, "low_repeat_rate")
+    if can_compare("low_repeat_rate"):
+        repeat_rate = user_data["repeat_customer_rate"]
+        repeat_gap = assumptions["repeat_customer_rate_benchmark"] - repeat_rate
+        severity = classify_severity_3tier(repeat_gap, "low_repeat_rate")
+    else:
+        severity = None
     if severity:
         repeat_evidence, repeat_confidence_override = _evidence_and_confidence(
             "repeat_customer_rate_benchmark", "업계 가정치 (실증 데이터 없음)"
@@ -334,9 +351,13 @@ def detect_bottlenecks(
         findings.append(finding)
 
     # (5) 좌석/처리용량 -- 사용자 자체 데이터 (mock), 대기시간(분) 기준으로 3단계 판정
-    peak_util = user_data["peak_hour_utilization_rate"]
-    wait_time = user_data["avg_wait_time_minutes"]
-    if peak_util >= assumptions["peak_utilization_warning_threshold"]:
+    if can_compare("seat_capacity_shortage"):
+        peak_util = user_data["peak_hour_utilization_rate"]
+        wait_time = user_data["avg_wait_time_minutes"]
+    else:
+        peak_util = None
+        wait_time = None
+    if peak_util is not None and peak_util >= assumptions["peak_utilization_warning_threshold"]:
         severity = classify_severity_3tier(wait_time, "seat_capacity_shortage")
         if severity:
             findings.append({
@@ -358,9 +379,12 @@ def detect_bottlenecks(
         revenue = user_data["monthly_revenue"]
 
         # 6-1. 낮은 온라인 판매 비중
-        online_share = gross / revenue if revenue else 0
-        gap = online_assump["online_sales_share_benchmark"] - online_share
-        severity = classify_severity_3tier(gap, "low_online_sales_share")
+        if can_compare("low_online_sales_share"):
+            online_share = gross / revenue if revenue else 0
+            gap = online_assump["online_sales_share_benchmark"] - online_share
+            severity = classify_severity_3tier(gap, "low_online_sales_share")
+        else:
+            severity = None
         if severity:
             findings.append({
                 "bottleneck_type": "low_online_sales_share",
@@ -372,10 +396,13 @@ def detect_bottlenecks(
             })
 
         # 6-2. 높은 플랫폼 비용률
-        platform_cost = online["online_platform_fee"] + online["online_payment_fee"] + online["online_merchant_delivery_fee"]
-        platform_cost_rate = platform_cost / gross if gross else 0
-        gap = platform_cost_rate - online_assump["platform_cost_rate_benchmark"]
-        severity = classify_severity_3tier(gap, "high_platform_cost_rate")
+        if can_compare("high_platform_cost_rate"):
+            platform_cost = online["online_platform_fee"] + online["online_payment_fee"] + online["online_merchant_delivery_fee"]
+            platform_cost_rate = platform_cost / gross if gross else 0
+            gap = platform_cost_rate - online_assump["platform_cost_rate_benchmark"]
+            severity = classify_severity_3tier(gap, "high_platform_cost_rate")
+        else:
+            severity = None
         if severity:
             findings.append({
                 "bottleneck_type": "high_platform_cost_rate",
@@ -387,9 +414,12 @@ def detect_bottlenecks(
             })
 
         # 6-3. 높은 온라인 취소·환불률
-        cancel_rate = online["online_cancel_refund_amount"] / gross if gross else 0
-        gap = cancel_rate - online_assump["online_cancel_refund_rate_benchmark"]
-        severity = classify_severity_3tier(gap, "high_online_cancel_refund_rate")
+        if can_compare("high_online_cancel_refund_rate"):
+            cancel_rate = online["online_cancel_refund_amount"] / gross if gross else 0
+            gap = cancel_rate - online_assump["online_cancel_refund_rate_benchmark"]
+            severity = classify_severity_3tier(gap, "high_online_cancel_refund_rate")
+        else:
+            severity = None
         if severity:
             findings.append({
                 "bottleneck_type": "high_online_cancel_refund_rate",
@@ -401,9 +431,12 @@ def detect_bottlenecks(
             })
 
         # 6-4. 낮은 순정산율
-        settlement_rate = online["online_settlement_amount"] / gross if gross else 0
-        gap = online_assump["net_settlement_rate_benchmark"] - settlement_rate
-        severity = classify_severity_3tier(gap, "low_net_settlement_rate")
+        if can_compare("low_net_settlement_rate"):
+            settlement_rate = online["online_settlement_amount"] / gross if gross else 0
+            gap = online_assump["net_settlement_rate_benchmark"] - settlement_rate
+            severity = classify_severity_3tier(gap, "low_net_settlement_rate")
+        else:
+            severity = None
         if severity:
             findings.append({
                 "bottleneck_type": "low_net_settlement_rate",

@@ -42,12 +42,27 @@ def run_allocation_simulation(
     pos_data: dict,
     min_shares: dict = None,
     tradeoff_warnings: list = None,
+    business_history: list = None,
 ) -> dict:
     """저장된 병목 진단을 사용해 A·B·C 배분안과 재무 결과를 생성한다.
 
     min_shares/tradeoff_warnings는 회차 히스토리(business_history.py)에서 파생되는 선순환
     메커니즘 입력값이다. 둘 다 생략 가능 -- 저장된 findings만으로 1회차와 동일하게 동작한다.
     """
+    if business_history is not None:
+        persistence_counts = compute_persistence_counts(business_history)
+        if min_shares is None:
+            min_shares = compute_escalated_min_shares(
+                persistence_counts,
+                BOTTLENECK_TO_CATEGORY,
+                CATEGORIES,
+            )
+        if tradeoff_warnings is None:
+            tradeoff_warnings = compute_tradeoff_warnings(
+                business_history,
+                BOTTLENECK_TO_CATEGORY,
+            )
+
     drafts = generate_scenario_drafts(findings, min_shares=min_shares)
 
     loan_amount = loan["amount"]
