@@ -30,18 +30,8 @@ CALCULATION_VERSION = "1.1"  # 손익분기 3필드 추가
 PROMPT_VERSION = "1.0"
 
 
-def run_simulation(profile: dict, loan: dict, pos_data: dict) -> dict:
-    """
-    profile: {"trade_area_usage_type": "university", "monthly_revenue_band": "500-1000", ...}
-    loan: {"amount": 15000000, "annual_interest_rate": 0.045, "term_months": 36}
-    pos_data: mock_pos_data.py와 동일한 스키마 (실제 연동 시 이 부분만 실제 데이터로 교체)
-
-    반환: 병목 진단 + 시나리오별(A/B/C) 재무결과·SCB설명이 모두 담긴 딕셔너리
-    """
-    # [1] 병목 진단 -- K-means 클러스터링으로 찾은 '유사 소비패턴 그룹' 대비 진단
-    findings, cluster_info = detect_bottlenecks_with_ai_clustering(pos_data)
-
-    # [2] 배분안 생성 (A/B/C, 고정값)
+def run_allocation_simulation(findings: list[dict], loan: dict, pos_data: dict) -> dict:
+    """저장된 병목 진단을 사용해 A·B·C 배분안과 재무 결과를 생성한다."""
     drafts = generate_scenario_drafts(findings)
 
     loan_amount = loan["amount"]
@@ -57,6 +47,8 @@ def run_simulation(profile: dict, loan: dict, pos_data: dict) -> dict:
             finance_kwargs["annual_interest_rate"] = annual_rate
         if term_months is not None:
             finance_kwargs["loan_term_months"] = term_months
+        finance_kwargs["grace_months"] = loan.get("grace_months", 0)
+        finance_kwargs["repayment_type"] = loan.get("repayment_type", "equal_payment")
 
         financial_result = calculate_financial_projection(
             allocation=d["allocation"],
@@ -96,7 +88,6 @@ def run_simulation(profile: dict, loan: dict, pos_data: dict) -> dict:
 
     return {
         "bottleneck_diagnosis": findings,
-        "ai_cluster_assignment": cluster_info,
         "scenario_results": scenario_results,
         "note": "AI는 특정 안을 추천하지 않습니다. 진단 결과와 재무 계산을 참고해 직접 선택하세요.",
         "versions": {
@@ -107,6 +98,19 @@ def run_simulation(profile: dict, loan: dict, pos_data: dict) -> dict:
             "prompt_version": PROMPT_VERSION,
         },
     }
+
+
+def run_simulation(profile: dict, loan: dict, pos_data: dict) -> dict:
+    """
+    profile: {"trade_area_usage_type": "university", "monthly_revenue_band": "500-1000", ...}
+    loan: {"amount": 15000000, "annual_interest_rate": 0.045, "term_months": 36}
+    pos_data: mock_pos_data.py와 동일한 스키마 (실제 연동 시 이 부분만 실제 데이터로 교체)
+
+    반환: 병목 진단 + 시나리오별(A/B/C) 재무결과·SCB설명이 모두 담긴 딕셔너리
+    """
+    findings, cluster_info = detect_bottlenecks_with_ai_clustering(pos_data)
+    result = run_allocation_simulation(findings, loan, pos_data)
+    return {**result, "ai_cluster_assignment": cluster_info}
 
 
 # ─────────────────────────────────────────────

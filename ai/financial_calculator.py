@@ -37,6 +37,25 @@ def calc_monthly_loan_payment(loan_amount: int, annual_rate: float, term_months:
     return round(payment)
 
 
+def calc_representative_monthly_payment(
+    loan_amount: int,
+    annual_rate: float,
+    term_months: int,
+    grace_months: int,
+    repayment_type: str,
+) -> int:
+    if grace_months < 0 or grace_months >= term_months:
+        raise ValueError("거치 기간은 0 이상이고 전체 상환 기간보다 짧아야 합니다.")
+
+    amortizing_months = term_months - grace_months
+    monthly_interest = loan_amount * annual_rate / 12
+    if repayment_type == "bullet_payment":
+        return round(monthly_interest)
+    if repayment_type == "equal_principal":
+        return round(loan_amount / amortizing_months + monthly_interest)
+    return calc_monthly_loan_payment(loan_amount, annual_rate, amortizing_months)
+
+
 def compute_fixed_cost_effects(allocation: dict, loan_amount: int) -> dict:
     monthly_recurring_cost = 0.0
     for cat, share in allocation.items():
@@ -79,6 +98,8 @@ def calculate_financial_projection(
     annual_interest_rate: float = DEFAULT_ANNUAL_INTEREST_RATE,
     loan_term_months: int = DEFAULT_LOAN_TERM_MONTHS,
     avg_daily_customers: int = None,
+    grace_months: int = 0,
+    repayment_type: str = "equal_payment",
 ) -> dict:
     """
     매출 성장 가정을 전혀 넣지 않은, 순수 지출/상환 계산.
@@ -87,7 +108,13 @@ def calculate_financial_projection(
     avg_daily_customers가 주어지면 손익분기 추가 매출을 채우는 데 필요한
     '추가 주문 수'까지 계산한다 (없으면 해당 필드는 None).
     """
-    monthly_payment = calc_monthly_loan_payment(loan_amount, annual_interest_rate, loan_term_months)
+    monthly_payment = calc_representative_monthly_payment(
+        loan_amount,
+        annual_interest_rate,
+        loan_term_months,
+        grace_months,
+        repayment_type,
+    )
     fixed_cost_effects = compute_fixed_cost_effects(allocation, loan_amount)
     additional_fixed_cost = fixed_cost_effects["additional_fixed_cost_per_month"]
     employee_change = fixed_cost_effects["employee_count_change"]
@@ -120,6 +147,12 @@ def calculate_financial_projection(
         if avg_order_value > 0:
             required_additional_orders = round(breakeven_additional_revenue / avg_order_value)
 
+    risk_level_basis = (
+        "현재 매출 수준 그대로(추가 성장 없이)도 상환·고정비를 감당할 수 있는지로 판정"
+    )
+    if repayment_type == "bullet_payment":
+        risk_level_basis += "했으며 만기에 대출 원금 전액을 별도로 상환해야 합니다."
+
     return {
         "monthly_loan_payment": monthly_payment,
         "loan_term_months": loan_term_months,  # 대출 자체의 총 상환기간 (계산 아님, 입력조건 그대로)
@@ -136,7 +169,7 @@ def calculate_financial_projection(
             "reason": "추가 순현금에 대한 검증된 가정이 없습니다.",
         },
         "risk_level": risk_level,
-        "risk_level_basis": "현재 매출 수준 그대로(추가 성장 없이)도 상환·고정비를 감당할 수 있는지로 판정",
+        "risk_level_basis": risk_level_basis,
         "loan_scale_warning": loan_scale_warning,
     }
 
