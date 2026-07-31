@@ -1,6 +1,6 @@
 # 시뮬레이션 생성 서비스의 소유권·선행 상태·원자적 영속화를 검증하는 테스트
 from contextlib import contextmanager
-from datetime import date
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from uuid import UUID
 
@@ -18,7 +18,7 @@ from app.domain.enums import (
     DiagnosisStatus,
     RepaymentType,
 )
-from app.domain.simulation import Simulation
+from app.domain.simulation import Scenario, ScenarioSelection, Simulation
 from app.services.simulation import SimulationCreationCommand, SimulationService
 from app.services.simulation_engine import SimulationGenerationError
 
@@ -148,6 +148,7 @@ class FakeDatabase:
         self.dataset = dataset
         self.diagnosis = diagnosis
         self.saved_simulation: Simulation | None = None
+        self.selection: ScenarioSelection | None = None
         self.rollback_count = 0
 
     def get(self, model, object_id):
@@ -155,6 +156,18 @@ class FakeDatabase:
             return self.business
         if model is Diagnosis and object_id == self.diagnosis.id:
             return self.diagnosis
+        if model is Simulation and self.saved_simulation is not None:
+            if object_id == self.saved_simulation.id:
+                return self.saved_simulation
+        if model is Scenario and self.saved_simulation is not None:
+            return next(
+                (
+                    scenario
+                    for scenario in self.saved_simulation.scenarios
+                    if scenario.id == object_id
+                ),
+                None,
+            )
         return None
 
     def rollback(self) -> None:
@@ -167,7 +180,14 @@ class FakeDatabase:
     def add(self, value) -> None:
         if isinstance(value, Simulation):
             value.id = 45
+            value.created_at = datetime(2026, 7, 31, 12, 0, tzinfo=UTC)
+            for scenario_id, scenario in enumerate(value.scenarios, start=101):
+                scenario.id = scenario_id
+                scenario.simulation_id = value.id
             self.saved_simulation = value
+        if isinstance(value, ScenarioSelection):
+            value.id = 501
+            self.selection = value
 
     def flush(self) -> None:
         pass
@@ -177,10 +197,12 @@ class FakeEngine:
     def __init__(self, database: FakeDatabase) -> None:
         self.database = database
         self.request = None
+        self.run_count = 0
 
     def run(self, request):
         assert self.database.rollback_count == 1
         self.request = request
+        self.run_count += 1
         return engine_result()
 
 
@@ -293,3 +315,78 @@ def test_create_persists_complete_scenario_graph(service: SimulationService) -> 
         == {DataSourceType.CALCULATED, DataSourceType.AI_GENERATED_TEXT}
         for scenario in simulation.scenarios
     )
+
+
+def test_get_result_orders_scenarios_and_allocations(
+    service: SimulationService,
+) -> None:
+    service.create(valid_command(), SESSION_COOKIE)
+
+    result = service.get_result(45, SESSION_COOKIE)
+
+    assert result.status == "COMPLETED"
+    assert result.selected_scenario_id is None
+    assert [scenario.scenario_code for scenario in result.scenarios] == ["A", "B", "C"]
+    assert [item.category for item in result.scenarios[0].allocations] == [
+        "MARKETING_ONLINE",
+        "EQUIPMENT_INTERIOR",
+        "LABOR",
+        "INVENTORY",
+    ]
+    assert result.scenarios[0].reasons[0].source_type == "CALCULATED"
+
+
+def test_comparison_never_returns_a_recommendation(
+    service: SimulationService,
+) -> None:
+    service.create(valid_command(), SESSION_COOKIE)
+    engine_calls = service.engine.run_count
+
+    comparison = service.get_comparison(45, SESSION_COOKIE)
+
+    assert comparison.recommendation_provided is False
+    assert comparison.scenarios[0].financial_result.risk_level in {
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+    }
+    assert "추천" in comparison.disclaimer
+    assert service.engine.run_count == engine_calls
+
+
+def test_selection_rejects_scenario_from_another_simulation(
+    service: SimulationService,
+) -> None:
+    service.create(valid_command(), SESSION_COOKIE)
+
+    with pytest.raises(ApiError) as caught:
+        service.select_scenario(45, 999, SESSION_COOKIE)
+
+    assert caught.value.code == "SCENARIO_NOT_IN_SIMULATION"
+    assert caught.value.status_code == 400
+
+
+def test_selection_can_be_created_and_changed_before_lock(
+    service: SimulationService,
+) -> None:
+    service.create(valid_command(), SESSION_COOKIE)
+
+    selected = service.select_scenario(45, 101, SESSION_COOKIE)
+    changed = service.select_scenario(45, 102, SESSION_COOKIE)
+
+    assert selected.selected_scenario_id == 101
+    assert changed.selected_scenario_id == 102
+    assert changed.locked is False
+    assert changed.selected_at.tzinfo is not None
+
+
+def test_selection_cannot_change_after_lock(service: SimulationService) -> None:
+    service.create(valid_command(), SESSION_COOKIE)
+    service.select_scenario(45, 101, SESSION_COOKIE)
+    service.database.selection.lock()
+
+    with pytest.raises(ApiError) as caught:
+        service.select_scenario(45, 102, SESSION_COOKIE)
+
+    assert caught.value.code == "SELECTION_LOCKED"
+    assert caught.value.status_code == 409

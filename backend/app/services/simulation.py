@@ -1,6 +1,6 @@
 # 완료 진단으로 자금 배분 시뮬레이션을 생성하고 전체 결과를 원자적으로 저장하는 서비스
 from dataclasses import dataclass
-from datetime import date
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Any
 from uuid import UUID
@@ -26,6 +26,7 @@ from app.domain.simulation import (
     ScenarioAllocation,
     ScenarioFinancialResult,
     ScenarioReason,
+    ScenarioSelection,
     Simulation,
 )
 from app.services.simulation_engine import (
@@ -71,6 +72,10 @@ RISK_MAP = {
     "medium": RiskLevel.MEDIUM,
     "high": RiskLevel.HIGH,
 }
+NEUTRAL_DISCLAIMER = (
+    "AI는 특정 시나리오를 추천하거나 성과를 보장하지 않습니다. "
+    "진단 근거와 재무 계산을 비교해 사용자가 직접 판단해야 합니다."
+)
 
 
 @dataclass(frozen=True)
@@ -88,6 +93,94 @@ class SimulationCreationCommand:
 class SimulationCreated:
     simulation_id: int
     status: str
+
+
+@dataclass(frozen=True)
+class LoanConditionResult:
+    amount: int
+    annual_interest_rate: Decimal
+    term_months: int
+    grace_months: int
+    repayment_type: str
+
+
+@dataclass(frozen=True)
+class AllocationResult:
+    category: str
+    ratio: Decimal
+    amount: int
+
+
+@dataclass(frozen=True)
+class ReasonResult:
+    bottleneck_id: int | None
+    category: str
+    description: str
+    source_type: str
+
+
+@dataclass(frozen=True)
+class FinancialResult:
+    monthly_loan_payment: int | None
+    monthly_recurring_cost: int | None
+    cash_after_payment: int | None
+    break_even_additional_revenue: int | None
+    required_additional_orders: int | None
+    payback_period_months: int | None
+    risk_level: str | None
+
+
+@dataclass(frozen=True)
+class ScenarioResult:
+    scenario_id: int
+    scenario_code: str
+    strategy_type: str
+    title: str
+    allocations: tuple[AllocationResult, ...]
+    reasons: tuple[ReasonResult, ...]
+    financial_result: FinancialResult
+    target_metrics: tuple[str, ...]
+    risk_reasons: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class SimulationResult:
+    simulation_id: int
+    business_id: int
+    diagnosis_id: int
+    status: str
+    loan_condition: LoanConditionResult
+    scenarios: tuple[ScenarioResult, ...]
+    selected_scenario_id: int | None
+    created_at: datetime
+
+
+@dataclass(frozen=True)
+class ScenarioComparison:
+    scenario_id: int
+    scenario_code: str
+    strategy_type: str
+    title: str
+    allocations: tuple[AllocationResult, ...]
+    financial_result: FinancialResult
+    target_metrics: tuple[str, ...]
+    risk_reasons: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class SimulationComparison:
+    simulation_id: int
+    scenarios: tuple[ScenarioComparison, ...]
+    recommendation_provided: bool
+    disclaimer: str
+
+
+@dataclass(frozen=True)
+class ScenarioSelected:
+    simulation_id: int
+    selected_scenario_id: int
+    selected_at: datetime
+    locked: bool
 
 
 @dataclass(frozen=True)
@@ -145,6 +238,133 @@ class SimulationService:
             simulation_id = simulation.id
 
         return SimulationCreated(simulation_id=simulation_id, status="COMPLETED")
+
+    def get_result(
+        self,
+        simulation_id: int,
+        session_cookie: str | None,
+    ) -> SimulationResult:
+        simulation = self._get_owned_simulation(simulation_id, session_cookie)
+        if (
+            simulation.id is None
+            or simulation.business_id is None
+            or simulation.diagnosis_id is None
+            or simulation.created_at is None
+        ):
+            raise RuntimeError("저장된 시뮬레이션 식별 정보가 없습니다.")
+
+        selected_scenario_id = (
+            simulation.selection.scenario_id if simulation.selection is not None else None
+        )
+        return SimulationResult(
+            simulation_id=simulation.id,
+            business_id=simulation.business_id,
+            diagnosis_id=simulation.diagnosis_id,
+            status=simulation.status.upper(),
+            loan_condition=LoanConditionResult(
+                amount=simulation.loan_amount,
+                annual_interest_rate=simulation.loan_interest_rate,
+                term_months=simulation.loan_term_months,
+                grace_months=simulation.loan_grace_months,
+                repayment_type=simulation.loan_repayment_type.name,
+            ),
+            scenarios=tuple(
+                _project_scenario(scenario)
+                for scenario in sorted(simulation.scenarios, key=lambda item: item.code.value)
+            ),
+            selected_scenario_id=selected_scenario_id,
+            created_at=simulation.created_at,
+        )
+
+    def get_comparison(
+        self,
+        simulation_id: int,
+        session_cookie: str | None,
+    ) -> SimulationComparison:
+        result = self.get_result(simulation_id, session_cookie)
+        return SimulationComparison(
+            simulation_id=result.simulation_id,
+            scenarios=tuple(
+                ScenarioComparison(
+                    scenario_id=scenario.scenario_id,
+                    scenario_code=scenario.scenario_code,
+                    strategy_type=scenario.strategy_type,
+                    title=scenario.title,
+                    allocations=scenario.allocations,
+                    financial_result=scenario.financial_result,
+                    target_metrics=scenario.target_metrics,
+                    risk_reasons=scenario.risk_reasons,
+                )
+                for scenario in result.scenarios
+            ),
+            recommendation_provided=False,
+            disclaimer=NEUTRAL_DISCLAIMER,
+        )
+
+    def select_scenario(
+        self,
+        simulation_id: int,
+        scenario_id: int,
+        session_cookie: str | None,
+    ) -> ScenarioSelected:
+        with self.database.begin():
+            simulation = self._get_owned_simulation(simulation_id, session_cookie)
+            scenario = self.database.get(Scenario, scenario_id)
+            if scenario is None or scenario.simulation_id != simulation.id or scenario.id is None:
+                raise ApiError(
+                    400,
+                    "SCENARIO_NOT_IN_SIMULATION",
+                    "선택한 시나리오가 해당 시뮬레이션에 속하지 않습니다.",
+                )
+
+            selected_at = datetime.now(UTC)
+            selection = simulation.selection
+            if selection is None:
+                selection = ScenarioSelection(
+                    simulation_id=simulation.id,
+                    scenario_id=scenario.id,
+                    selected_at=selected_at,
+                    locked=False,
+                )
+                simulation.selection = selection
+                self.database.add(selection)
+            else:
+                try:
+                    selection.change_scenario(scenario.id)
+                except ValueError as error:
+                    raise ApiError(
+                        409,
+                        "SELECTION_LOCKED",
+                        "집행 등록 후에는 시나리오 선택을 변경할 수 없습니다.",
+                    ) from error
+                selection.selected_at = selected_at
+            self.database.flush()
+
+            return ScenarioSelected(
+                simulation_id=simulation.id,
+                selected_scenario_id=selection.scenario_id,
+                selected_at=selection.selected_at,
+                locked=selection.locked,
+            )
+
+    def _get_owned_simulation(
+        self,
+        simulation_id: int,
+        session_cookie: str | None,
+    ) -> Simulation:
+        simulation = self.database.get(Simulation, simulation_id)
+        session_id = _parse_session_id(session_cookie)
+        business = (
+            self.database.get(Business, simulation.business_id) if simulation is not None else None
+        )
+        if (
+            simulation is None
+            or business is None
+            or session_id is None
+            or business.demo_session_id != session_id
+        ):
+            raise ApiError(404, "RESOURCE_NOT_FOUND", "요청한 자원을 찾을 수 없습니다.")
+        return simulation
 
     def _prepare(
         self,
@@ -352,3 +572,46 @@ def _calculated_reasons(
                     )
                 )
     return reasons
+
+
+def _project_scenario(scenario: Scenario) -> ScenarioResult:
+    if scenario.id is None:
+        raise RuntimeError("저장된 시나리오 식별자가 없습니다.")
+    allocation_order = {category: index for index, category in enumerate(AllocationCategory)}
+    return ScenarioResult(
+        scenario_id=scenario.id,
+        scenario_code=scenario.code.name,
+        strategy_type=scenario.strategy_type,
+        title=scenario.title,
+        allocations=tuple(
+            AllocationResult(
+                category=allocation.category.name,
+                ratio=allocation.ratio,
+                amount=allocation.amount,
+            )
+            for allocation in sorted(
+                scenario.allocations,
+                key=lambda item: allocation_order[item.category],
+            )
+        ),
+        reasons=tuple(
+            ReasonResult(
+                bottleneck_id=reason.bottleneck_id,
+                category=reason.category.name,
+                description=reason.description,
+                source_type=reason.source_type.name,
+            )
+            for reason in scenario.reasons
+        ),
+        financial_result=FinancialResult(
+            monthly_loan_payment=scenario.monthly_loan_payment,
+            monthly_recurring_cost=scenario.monthly_recurring_cost,
+            cash_after_payment=scenario.cash_after_payment,
+            break_even_additional_revenue=scenario.break_even_additional_revenue,
+            required_additional_orders=scenario.required_additional_orders,
+            payback_period_months=scenario.payback_period_months,
+            risk_level=scenario.risk_level.name if scenario.risk_level is not None else None,
+        ),
+        target_metrics=tuple(scenario.target_metrics),
+        risk_reasons=tuple(scenario.risk_reasons),
+    )
