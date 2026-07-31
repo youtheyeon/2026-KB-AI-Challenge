@@ -160,3 +160,5 @@
 - 부분 사후 데이터는 `comparable_bottleneck_types`에 포함된 필드만 읽으며, 관측하지 않은 기존 병목을 `not_comparable_bottlenecks`로 보존한다.
 - 저장 진단용 `run_allocation_simulation()`은 선택적 완료 이력에서 지속 병목 최소 비중과 부작용 경고만 계산하고 개인 기준선 재진단은 수행하지 않는다.
 - AI 변경 후 전체 백엔드 회귀 테스트는 131개 통과와 11개 스킵이며 새 AI 테스트 Ruff·포맷 검사가 통과했다.
+- `OutcomeEngine` RED는 어댑터 모듈 부재로 실패했고, Mock 생성·부분 병목 비교·재무 재계산 지연 로더와 안전한 형상 검증을 구현한 뒤 집중 테스트 5개가 통과했다.
+- 어댑터는 원래 AI 예외 메시지를 공개하지 않고 모든 계산 경계 실패를 `OutcomeCalculationError`로 변환한다.
