@@ -1,66 +1,31 @@
-import { CheckCircle2, ChevronLeft, ChevronRight, MapPin, Upload } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronRight } from 'lucide-react';
 
-import { SAMPLE, UPLOAD_SLOTS, type SlotState } from '@/entities/simulation';
 import { Button } from '@/shared/ui';
 
-const CHANNELS = ['홀 판매', '배달 플랫폼', '포장', '온라인 판매', '기타'];
-const BIZ_TYPES = ['외식업', '카페·베이커리', '소매업', '미용·생활서비스', '숙박업', '기타'];
-
-type Section = 'info' | 'upload';
+import { useDataConnectStep } from '../model/useDataConnectStep';
+import { BusinessInfoForm } from './BusinessInfoForm';
+import { DataUploadPanel } from './DataUploadPanel';
 
 interface DataConnectStepProps {
   isSample: boolean;
+  businessId: number | null;
   onNext: () => void;
+  onBusinessRegistered: (businessId: number) => void;
+  onDatasetUploaded: (datasetId: number) => void;
 }
 
-export const DataConnectStep = ({ isSample, onNext }: DataConnectStepProps) => {
-  const [name, setName] = useState(isSample ? SAMPLE.name : '');
-  const [bizType, setBizType] = useState(isSample ? SAMPLE.bizType : '');
-  const [region, setRegion] = useState(isSample ? SAMPLE.region : '');
-  const [employees, setEmployees] = useState(isSample ? SAMPLE.employees : '');
-  const [channels, setChannels] = useState<string[]>(isSample ? SAMPLE.channels : []);
-  const [slots, setSlots] = useState<Record<string, SlotState>>(
-    Object.fromEntries(UPLOAD_SLOTS.map((s) => [s.id, isSample ? 'done' : 'idle'])),
-  );
-  const [section, setSection] = useState<Section>('info');
-  const [useSample, setUseSample] = useState(isSample);
-
-  const trigger = (id: string) => {
-    setSlots((p) => ({ ...p, [id]: 'parsing' }));
-    setTimeout(() => setSlots((p) => ({ ...p, [id]: 'done' })), 1300);
-  };
-
-  const applySample = () => {
-    setUseSample(true);
-    setName(SAMPLE.name);
-    setBizType(SAMPLE.bizType);
-    setRegion(SAMPLE.region);
-    setEmployees(SAMPLE.employees);
-    setChannels(SAMPLE.channels);
-    setSlots(Object.fromEntries(UPLOAD_SLOTS.map((s) => [s.id, 'done'])));
-    setSection('upload');
-  };
-
-  const doneCount = Object.values(slots).filter((v) => v === 'done').length;
-  const reqDone = ['sales', 'expense'].every((id) => slots[id] === 'done');
-  const canNext = Boolean(name && bizType && region && reqDone);
-
-  const toggleChannel = (c: string) =>
-    setChannels((p) => (p.includes(c) ? p.filter((x) => x !== c) : [...p, c]));
-
-  const sectionTab = (id: Section, label: string) => (
-    <button
-      onClick={() => setSection(id)}
-      className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
-        section === id
-          ? 'border-foreground text-foreground'
-          : 'border-transparent text-muted-foreground hover:text-foreground'
-      }`}
-    >
-      {label}
-    </button>
-  );
+export const DataConnectStep = (props: DataConnectStepProps) => {
+  const {
+    section,
+    setSection,
+    useSample,
+    applySample,
+    doneCount,
+    canNext,
+    form,
+    registration,
+    upload,
+  } = useDataConnectStep(props);
 
   return (
     <div className="space-y-6">
@@ -86,188 +51,45 @@ export const DataConnectStep = ({ isSample, onNext }: DataConnectStepProps) => {
       )}
 
       <div className="flex border-b border-border">
-        {sectionTab('info', '1 · 기본정보')}
-        {sectionTab('upload', '2 · 데이터 업로드')}
+        {(['info', 'upload'] as const).map((id) => (
+          <button
+            key={id}
+            onClick={() => setSection(id)}
+            className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+              section === id
+                ? 'border-foreground text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {id === 'info' ? '1 · 기본정보' : '2 · 데이터 업로드'}
+          </button>
+        ))}
       </div>
 
       {section === 'info' && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {[
-              { label: '사업장명 *', val: name, setter: setName, ph: '예: 마포떡볶이' },
-              { label: '사업 지역 *', val: region, setter: setRegion, ph: '예: 서울 마포구' },
-            ].map((f) => (
-              <div key={f.label} className="space-y-1.5">
-                <label className="font-mono text-xs text-muted-foreground">{f.label}</label>
-                <input
-                  value={f.val}
-                  onChange={(e) => f.setter(e.target.value)}
-                  placeholder={f.ph}
-                  className="w-full rounded border border-border bg-input-background px-3 py-2 text-sm focus:border-foreground focus:outline-none"
-                />
-              </div>
-            ))}
-            <div className="space-y-1.5">
-              <label className="font-mono text-xs text-muted-foreground">업종 *</label>
-              <select
-                value={bizType}
-                onChange={(e) => setBizType(e.target.value)}
-                className="w-full rounded border border-border bg-input-background px-3 py-2 text-sm focus:border-foreground focus:outline-none"
-              >
-                <option value="">선택하세요</option>
-                {BIZ_TYPES.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <label className="font-mono text-xs text-muted-foreground">직원 수</label>
-              <input
-                value={employees}
-                onChange={(e) => setEmployees(e.target.value)}
-                placeholder="예: 2명"
-                className="w-full rounded border border-border bg-input-background px-3 py-2 text-sm focus:border-foreground focus:outline-none"
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <label className="font-mono text-xs text-muted-foreground">주요 판매 채널</label>
-            <div className="flex flex-wrap gap-2">
-              {CHANNELS.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => toggleChannel(c)}
-                  className={`rounded border px-3 py-1.5 text-xs font-medium transition-colors ${
-                    channels.includes(c)
-                      ? 'border-foreground bg-foreground text-background'
-                      : 'border-border text-muted-foreground hover:border-foreground/40'
-                  }`}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <Button variant="outline" onClick={() => setSection('upload')} className="px-4 py-2">
-              데이터 업로드 <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {section === 'upload' && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {UPLOAD_SLOTS.map((slot) => {
-              const Icon = slot.icon;
-              const state = slots[slot.id];
-              return (
-                <div
-                  key={slot.id}
-                  className={`space-y-3 rounded border p-4 ${
-                    state === 'done' ? 'border-foreground/30 bg-muted/10' : 'border-border'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Icon className="h-4 w-4 text-muted-foreground" />
-                      <p className="text-sm font-medium">{slot.label}</p>
-                    </div>
-                    <span className={`rounded border px-1.5 py-0.5 font-mono text-xs ${slot.bc}`}>
-                      {slot.badge}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{slot.hint}</p>
-                  {state === 'idle' && (
-                    <div className="flex items-center gap-2">
-                      <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded border border-dashed border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-foreground/40">
-                        <Upload className="h-3.5 w-3.5" />
-                        파일 선택 ({slot.formats})
-                        <input type="file" className="hidden" />
-                      </label>
-                      <button
-                        onClick={() => trigger(slot.id)}
-                        className="text-xs whitespace-nowrap text-muted-foreground underline hover:text-foreground"
-                      >
-                        샘플
-                      </button>
-                    </div>
-                  )}
-                  {state === 'parsing' && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-foreground/30 border-t-foreground" />
-                      컬럼 분석 중...
-                    </div>
-                  )}
-                  {state === 'done' && (
-                    <div className="flex items-center gap-1.5 text-xs text-green-600">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      분석 완료 · {slot.formats.split('·')[0].trim()} 파일
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-          <div className="flex items-center gap-2 rounded border border-border bg-muted/10 px-4 py-3">
-            <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">상권 데이터 자동 조회 완료</p>
-              <p className="text-xs text-muted-foreground">
-                {region || '등록된 사업 지역'} 기준으로 공공데이터를 자동 조회했습니다. 별도
-                업로드가 필요하지 않습니다.
-              </p>
-            </div>
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600" />
-          </div>
-          <div className="space-y-1.5 rounded border border-border bg-muted/10 px-5 py-4">
-            <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
-              분석 결과 요약
-            </p>
-            <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {[
-                { label: '분석 기간', value: '2026.01~2026.06' },
-                { label: '매출 거래', value: doneCount >= 1 ? '4,820건' : '–' },
-                { label: '비용 거래', value: doneCount >= 2 ? '1,130건' : '–' },
-                { label: '누락값', value: doneCount >= 1 ? '12건' : '–' },
-              ].map((s) => (
-                <div key={s.label}>
-                  <p className="text-xs text-muted-foreground">{s.label}</p>
-                  <p className="mt-0.5 font-mono text-sm">{s.value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="flex justify-between">
-            <button
-              onClick={() => setSection('info')}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              기본정보
-            </button>
+        <>
+          <BusinessInfoForm form={form} registration={registration} />
+          <div className="flex justify-end pt-2">
             <Button
-              onClick={onNext}
+              onClick={props.onNext}
               disabled={!canNext}
               className="px-5 py-2.5 disabled:cursor-not-allowed disabled:opacity-30"
             >
-              사업 상태 분석하기 <ChevronRight className="h-4 w-4" />
+              분석 시작 <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-        </div>
+        </>
       )}
 
-      {section === 'info' && (
-        <div className="flex justify-end pt-2">
-          <Button
-            onClick={onNext}
-            disabled={!canNext}
-            className="px-5 py-2.5 disabled:cursor-not-allowed disabled:opacity-30"
-          >
-            분석 시작 <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+      {section === 'upload' && (
+        <DataUploadPanel
+          region={form.region}
+          useSample={useSample}
+          upload={upload}
+          doneCount={doneCount}
+          canNext={canNext}
+          onBack={() => setSection('info')}
+        />
       )}
     </div>
   );
