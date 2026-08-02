@@ -57,7 +57,7 @@ class FakeDatabase:
         self.session = DemoSession(
             id=SESSION_ID,
             last_accessed_at=NOW,
-            expires_at=NOW + timedelta(days=1),
+            expires_at=datetime.now(UTC) + timedelta(days=1),
             status=DemoSessionStatus.ACTIVE,
         )
         self.business = Business(
