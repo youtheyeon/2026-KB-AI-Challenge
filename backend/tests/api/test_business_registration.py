@@ -243,7 +243,7 @@ def test_register_business_reuses_valid_demo_session(monkeypatch) -> None:
     database.demo_sessions[session_id] = DemoSession(
         id=session_id,
         last_accessed_at=previous_access,
-        expires_at=datetime(2026, 8, 1, tzinfo=UTC),
+        expires_at=datetime.now(UTC) + timedelta(days=1),
         status="active",
     )
     monkeypatch.setattr(db_session, "SessionFactory", lambda: database)
@@ -300,7 +300,7 @@ def test_register_business_replaces_inactive_session_before_expiry(monkeypatch) 
     database.demo_sessions[inactive_session_id] = DemoSession(
         id=inactive_session_id,
         last_accessed_at=datetime(2026, 7, 30, tzinfo=UTC),
-        expires_at=datetime(2026, 8, 1, tzinfo=UTC),
+        expires_at=datetime.now(UTC) + timedelta(days=1),
         status="expired",
     )
     monkeypatch.setattr(db_session, "SessionFactory", lambda: database)
