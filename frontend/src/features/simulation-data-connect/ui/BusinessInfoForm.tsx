@@ -22,8 +22,13 @@ export const BusinessInfoForm = ({ form, registration }: BusinessInfoFormProps) 
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {[
-          { label: '사업장명 *', val: form.name, setter: form.setName, ph: '예: 마포떡볶이' },
-          { label: '사업 지역 *', val: form.region, setter: form.setRegion, ph: '예: 서울 마포구' },
+          { label: '사업장명 *', val: form.name, setter: form.setName, ph: '예: 연희동 Y카페' },
+          {
+            label: '사업 지역 *',
+            val: form.region,
+            setter: form.setRegion,
+            ph: '예: 서울특별시 서대문구 연희동',
+          },
         ].map((f) => (
           <div key={f.label} className="space-y-1.5">
             <label className="font-mono text-xs text-muted-foreground">{f.label}</label>
