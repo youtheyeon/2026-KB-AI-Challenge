@@ -94,6 +94,8 @@ class ScenarioResponse(ApiModel):
     financial_result: FinancialResultResponse = Field(alias="financialResult")
     target_metrics: list[str] = Field(alias="targetMetrics")
     risk_reasons: list[str] = Field(alias="riskReasons")
+    allocation_rationale: str | None = Field(alias="allocationRationale")
+    scb_growth_outlook: str | None = Field(alias="scbGrowthOutlook")
 
 
 class SimulationResponse(ApiModel):
@@ -116,6 +118,8 @@ class ScenarioComparisonResponse(ApiModel):
     financial_result: FinancialResultResponse = Field(alias="financialResult")
     target_metrics: list[str] = Field(alias="targetMetrics")
     risk_reasons: list[str] = Field(alias="riskReasons")
+    allocation_rationale: str | None = Field(alias="allocationRationale")
+    scb_growth_outlook: str | None = Field(alias="scbGrowthOutlook")
 
 
 class SimulationComparisonResponse(ApiModel):
