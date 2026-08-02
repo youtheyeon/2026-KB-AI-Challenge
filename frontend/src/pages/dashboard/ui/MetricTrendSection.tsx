@@ -13,9 +13,90 @@ import {
 } from 'recharts';
 
 import { TREND_DATA } from '@/entities/verify';
+import type { DashboardMetricTrendResponse } from '@/shared/api/schema';
 import { SectionLabel } from '@/shared/ui';
 
-export const MetricTrendSection = () => {
+const METRIC_LABEL: Record<string, string> = {
+  MONTHLY_SALES: '월 매출',
+  OPERATING_PROFIT: '영업이익',
+  ONLINE_ORDER_RATIO: '온라인 주문 비중',
+  CASH_AFTER_REPAYMENT: '상환 후 잔여 현금',
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  ABOVE_EXPECTED: '예상 상단 초과',
+  WITHIN_RANGE: '범위 내',
+  BELOW_EXPECTED: '범위 미달',
+  NOT_COMPARABLE: '비교 불가',
+};
+
+const formatMetricValue = (value: number | null, unit: string): string => {
+  if (value === null) return '-';
+  if (unit === 'RATIO') return `${(value * 100).toFixed(1)}%`;
+  if (unit === 'KRW') return `${Math.round(value / 10_000).toLocaleString()}만원`;
+  return value.toLocaleString();
+};
+
+interface MetricTrendSectionProps {
+  isRealMode: boolean;
+  metricTrends: DashboardMetricTrendResponse[] | null;
+}
+
+export const MetricTrendSection = ({ isRealMode, metricTrends }: MetricTrendSectionProps) => {
+  if (isRealMode) {
+    if (!metricTrends || metricTrends.length === 0) {
+      return (
+        <section className="space-y-4">
+          <SectionLabel>핵심 지표 추이</SectionLabel>
+          <div className="rounded border border-border px-5 py-8 text-center text-sm text-muted-foreground">
+            아직 결과 검증이 완료된 지표가 없습니다.
+          </div>
+        </section>
+      );
+    }
+
+    return (
+      <section className="space-y-4">
+        <SectionLabel>핵심 지표 추이</SectionLabel>
+        <div className="overflow-hidden rounded border border-border">
+          <div className="grid grid-cols-12 border-b border-border bg-muted/30 px-5 py-2.5">
+            {[
+              { label: '지표', span: 'col-span-4' },
+              { label: '진행 전', span: 'col-span-2' },
+              { label: '진행 후', span: 'col-span-2' },
+              { label: '기록일', span: 'col-span-2' },
+              { label: '상태', span: 'col-span-2' },
+            ].map((h) => (
+              <p key={h.label} className={`font-mono text-xs text-muted-foreground ${h.span}`}>
+                {h.label}
+              </p>
+            ))}
+          </div>
+          {metricTrends.map((m, i) => (
+            <div
+              key={`${m.simulationId}-${m.metricCode}-${i}`}
+              className="grid grid-cols-12 items-center border-b border-border px-5 py-3 last:border-0"
+            >
+              <p className="col-span-4 text-sm">{METRIC_LABEL[m.metricCode] ?? m.metricCode}</p>
+              <p className="col-span-2 font-mono text-sm text-muted-foreground">
+                {formatMetricValue(m.beforeValue, m.unit)}
+              </p>
+              <p className="col-span-2 font-mono text-sm font-semibold">
+                {formatMetricValue(m.afterValue, m.unit)}
+              </p>
+              <p className="col-span-2 font-mono text-xs text-muted-foreground">
+                {new Date(m.recordedAt).toLocaleDateString('ko-KR')}
+              </p>
+              <p className="col-span-2 font-mono text-xs text-muted-foreground">
+                {STATUS_LABEL[m.status] ?? m.status}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="space-y-4">
       <SectionLabel>핵심 지표 추이</SectionLabel>

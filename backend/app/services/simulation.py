@@ -146,6 +146,8 @@ class ScenarioResult:
     financial_result: FinancialResult
     target_metrics: tuple[str, ...]
     risk_reasons: tuple[str, ...]
+    allocation_rationale: str | None
+    scb_growth_outlook: str | None
 
 
 @dataclass(frozen=True)
@@ -170,6 +172,8 @@ class ScenarioComparison:
     financial_result: FinancialResult
     target_metrics: tuple[str, ...]
     risk_reasons: tuple[str, ...]
+    allocation_rationale: str | None
+    scb_growth_outlook: str | None
 
 
 @dataclass(frozen=True)
@@ -299,6 +303,8 @@ class SimulationService:
                     financial_result=scenario.financial_result,
                     target_metrics=scenario.target_metrics,
                     risk_reasons=scenario.risk_reasons,
+                    allocation_rationale=scenario.allocation_rationale,
+                    scb_growth_outlook=scenario.scb_growth_outlook,
                 )
                 for scenario in result.scenarios
             ),
@@ -633,22 +639,12 @@ def _to_scenario(
         ),
         target_metrics=list(generated.get("target_metrics", [])),
         risk_reasons=risk_reasons,
+        allocation_rationale=generated.get("allocation_rationale"),
+        scb_growth_outlook=generated.get("scb_growth_outlook"),
         allocations=allocations,
         reasons=[],
     )
     scenario.reasons.extend(_calculated_reasons(bottlenecks, ratios))
-
-    rationale = generated.get("allocation_rationale")
-    if rationale:
-        largest_category = max(AllocationCategory, key=ratios.__getitem__)
-        scenario.reasons.append(
-            ScenarioReason(
-                bottleneck_id=None,
-                category=largest_category,
-                description=rationale,
-                source_type=DataSourceType.AI_GENERATED_TEXT,
-            )
-        )
     return scenario
 
 
@@ -715,4 +711,6 @@ def _project_scenario(scenario: Scenario) -> ScenarioResult:
         ),
         target_metrics=tuple(scenario.target_metrics),
         risk_reasons=tuple(scenario.risk_reasons),
+        allocation_rationale=scenario.allocation_rationale,
+        scb_growth_outlook=scenario.scb_growth_outlook,
     )

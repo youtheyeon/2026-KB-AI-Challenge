@@ -22,3 +22,10 @@ export type {
   UploadSlot,
 } from './model/types';
 export { calcMonthly, calcPayback } from './lib/calc';
+export { manwonToWon, methodToRepaymentType, wonToManwon, yearsToMonths } from './lib/units';
+export {
+  createSimulation,
+  getSimulation,
+  getSimulationComparison,
+  selectScenario,
+} from './api/simulation';

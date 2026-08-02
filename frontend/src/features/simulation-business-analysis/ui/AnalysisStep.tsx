@@ -19,6 +19,7 @@ interface AnalysisStepProps {
   businessId: number | null;
   datasetId: number | null;
   onNext: () => void;
+  onDiagnosisReady?: (diagnosisId: number) => void;
 }
 
 interface MetricItem {
@@ -348,7 +349,12 @@ const ResultsView = ({
   );
 };
 
-export const AnalysisStep = ({ businessId, datasetId, onNext }: AnalysisStepProps) => {
+export const AnalysisStep = ({
+  businessId,
+  datasetId,
+  onNext,
+  onDiagnosisReady,
+}: AnalysisStepProps) => {
   const isRealMode = businessId != null && datasetId != null;
 
   const [mockLoading, setMockLoading] = useState(true);
@@ -375,6 +381,8 @@ export const AnalysisStep = ({ businessId, datasetId, onNext }: AnalysisStepProp
         setDiagnosis(result);
         if (result.status === 'RUNNING') {
           timeoutId = setTimeout(() => poll(diagnosisId), POLL_INTERVAL_MS);
+        } else if (result.status === 'COMPLETED') {
+          onDiagnosisReady?.(diagnosisId);
         }
       } catch (e) {
         if (!cancelled) {

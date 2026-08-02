@@ -202,7 +202,6 @@ export const useDataConnectStep = ({
         return;
       }
 
-      // failed
       setSlots((p) => {
         const next = { ...p };
         attemptedSlotIds.forEach((id) => (next[id] = 'error'));

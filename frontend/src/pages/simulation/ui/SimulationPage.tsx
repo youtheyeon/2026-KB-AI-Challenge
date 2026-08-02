@@ -20,6 +20,9 @@ export const SimulationPage = () => {
   const [step, setStep] = useState(0);
   const [businessId, setBusinessId] = useState<number | null>(null);
   const [datasetId, setDatasetId] = useState<number | null>(null);
+  const [diagnosisId, setDiagnosisId] = useState<number | null>(null);
+  const [simulationId, setSimulationId] = useState<number | null>(null);
+  const [selectedScenarioId, setSelectedScenarioId] = useState<number | null>(null);
   const [cond, setCond] = useState<LoanCond>({
     loanAmount: 3000,
     rateMode: 'demo',
@@ -43,7 +46,7 @@ export const SimulationPage = () => {
   const prev = () => setStep((s) => Math.max(s - 1, 0));
 
   if (saved) {
-    return <SimulationResult cond={cond} />;
+    return <SimulationResult cond={cond} businessId={businessId} simulationId={simulationId} />;
   }
 
   return (
@@ -61,10 +64,42 @@ export const SimulationPage = () => {
             onDatasetUploaded={setDatasetId}
           />
         )}
-        {step === 1 && <AnalysisStep businessId={businessId} datasetId={datasetId} onNext={next} />}
-        {step === 2 && <LoanStep cond={cond} setCond={setCond} onNext={next} />}
-        {step === 3 && <BuildStep cond={cond} onNext={next} />}
-        {step === 4 && <CompareStep cond={cond} onNext={next} />}
+        {step === 1 && (
+          <AnalysisStep
+            businessId={businessId}
+            datasetId={datasetId}
+            onNext={next}
+            onDiagnosisReady={setDiagnosisId}
+          />
+        )}
+        {step === 2 && (
+          <LoanStep
+            cond={cond}
+            setCond={setCond}
+            businessId={businessId}
+            diagnosisId={diagnosisId}
+            onNext={next}
+            onSimulationCreated={setSimulationId}
+          />
+        )}
+        {step === 3 && (
+          <BuildStep
+            cond={cond}
+            businessId={businessId}
+            simulationId={simulationId}
+            onNext={next}
+          />
+        )}
+        {step === 4 && (
+          <CompareStep
+            cond={cond}
+            businessId={businessId}
+            simulationId={simulationId}
+            selectedScenarioId={selectedScenarioId}
+            onScenarioSelected={setSelectedScenarioId}
+            onNext={next}
+          />
+        )}
 
         {step > 0 && (
           <button

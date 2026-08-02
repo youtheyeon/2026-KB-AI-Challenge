@@ -1,18 +1,27 @@
 import { AlertTriangle, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
 
 import {
   calcMonthly,
+  createSimulation,
   DEMO_RATE,
+  manwonToWon,
+  methodToRepaymentType,
   SAMPLE,
+  yearsToMonths,
   type LoanCond,
   type LoanRateMode,
 } from '@/entities/simulation';
-import { Button } from '@/shared/ui';
+import { getApiErrorMessage } from '@/shared/api';
+import { Button, ErrorBanner } from '@/shared/ui';
 
 interface LoanStepProps {
   cond: LoanCond;
   setCond: (c: LoanCond) => void;
+  businessId: number | null;
+  diagnosisId: number | null;
   onNext: () => void;
+  onSimulationCreated: (simulationId: number) => void;
 }
 
 const METHODS = [
@@ -21,12 +30,49 @@ const METHODS = [
   { id: 'bullet', label: '만기일시', desc: '만기에 원금 일괄' },
 ];
 
-export const LoanStep = ({ cond, setCond, onNext }: LoanStepProps) => {
+export const LoanStep = ({
+  cond,
+  setCond,
+  businessId,
+  diagnosisId,
+  onNext,
+  onSimulationCreated,
+}: LoanStepProps) => {
+  const isRealMode = businessId != null && diagnosisId != null;
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+
   const set = (p: Partial<LoanCond>) => setCond({ ...cond, ...p });
   const monthly = calcMonthly(cond.loanAmount, cond.rate, cond.period, cond.grace, cond.method);
   const totalMonthly = monthly + cond.existingMonthly;
   const burden = SAMPLE.residual > 0 ? Math.round((totalMonthly / SAMPLE.residual) * 100) : 0;
   const baseResidual = SAMPLE.residual - totalMonthly;
+
+  const handleNext = async () => {
+    if (!isRealMode || businessId === null || diagnosisId === null) {
+      onNext();
+      return;
+    }
+
+    setCreating(true);
+    setCreateError(null);
+    try {
+      const { simulationId } = await createSimulation(businessId, {
+        diagnosisId,
+        loanAmount: manwonToWon(cond.loanAmount),
+        annualInterestRate: cond.rate / 100,
+        termMonths: yearsToMonths(cond.period),
+        graceMonths: yearsToMonths(cond.grace),
+        repaymentType: methodToRepaymentType(cond.method),
+      });
+      onSimulationCreated(simulationId);
+      onNext();
+    } catch (error) {
+      setCreateError(getApiErrorMessage(error));
+    } finally {
+      setCreating(false);
+    }
+  };
 
   return (
     <div className="space-y-7">
@@ -204,9 +250,16 @@ export const LoanStep = ({ cond, setCond, onNext }: LoanStepProps) => {
         )}
       </div>
 
+      {createError && <ErrorBanner message={createError} />}
+
       <div className="flex justify-end">
-        <Button onClick={onNext} className="px-5 py-2.5">
-          자금 배분안 구성 <ChevronRight className="h-4 w-4" />
+        <Button
+          onClick={handleNext}
+          disabled={creating}
+          className="px-5 py-2.5 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {creating ? '시뮬레이션 생성 중...' : '자금 배분안 구성'}{' '}
+          <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
     </div>

@@ -247,7 +247,7 @@ def test_simulation_api_persists_graph_and_single_selection(
         assert database.scalar(select(func.count()).select_from(Simulation)) == 1
         assert database.scalar(select(func.count()).select_from(Scenario)) == 3
         assert database.scalar(select(func.count()).select_from(ScenarioAllocation)) == 12
-        assert database.scalar(select(func.count()).select_from(ScenarioReason)) == 6
+        assert database.scalar(select(func.count()).select_from(ScenarioReason)) == 3
         assert database.scalar(select(func.count()).select_from(ScenarioSelection)) == 1
 
 
