@@ -18,6 +18,8 @@ export const SimulationPage = () => {
   const [searchParams] = useSearchParams();
   const isSample = searchParams.get('sample') === 'true';
   const [step, setStep] = useState(0);
+  const [businessId, setBusinessId] = useState<number | null>(null);
+  const [datasetId, setDatasetId] = useState<number | null>(null);
   const [cond, setCond] = useState<LoanCond>({
     loanAmount: 3000,
     rateMode: 'demo',
@@ -50,8 +52,16 @@ export const SimulationPage = () => {
       <StepProgressBar steps={STEPS} step={step} />
 
       <main className="mx-auto max-w-3xl px-6 py-8">
-        {step === 0 && <DataConnectStep isSample={isSample} onNext={next} />}
-        {step === 1 && <AnalysisStep onNext={next} />}
+        {step === 0 && (
+          <DataConnectStep
+            isSample={isSample}
+            businessId={businessId}
+            onNext={next}
+            onBusinessRegistered={setBusinessId}
+            onDatasetUploaded={setDatasetId}
+          />
+        )}
+        {step === 1 && <AnalysisStep businessId={businessId} datasetId={datasetId} onNext={next} />}
         {step === 2 && <LoanStep cond={cond} setCond={setCond} onNext={next} />}
         {step === 3 && <BuildStep cond={cond} onNext={next} />}
         {step === 4 && <CompareStep cond={cond} onNext={next} />}
