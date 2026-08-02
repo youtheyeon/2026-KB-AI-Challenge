@@ -1,6 +1,6 @@
 import type { IconComponent } from '@/shared/lib/types';
 
-export type SlotState = 'idle' | 'parsing' | 'done';
+export type SlotState = 'idle' | 'parsing' | 'done' | 'error';
 
 export interface UploadSlot {
   id: string;
