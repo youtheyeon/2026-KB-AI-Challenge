@@ -9,10 +9,14 @@ import { Header } from './Header';
 
 interface SimulationResultProps {
   cond: LoanCond;
+  businessId: number | null;
+  simulationId: number | null;
 }
 
-export const SimulationResult = ({ cond }: SimulationResultProps) => {
+export const SimulationResult = ({ cond, businessId }: SimulationResultProps) => {
   const navigate = useNavigate();
+  const verifyHref =
+    businessId != null ? `${ROUTES.verify}?businessId=${businessId}` : ROUTES.verify;
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -54,7 +58,7 @@ export const SimulationResult = ({ cond }: SimulationResultProps) => {
             </Button>
             <Button
               variant="outline"
-              onClick={() => navigate(ROUTES.verify)}
+              onClick={() => navigate(verifyHref)}
               className="py-3 text-muted-foreground"
             >
               바로 결과 검증 시작하기
