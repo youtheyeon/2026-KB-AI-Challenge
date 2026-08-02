@@ -21,8 +21,9 @@ const METRIC_ROWS = [
   { key: 'fixedCost', label: '추가 고정비' },
   { key: 'repayment', label: '월 상환금' },
   { key: 'residual', label: '상환 후 여유 현금' },
+  { key: 'breakEven', label: '손익분기 추가매출' },
+  { key: 'requiredOrders', label: '필요 추가 주문 수' },
   { key: 'payback', label: '투자금 회수기간' },
-  { key: 'employment', label: '직원 수 변화' },
   { key: 'risk', label: '결과 변동 위험' },
 ];
 
@@ -43,12 +44,12 @@ export const CompareStep = ({ cond, onNext }: CompareStepProps) => {
         return `${monthly}만원/월`;
       case 'residual':
         return resid;
+      case 'breakEven':
+        return `+${sc.breakEvenAdditionalRevenue}만원/월`;
+      case 'requiredOrders':
+        return `약 ${sc.requiredAdditionalOrders}건/월`;
       case 'payback':
         return payback < 200 ? `약 ${payback}개월` : '60개월 이상';
-      case 'employment':
-        return sc.employees > SAMPLE.employees_n
-          ? `+${sc.employees - SAMPLE.employees_n}명`
-          : '변화 없음';
       case 'risk':
         return sc.riskLevel;
       default:
@@ -62,6 +63,10 @@ export const CompareStep = ({ cond, onNext }: CompareStepProps) => {
         <h2 className="text-xl font-semibold">시나리오 비교</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           A·B·C안의 예상 효과와 위험을 동일한 기준으로 비교합니다.
+        </p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          본 결과는 현재 사업 상태와 대출 조건을 바탕으로 계산한 재무 비교이며 실제 성과를
+          예측하거나 보장하지 않습니다. AI는 특정 배분안을 추천하지 않습니다.
         </p>
       </div>
 
@@ -134,20 +139,56 @@ export const CompareStep = ({ cond, onNext }: CompareStepProps) => {
                   닫기
                 </button>
               </div>
-              <div className="grid grid-cols-1 divide-y divide-border md:grid-cols-2 md:divide-x md:divide-y-0">
-                <div className="space-y-2 px-6 py-5">
-                  <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
-                    배분 근거
-                  </p>
-                  <p className="text-sm leading-relaxed text-foreground">
-                    {sc.allocationRationale}
-                  </p>
+              <div className="divide-y divide-border">
+                <div className="grid grid-cols-1 divide-y divide-border md:grid-cols-2 md:divide-x md:divide-y-0">
+                  <div className="space-y-2 px-6 py-5">
+                    <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
+                      배분 근거
+                    </p>
+                    <p className="text-sm leading-relaxed text-foreground">
+                      {sc.allocationRationale}
+                    </p>
+                  </div>
+                  <div className="space-y-2 px-6 py-5">
+                    <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
+                      SCB 성장 가능성
+                    </p>
+                    <p className="text-sm leading-relaxed text-foreground">
+                      {sc.scbGrowthPotential}
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-2 px-6 py-5">
-                  <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
-                    SCB 성장 가능성
-                  </p>
-                  <p className="text-sm leading-relaxed text-foreground">{sc.scbGrowthPotential}</p>
+                <div className="grid grid-cols-1 divide-y divide-border md:grid-cols-2 md:divide-x md:divide-y-0">
+                  <div className="space-y-2 px-6 py-5">
+                    <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
+                      위험 근거
+                    </p>
+                    <ul className="space-y-1">
+                      {sc.riskReasons.map((reason) => (
+                        <li
+                          key={reason}
+                          className="text-sm leading-relaxed text-foreground before:mr-1.5 before:text-muted-foreground before:content-['·']"
+                        >
+                          {reason}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="space-y-2 px-6 py-5">
+                    <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
+                      집행 후 확인할 목표 지표
+                    </p>
+                    <ul className="space-y-1">
+                      {sc.targetMetrics.map((metric) => (
+                        <li
+                          key={metric}
+                          className="text-sm leading-relaxed text-foreground before:mr-1.5 before:text-muted-foreground before:content-['·']"
+                        >
+                          {metric}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>

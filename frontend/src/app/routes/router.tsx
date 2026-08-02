@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router';
 
+import { DashboardPage } from '@/pages/dashboard';
 import { LandingPage } from '@/pages/landing';
 import { LoginPage } from '@/pages/login';
 import { SimulationPage } from '@/pages/simulation';
@@ -22,5 +23,9 @@ export const router = createBrowserRouter([
   {
     path: ROUTES.verify,
     Component: VerifyPage,
+  },
+  {
+    path: ROUTES.dashboard,
+    Component: DashboardPage,
   },
 ]);

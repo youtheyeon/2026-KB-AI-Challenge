@@ -20,15 +20,12 @@ export const SimulationPage = () => {
   const [step, setStep] = useState(0);
   const [cond, setCond] = useState<LoanCond>({
     loanAmount: 3000,
-    ownFunds: 0,
     rateMode: 'demo',
     rate: DEMO_RATE,
     period: 3,
     grace: 0,
     method: 'equal-payment',
     existingMonthly: 0,
-    analysisPeriod: 3,
-    useDate: new Date().toISOString().split('T')[0],
   });
   const [saved, setSaved] = useState(false);
 

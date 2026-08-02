@@ -1,7 +1,7 @@
 import { ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-import { BOTTLENECKS, sevCfg } from '@/entities/simulation';
+import { BOTTLENECKS, CATEGORY_LABELS, sevCfg } from '@/entities/simulation';
 import { Button } from '@/shared/ui';
 
 interface AnalysisStepProps {
@@ -180,6 +180,16 @@ export const AnalysisStep = ({ onNext }: AnalysisStepProps) => {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">{b.desc}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {b.relatedCategories.map((c) => (
+                    <span
+                      key={c}
+                      className="rounded border border-border bg-muted/40 px-1.5 py-0.5 font-mono text-xs text-muted-foreground"
+                    >
+                      {CATEGORY_LABELS[c]}
+                    </span>
+                  ))}
+                </div>
                 <div className="flex items-center justify-between gap-2">
                   <p className="flex-1 rounded bg-muted/50 px-2.5 py-1.5 font-mono text-xs">
                     {b.metric}
@@ -198,6 +208,9 @@ export const AnalysisStep = ({ onNext }: AnalysisStepProps) => {
                     </p>
                     <p className="text-xs leading-relaxed text-muted-foreground">{b.desc}</p>
                     <p className="font-mono text-xs text-muted-foreground">{b.metric}</p>
+                    <p className="font-mono text-xs text-muted-foreground">
+                      출처: {b.evidenceSourceType} · {b.evidenceDescription}
+                    </p>
                   </div>
                 )}
               </div>

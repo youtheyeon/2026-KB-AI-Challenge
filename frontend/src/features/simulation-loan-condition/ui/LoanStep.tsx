@@ -49,11 +49,6 @@ export const LoanStep = ({ cond, setCond, onNext }: LoanStepProps) => {
               set: (v: number) => set({ loanAmount: v }),
             },
             {
-              label: '자기자금 (만원)',
-              val: cond.ownFunds,
-              set: (v: number) => set({ ownFunds: v }),
-            },
-            {
               label: '기존 월 상환액 (만원)',
               val: cond.existingMonthly,
               set: (v: number) => set({ existingMonthly: v }),
@@ -69,15 +64,6 @@ export const LoanStep = ({ cond, setCond, onNext }: LoanStepProps) => {
               />
             </div>
           ))}
-        </div>
-        <div className="space-y-1.5">
-          <label className="font-mono text-xs text-muted-foreground">자금 사용 예정일</label>
-          <input
-            type="date"
-            value={cond.useDate}
-            onChange={(e) => set({ useDate: e.target.value })}
-            className="w-44 rounded border border-border bg-input-background px-3 py-2 font-mono text-sm focus:border-foreground focus:outline-none"
-          />
         </div>
       </div>
 
@@ -142,12 +128,6 @@ export const LoanStep = ({ cond, setCond, onNext }: LoanStepProps) => {
               val: cond.grace,
               opts: [0, 1, 2, 3],
               set: (v: number) => set({ grace: v }),
-            },
-            {
-              label: '분석 기간 (년)',
-              val: cond.analysisPeriod,
-              opts: [1, 2, 3, 5],
-              set: (v: number) => set({ analysisPeriod: v }),
             },
           ].map((f) => (
             <div key={f.label} className="space-y-1.5">

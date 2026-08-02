@@ -1,6 +1,6 @@
 export {
   BOTTLENECKS,
-  COL_MAPS,
+  CATEGORY_LABELS,
   DEMO_RATE,
   riskColor,
   SAMPLE,
@@ -10,9 +10,9 @@ export {
   UPLOAD_SLOTS,
 } from './model/constants';
 export type {
+  AllocationCategory,
   Bottleneck,
   BottleneckSeverity,
-  ColumnMap,
   LoanCond,
   LoanRateMode,
   RiskLevel,

@@ -1,0 +1,19 @@
+{
+  "referenceDate": "2024-06-30",
+  "sourceName": "서울시 상권분석서비스 추정매출-상권",
+  "snapshotVersion": "20242-cafe-v1",
+  "referenceArea": "서울 전체 커피-음료 상권",
+  "sampleSize": 326,
+  "medianMonthlySalesAmount": 94283406,
+  "medianMonthlyOrderCount": 11729,
+  "timeOfDaySalesRatios": {
+    "00_06": 0.005565,
+    "06_11": 0.12448,
+    "11_14": 0.345965,
+    "14_17": 0.268165,
+    "17_21": 0.217863,
+    "21_24": 0.037963
+  },
+  "floatingPopulationGrowthRate": null,
+  "floatingPopulationUnavailableReason": "현재 캐시에는 유동인구 데이터가 없습니다."
+}
