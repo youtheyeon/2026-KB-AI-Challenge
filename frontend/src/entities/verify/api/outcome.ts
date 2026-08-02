@@ -6,8 +6,6 @@ import type {
   OutcomeResultResponse,
 } from '@/shared/api/schema';
 
-// 백엔드 outcome-data 엔드포인트는 oneOf 바디를 openapi_extra로만 명세해
-// swagger-typescript-api가 요청 타입을 생성하지 못한다 (schema.ts에 없음).
 export interface ManualOutcomeMetricsRequest {
   monthlySalesAmount: number;
   operatingProfitAmount: number;
