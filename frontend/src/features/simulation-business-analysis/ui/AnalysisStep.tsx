@@ -35,6 +35,7 @@ interface DisplayBottleneck {
   title: string;
   sev: BottleneckSeverity;
   description: string;
+  evidence: string;
   metric?: string;
   confidenceLabel: string;
   sourceLabel?: string;
@@ -150,7 +151,8 @@ const buildDisplayBottlenecks = (diagnosis: DiagnosisResultResponse): DisplayBot
     id: b.code,
     title: b.title,
     sev: PRIORITY_TO_SEV[b.priority],
-    description: b.evidence,
+    description: b.detail,
+    evidence: b.evidence,
     confidenceLabel: CONFIDENCE_LABEL[b.confidence],
   }));
 
@@ -159,9 +161,10 @@ const MOCK_DISPLAY_BOTTLENECKS: DisplayBottleneck[] = BOTTLENECKS.map((b) => ({
   title: b.label,
   sev: b.sev,
   description: b.desc,
+  evidence: b.evidenceDescription,
   metric: b.metric,
   confidenceLabel: b.conf,
-  sourceLabel: `${b.evidenceSourceType} · ${b.evidenceDescription}`,
+  sourceLabel: b.evidenceSourceType,
   relatedCategoryLabels: b.relatedCategories.map((c) => CATEGORY_LABELS[c]),
 }));
 
@@ -313,7 +316,7 @@ const ResultsView = ({
                     <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
                       근거
                     </p>
-                    <p className="text-xs leading-relaxed text-muted-foreground">{b.description}</p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">{b.evidence}</p>
                     {b.sourceLabel && (
                       <p className="font-mono text-xs text-muted-foreground">
                         출처: {b.sourceLabel}

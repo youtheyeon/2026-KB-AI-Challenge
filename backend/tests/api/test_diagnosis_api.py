@@ -298,7 +298,8 @@ def test_get_completed_diagnosis_returns_metrics_and_bottlenecks(
             "title": "판매 채널 편중",
             "priority": "HIGH",
             "confidence": "MEDIUM",
-            "evidence": "온라인 주문 비중 9%, 비교군 28%.",
+            "detail": "온라인 주문 비중 9%, 비교군 28%.",
+            "evidence": "업로드 자료를 업계 참고치와 비교했습니다.",
         }
     ]
 

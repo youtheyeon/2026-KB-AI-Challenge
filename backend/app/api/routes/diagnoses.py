@@ -91,6 +91,7 @@ class BottleneckResponse(CamelModel):
     title: str
     priority: Literal["LOW", "MEDIUM", "HIGH"]
     confidence: Literal["LOW", "MEDIUM", "HIGH"]
+    detail: str
     evidence: str
 
 
@@ -301,5 +302,6 @@ def _bottleneck_response(bottleneck: Bottleneck) -> BottleneckResponse:
         title=titles.get(bottleneck.bottleneck_type, bottleneck.bottleneck_type),
         priority=priorities[bottleneck.severity],
         confidence=confidence,
-        evidence=bottleneck.detail,
+        detail=bottleneck.detail,
+        evidence=bottleneck.evidence_description,
     )

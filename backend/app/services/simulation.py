@@ -1,4 +1,5 @@
 # 완료 진단으로 자금 배분 시뮬레이션을 생성하고 전체 결과를 원자적으로 저장하는 서비스
+import logging
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from decimal import Decimal
@@ -39,6 +40,8 @@ from app.services.simulation_engine import (
     SimulationEngineRequest,
     SimulationGenerationError,
 )
+
+logger = logging.getLogger(__name__)
 
 SEVERITY_MAP = {
     BottleneckSeverity.MILD: "경미",
@@ -233,6 +236,10 @@ class SimulationService:
             simulation = self._to_simulation(command, prepared, generated)
             simulation.validate_scenarios()
         except (KeyError, TypeError, ValueError, SimulationGenerationError) as error:
+            logger.exception(
+                "시뮬레이션 생성이 실패했습니다.",
+                extra={"business_id": command.business_id, "diagnosis_id": command.diagnosis_id},
+            )
             raise ApiError(
                 502,
                 "SIMULATION_GENERATION_FAILED",
