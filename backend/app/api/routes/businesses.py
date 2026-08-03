@@ -130,13 +130,14 @@ def register_business(
         )
 
     if created_session:
+        is_production = settings.environment == "production"
         response.set_cookie(
             key="demo_session_id",
             value=str(demo_session.id),
             max_age=int(timedelta(hours=24).total_seconds()),
             httponly=True,
-            samesite="lax",
-            secure=settings.environment == "production",
+            samesite="none" if is_production else "lax",
+            secure=is_production,
         )
 
     return registered_business
