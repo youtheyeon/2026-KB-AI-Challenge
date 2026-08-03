@@ -29,3 +29,5 @@ export {
   getSimulationComparison,
   selectScenario,
 } from './api/simulation';
+export { MockScenarioAllocationCard } from './ui/MockScenarioAllocationCard';
+export { ScenarioAllocationCard } from './ui/ScenarioAllocationCard';

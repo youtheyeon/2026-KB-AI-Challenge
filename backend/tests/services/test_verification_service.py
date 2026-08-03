@@ -129,6 +129,8 @@ class FakeDatabase:
             value.created_at = NOW
             self.executions.append(value)
             self.added_execution = value
+        elif isinstance(value, ScenarioSelection):
+            value.id = 999
 
     def flush(self) -> None:
         pass
@@ -223,14 +225,14 @@ def test_targets_start_on_day_90_and_keep_execution_only_cycle(
         today=TODAY,
     )
 
-    assert [target.simulation_id for target in targets.targets] == [45, 46]
+    assert [target.simulation_id for target in targets.targets] == [45, 46, 48]
     assert targets.targets[1].execution_registered is True
 
 
 def test_targets_include_completed_only_when_requested(service: VerificationService) -> None:
     targets = service.list_targets(7, True, SESSION_COOKIE, today=TODAY)
 
-    assert [target.simulation_id for target in targets.targets] == [45, 46, 47]
+    assert [target.simulation_id for target in targets.targets] == [45, 46, 47, 48]
 
 
 def test_custom_execution_locks_selection_and_preserves_free_names(
@@ -268,7 +270,6 @@ def test_same_as_scenario_copies_categories_and_names(service: VerificationServi
     ("command", "code"),
     [
         (custom_command(simulation_id=44), "VERIFICATION_NOT_READY"),
-        (custom_command(simulation_id=48), "SELECTION_REQUIRED"),
         (custom_command(executed_at=date(2026, 8, 1)), "INVALID_EXECUTION_DATE"),
         (custom_command(unused_amount=0), "INVALID_EXECUTION_TOTAL"),
         (
@@ -286,6 +287,38 @@ def test_execution_rejects_invalid_state_or_input(
         service.create_execution(command, SESSION_COOKIE, now=NOW)
 
     assert caught.value.code == code
+
+
+def test_custom_execution_without_prior_selection_leaves_selection_empty(
+    service: VerificationService,
+) -> None:
+    created = service.create_execution(custom_command(simulation_id=48), SESSION_COOKIE, now=NOW)
+
+    assert created.total_executed_amount == 14_500_000
+    assert service.database.added_execution.selection is None
+    assert service.database.added_execution.selection_id is None
+
+
+def test_same_as_scenario_without_prior_selection_creates_one(
+    service: VerificationService,
+) -> None:
+    service.create_execution(
+        ExecutionCreationCommand(
+            simulation_id=48,
+            mode=ExecutionType.SAME_AS_C,
+            executed_at=date(2026, 7, 30),
+            items=(),
+            unused_amount=0,
+        ),
+        SESSION_COOKIE,
+        now=NOW,
+    )
+
+    simulation = next(item for item in service.database.simulations if item.id == 48)
+    scenario_c = next(item for item in simulation.scenarios if item.code is ScenarioCode.C)
+    assert simulation.selection is not None
+    assert simulation.selection.scenario_id == scenario_c.id
+    assert simulation.selection.locked is True
 
 
 def test_execution_rejects_wrong_session(service: VerificationService) -> None:

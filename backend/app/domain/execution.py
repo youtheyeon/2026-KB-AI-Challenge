@@ -38,7 +38,7 @@ class Execution(TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     simulation_id: Mapped[int] = mapped_column(ForeignKey("simulations.id", ondelete="RESTRICT"))
-    selection_id: Mapped[int] = mapped_column(
+    selection_id: Mapped[int | None] = mapped_column(
         ForeignKey("scenario_selections.id", ondelete="RESTRICT")
     )
     execution_type: Mapped[ExecutionType] = mapped_column(
@@ -50,7 +50,7 @@ class Execution(TimestampMixin, Base):
     note: Mapped[str | None] = mapped_column(String(1000))
 
     simulation: Mapped["Simulation"] = relationship()
-    selection: Mapped["ScenarioSelection"] = relationship()
+    selection: Mapped["ScenarioSelection | None"] = relationship()
     allocations: Mapped[list["ExecutionAllocation"]] = relationship(
         back_populates="execution", cascade="all, delete-orphan"
     )

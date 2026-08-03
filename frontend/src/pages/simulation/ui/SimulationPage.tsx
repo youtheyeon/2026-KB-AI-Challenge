@@ -22,7 +22,6 @@ export const SimulationPage = () => {
   const [datasetId, setDatasetId] = useState<number | null>(null);
   const [diagnosisId, setDiagnosisId] = useState<number | null>(null);
   const [simulationId, setSimulationId] = useState<number | null>(null);
-  const [selectedScenarioId, setSelectedScenarioId] = useState<number | null>(null);
   const [cond, setCond] = useState<LoanCond>({
     loanAmount: 3000,
     rateMode: 'demo',
@@ -95,8 +94,6 @@ export const SimulationPage = () => {
             cond={cond}
             businessId={businessId}
             simulationId={simulationId}
-            selectedScenarioId={selectedScenarioId}
-            onScenarioSelected={setSelectedScenarioId}
             onNext={next}
           />
         )}

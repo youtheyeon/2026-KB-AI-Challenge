@@ -1,7 +1,14 @@
 import { AlertTriangle, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-import { getSimulation, manwonToWon, wonToManwon } from '@/entities/simulation';
+import {
+  getSimulation,
+  manwonToWon,
+  MockScenarioAllocationCard,
+  ScenarioAllocationCard,
+  SCENARIOS,
+  wonToManwon,
+} from '@/entities/simulation';
 import { ARCHIVED_SIMS, createExecution, DEFAULT_ITEMS } from '@/entities/verify';
 import { getApiErrorMessage } from '@/shared/api';
 import { ExecutionModeRequest, type SimulationResponse } from '@/shared/api/schema';
@@ -75,6 +82,10 @@ const RealForm = ({
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
+  const isFreeForm = execMode === 'mix' || execMode === 'custom';
+  const selectedScenario = isFreeForm
+    ? null
+    : (simulation.scenarios.find((sc) => sc.scenarioCode === execMode) ?? null);
   const totalExec = execItems.reduce((s, i) => s + i.amount, 0);
   const unusedAmount = Math.max(0, loanAmountManwon - totalExec);
 
@@ -86,10 +97,12 @@ const RealForm = ({
       const { executionId } = await createExecution(simulationId, {
         executionMode: EXEC_MODE_TO_REQUEST[execMode],
         executedAt: execDate,
-        items: execItems
-          .filter((i) => i.name.trim().length > 0)
-          .map((i) => ({ name: i.name, amount: manwonToWon(i.amount) })),
-        unusedAmount: manwonToWon(unusedAmount),
+        items: isFreeForm
+          ? execItems
+              .filter((i) => i.name.trim().length > 0)
+              .map((i) => ({ name: i.name, amount: manwonToWon(i.amount) }))
+          : [],
+        unusedAmount: isFreeForm ? manwonToWon(unusedAmount) : 0,
       });
       onExecutionRegistered(executionId);
       onNext();
@@ -102,17 +115,28 @@ const RealForm = ({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold">실제로 대출금을 어떻게 사용했나요?</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          시뮬레이션의 A·B·C안은 의사결정 참고자료입니다. 실제 진행은 다를 수 있으며, 실제 내역을
-          기준으로 예측값을 재계산합니다.
+      <h2 className="text-xl font-semibold">실제로 대출금을 어떻게 사용했나요?</h2>
+
+      <div className="space-y-3">
+        <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
+          시뮬레이션에서 만든 A·B·C안
         </p>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {[...simulation.scenarios]
+            .sort((a, b) => a.scenarioCode.localeCompare(b.scenarioCode))
+            .map((sc) => (
+              <ScenarioAllocationCard
+                key={sc.scenarioId}
+                scenario={sc}
+                loanAmountWon={simulation.loanCondition.amount}
+              />
+            ))}
+        </div>
       </div>
 
       <div className="space-y-3">
         <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
-          진행 방식
+          실제로 어떤 안으로 진행했나요?
         </p>
         <div className="space-y-2">
           {EXEC_OPTIONS.map((opt) => (
@@ -138,7 +162,27 @@ const RealForm = ({
         </div>
       </div>
 
-      {execMode && (
+      {execMode && !isFreeForm && selectedScenario && (
+        <div className="space-y-3">
+          <div className="rounded border border-border bg-muted/10 px-5 py-4">
+            <p className="text-xs text-muted-foreground">
+              선택한 {selectedScenario.scenarioCode}안({selectedScenario.title})의 배분 내역 그대로
+              집행 등록됩니다. 항목을 따로 입력할 필요는 없어요.
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <p className="font-mono text-xs text-muted-foreground">대출 실행일</p>
+            <input
+              type="date"
+              value={execDate}
+              onChange={(e) => setExecDate(e.target.value)}
+              className="w-full rounded border border-border bg-background px-3 py-2 font-mono text-sm focus:border-foreground focus:outline-none"
+            />
+          </div>
+        </div>
+      )}
+
+      {execMode && isFreeForm && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
@@ -322,21 +366,28 @@ const MockForm = ({
   const [execItems, setExecItems] = useState(DEFAULT_ITEMS);
   const [execDate, setExecDate] = useState('2025.10.20');
 
+  const isFreeForm = execMode === 'mix' || execMode === 'custom';
+  const selectedScenario = isFreeForm ? null : (SCENARIOS.find((sc) => sc.id === execMode) ?? null);
   const totalExec = execItems.reduce((s, i) => s + i.amount, 0);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold">실제로 대출금을 어떻게 사용했나요?</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          시뮬레이션의 A·B·C안은 의사결정 참고자료입니다. 실제 진행은 다를 수 있으며, 실제 내역을
-          기준으로 예측값을 재계산합니다.
+      <h2 className="text-xl font-semibold">실제로 대출금을 어떻게 사용했나요?</h2>
+
+      <div className="space-y-3">
+        <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
+          시뮬레이션에서 만든 A·B·C안
         </p>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {SCENARIOS.map((sc) => (
+            <MockScenarioAllocationCard key={sc.id} scenario={sc} loanAmount={sim.loanAmount} />
+          ))}
+        </div>
       </div>
 
       <div className="space-y-3">
         <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
-          진행 방식
+          실제로 어떤 안으로 진행했나요?
         </p>
         <div className="space-y-2">
           {EXEC_OPTIONS.map((opt) => (
@@ -362,7 +413,26 @@ const MockForm = ({
         </div>
       </div>
 
-      {execMode && (
+      {execMode && !isFreeForm && selectedScenario && (
+        <div className="space-y-3">
+          <div className="rounded border border-border bg-muted/10 px-5 py-4">
+            <p className="text-xs text-muted-foreground">
+              선택한 {selectedScenario.id}안({selectedScenario.title})의 배분 내역 그대로 집행
+              등록됩니다. 항목을 따로 입력할 필요는 없어요.
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <p className="font-mono text-xs text-muted-foreground">대출 실행일</p>
+            <input
+              value={execDate}
+              onChange={(e) => setExecDate(e.target.value)}
+              className="w-full rounded border border-border bg-background px-3 py-2 font-mono text-sm focus:border-foreground focus:outline-none"
+            />
+          </div>
+        </div>
+      )}
+
+      {execMode && isFreeForm && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
