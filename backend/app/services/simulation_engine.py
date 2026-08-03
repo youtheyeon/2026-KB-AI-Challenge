@@ -74,10 +74,25 @@ def get_simulation_engine() -> SimulationEngine:
 
 
 def _load_simulation_runner() -> SimulationRunner:
-    ai_path = Path(__file__).resolve().parents[3] / "ai"
-    ai_path_text = str(ai_path)
+    ai_path_text = str(_resolve_ai_path())
     if ai_path_text not in sys.path:
         sys.path.insert(0, ai_path_text)
 
     module = import_module("run_simulation")
     return module.run_allocation_simulation
+
+
+def _resolve_ai_path() -> Path:
+    current_file = Path(__file__).resolve()
+    candidates = (
+        # Vercel: includeFiles로 함수 번들에 포함된 경우 /var/task/ai
+        current_file.parents[2] / "ai",
+        # 로컬 개발: repo_root/backend/app/services/... → repo_root/ai
+        current_file.parents[3] / "ai",
+    )
+    for candidate in candidates:
+        if candidate.is_dir():
+            return candidate
+
+    searched = ", ".join(str(candidate) for candidate in candidates)
+    raise ImportError(f"AI 모듈 디렉터리를 찾을 수 없습니다: {searched}")
