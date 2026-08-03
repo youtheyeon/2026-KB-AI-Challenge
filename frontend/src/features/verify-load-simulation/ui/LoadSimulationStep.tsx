@@ -1,15 +1,14 @@
 import { AlertTriangle, ChevronRight, RotateCcw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-import { ARCHIVED_SIMS, getVerificationTargets } from '@/entities/verify';
+import { getVerificationTargets } from '@/entities/verify';
 import { getApiErrorMessage } from '@/shared/api';
 import type { VerificationTargetResponse } from '@/shared/api/schema';
 import { Button } from '@/shared/ui';
 
 interface LoadSimulationStepProps {
   businessId: number | null;
-  onNext: () => void;
-  onSimulationSelected: (simulationId: number) => void;
+  onSimulationSelected: (simulationId: number, executionId: number | null) => void;
 }
 
 const LoadingView = () => (
@@ -47,21 +46,30 @@ const EmptyView = () => (
   </div>
 );
 
+const NeedsBusinessView = () => (
+  <div className="space-y-6">
+    <h2 className="text-xl font-semibold">어떤 시뮬레이션을 기준으로 결과를 확인할까요?</h2>
+    <div className="space-y-2 rounded border border-border px-5 py-14 text-center">
+      <p className="text-sm text-muted-foreground">
+        먼저 시뮬레이션을 진행해 사업자 정보를 연결해주세요.
+      </p>
+    </div>
+  </div>
+);
+
 const RealTargetList = ({
   targets,
-  onNext,
   onSimulationSelected,
 }: {
   targets: VerificationTargetResponse[];
-  onNext: () => void;
-  onSimulationSelected: (simulationId: number) => void;
+  onSimulationSelected: (simulationId: number, executionId: number | null) => void;
 }) => {
   const [loadedId, setLoadedId] = useState<number | null>(null);
+  const loadedTarget = targets.find((t) => t.simulationId === loadedId) ?? null;
 
   const handleNext = () => {
-    if (loadedId === null) return;
-    onSimulationSelected(loadedId);
-    onNext();
+    if (loadedTarget === null) return;
+    onSimulationSelected(loadedTarget.simulationId, loadedTarget.executionId);
   };
 
   return (
@@ -136,10 +144,11 @@ const RealTargetList = ({
       <div className="flex justify-end">
         <Button
           onClick={handleNext}
-          disabled={loadedId === null}
+          disabled={loadedTarget === null}
           className="px-5 py-2.5 disabled:cursor-not-allowed disabled:opacity-30"
         >
-          실제 진행 등록 <ChevronRight className="h-4 w-4" />
+          {loadedTarget?.executionRegistered ? '결과 비교로 이동' : '실제 진행 등록'}{' '}
+          <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
     </div>
@@ -148,18 +157,14 @@ const RealTargetList = ({
 
 export const LoadSimulationStep = ({
   businessId,
-  onNext,
   onSimulationSelected,
 }: LoadSimulationStepProps) => {
-  const isRealMode = businessId != null;
-
   const [targets, setTargets] = useState<VerificationTargetResponse[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [retryToken, setRetryToken] = useState(0);
-  const [loadedSim, setLoadedSim] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isRealMode || businessId === null) return;
+    if (businessId === null) return;
     let cancelled = false;
 
     const run = async () => {
@@ -177,95 +182,11 @@ export const LoadSimulationStep = ({
     return () => {
       cancelled = true;
     };
-  }, [isRealMode, businessId, retryToken]);
+  }, [businessId, retryToken]);
 
-  if (isRealMode) {
-    if (error) return <ErrorView message={error} onRetry={() => setRetryToken((t) => t + 1)} />;
-    if (!targets) return <LoadingView />;
-    if (targets.length === 0) return <EmptyView />;
-    return (
-      <RealTargetList
-        targets={targets}
-        onNext={onNext}
-        onSimulationSelected={onSimulationSelected}
-      />
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold">어떤 시뮬레이션을 기준으로 결과를 확인할까요?</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          저장된 시뮬레이션을 불러와 실제 진행 내역과 비교합니다.
-        </p>
-      </div>
-
-      <div className="space-y-3">
-        {ARCHIVED_SIMS.map((s) => {
-          const isLoaded = loadedSim === s.id;
-          return (
-            <div
-              key={s.id}
-              className={`overflow-hidden rounded border transition-colors ${
-                isLoaded ? 'border-foreground' : 'border-border'
-              }`}
-            >
-              <div className="flex flex-col gap-2 px-5 py-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs text-muted-foreground">{s.date}</span>
-                      <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
-                        {s.daysAgo}일 경과
-                      </span>
-                      <span className="rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 font-mono text-xs text-amber-700">
-                        {s.status}
-                      </span>
-                    </div>
-                    <p className="text-sm font-medium">{s.biz}</p>
-                    <p className="font-mono text-xs text-muted-foreground">
-                      대출금 {s.loanAmount.toLocaleString()}만원
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 flex-col gap-2">
-                    <button
-                      onClick={() => setLoadedSim(isLoaded ? null : s.id)}
-                      className={`rounded px-4 py-2 text-sm font-medium transition-colors ${
-                        isLoaded
-                          ? 'bg-foreground text-background'
-                          : 'border border-border hover:border-foreground/40'
-                      }`}
-                    >
-                      {isLoaded ? '✓ 불러옴' : '이 시뮬레이션 불러오기'}
-                    </button>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {s.scenarios.map((sc) => (
-                    <span
-                      key={sc}
-                      className="rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground"
-                    >
-                      {sc}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="flex justify-end">
-        <Button
-          onClick={onNext}
-          disabled={!loadedSim}
-          className="px-5 py-2.5 disabled:cursor-not-allowed disabled:opacity-30"
-        >
-          실제 진행 등록 <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  );
+  if (businessId === null) return <NeedsBusinessView />;
+  if (error) return <ErrorView message={error} onRetry={() => setRetryToken((t) => t + 1)} />;
+  if (!targets) return <LoadingView />;
+  if (targets.length === 0) return <EmptyView />;
+  return <RealTargetList targets={targets} onSimulationSelected={onSimulationSelected} />;
 };

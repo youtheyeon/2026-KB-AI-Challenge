@@ -33,6 +33,7 @@ class FakeVerificationService:
                     "saved_at": datetime(2026, 4, 30, 12, tzinfo=UTC),
                     "days_elapsed": 92,
                     "execution_registered": False,
+                    "execution_id": None,
                     "business_name": "청춘카페",
                     "region": "서울",
                     "loan_amount": 15_000_000,
