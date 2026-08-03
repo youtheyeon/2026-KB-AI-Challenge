@@ -92,8 +92,7 @@ flowchart LR
 
 ### 1. 서비스 소개
 
-<img width="1439" height="846" alt="1" src="https://github.com/user-attachments/assets/a2bcd265-ec40-4c09-9b15-cef5d34b2a1e" />
-
+<img width="1380" height="806" alt="1" src="https://github.com/user-attachments/assets/2f5fb8c2-f297-4ca1-8ded-309fc3641c38" />
 
 서비스가 해결하려는 문제와 전체 이용 흐름을 한눈에 확인할 수 있습니다. \
 샘플 데이터를 사용하여 실제 사업장 데이터를 등록하지 않고도 전체 시뮬레이션을 체험할 수 있습니다. 
