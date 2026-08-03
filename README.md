@@ -1,4 +1,4 @@
-# SCB 대출 기회를 성장으로 잇는 자금 배분 시뮬레이터
+# SCB 대출 기회를 성장으로 연결하는 자금 선순환 검증 에이전트 
 
 > 사업 데이터를 바탕으로 현재의 경영 병목을 진단하고, 대출금 사용 시나리오를 비교한 뒤, 실제 집행 결과를 다음 의사결정에 반영하는 소상공인 자금 활용 지원 서비스입니다.
 
@@ -92,40 +92,51 @@ flowchart LR
 
 ### 1. 서비스 소개
 
-![서비스 소개 화면](./docs/images/readme/01-landing.png)
+<img width="1439" height="846" alt="1" src="https://github.com/user-attachments/assets/a2bcd265-ec40-4c09-9b15-cef5d34b2a1e" />
 
-서비스가 해결하려는 문제와 전체 이용 흐름을 한눈에 확인할 수 있습니다. 샘플 데이터를 이용하면 실제 사업장 데이터를 등록하지 않고도 전체 시뮬레이션을 체험할 수 있습니다.
+
+서비스가 해결하려는 문제와 전체 이용 흐름을 한눈에 확인할 수 있습니다. \
+샘플 데이터를 사용하여 실제 사업장 데이터를 등록하지 않고도 전체 시뮬레이션을 체험할 수 있습니다. 
+
 
 ### 2. 사업 데이터 연결 및 병목 진단
 
-![사업 상태 분석 화면](./docs/images/readme/02-business-diagnosis.png)
+| 사업 데이터 연결 | 사업 데이터 진단 | 병목 후보 진단 |
+|:---:|:---:|:---:|
+| <img width="1440" height="788" alt="2" src="https://github.com/user-attachments/assets/38c961d9-e9cb-4e25-8ec7-eed29fea9246" /> | <img width="1436" height="747" alt="3" src="https://github.com/user-attachments/assets/57f94952-ebf5-448a-81e7-6840950567c1" /> | <img width="1440" height="764" alt="4" src="https://github.com/user-attachments/assets/1132b33b-bbcd-4cac-9841-34fd78518420" />
 
-사업자의 매출·비용 데이터와 지역 기반 상권 데이터를 종합해 현재 사업 상태를 보여줍니다.
 
-각 병목은 단순한 경고로 끝나지 않고 현재 수치, 비교 기준, 근거 출처와 판단 방법을 함께 제공합니다.
+사업자의 매출·비용 데이터와 지역 기반 상권 데이터를 종합해 현재 사업 상태를 보여줍니다.\
+각 병목은 단순한 경고로 끝나지 않고 현재 수치, 비교 기준, 근거 출처와 판단 방법을 함께 제공합니다. 
+
 
 ### 3. 자금 배분 시나리오 비교
 
-![시나리오 비교 화면](./docs/images/readme/03-scenario-comparison.png)
+| 자금 배분 시나리오 구성 | 배분 시나리오 비교 |
+|:---:|:---:|
+| <img width="1440" height="845" alt="5 0" src="https://github.com/user-attachments/assets/cce9c550-5801-4f9e-b636-5a5eec6f3588" /> | <img width="1440" height="845" alt="5" src="https://github.com/user-attachments/assets/a483a098-365d-46a3-810e-3489c09ca470" /> |
 
-동일한 대출금을 서로 다른 목적으로 배분한 세 가지 시나리오를 동일한 기준에서 비교합니다.
-
+동일한 대출금을 서로 다른 목적으로 배분한 세 가지 시나리오를 동일한 기준에서 비교합니다.\
 사업자는 배분 비율, 월 상환 부담, 잔여 현금, 대응하는 병목과 집행 후 확인할 지표를 함께 살펴볼 수 있습니다.
 
 ### 4. 실제 집행 및 결과 검증
 
-![결과 검증 화면](./docs/images/readme/04-result-verification.png)
+| 집행안 선택 | 집행 결과 검증 |
+|:---:|:---:|
+| <img width="1440" height="848" alt="8" src="https://github.com/user-attachments/assets/98206051-705e-44cd-a7b5-653ff1d55cc8" /> | <img width="1440" height="844" alt="10" src="https://github.com/user-attachments/assets/f17359eb-eef3-479d-a313-121b04f22d7f" />
 
-시뮬레이션에서 선택한 안과 실제 자금 사용 내역이 달라도 실제 집행안을 기준으로 결과를 다시 계산합니다.
 
+시뮬레이션에서 선택한 안과 실제 자금 사용 내역이 달라도 실제 집행안을 기준으로 결과를 다시 계산합니다.\
 집행 전후의 사업 지표를 비교해 개선된 병목과 새롭게 나타난 병목을 확인할 수 있습니다.
 
 ### 5. 선순환 대시보드
 
-![선순환 대시보드 화면](./docs/images/readme/05-dashboard.png)
+| 대출 현황 및 핵심 지표 추이 | 시뮬레이션 이력 |
+|:---:|:---:|
+| <img width="1440" height="657" alt="6" src="https://github.com/user-attachments/assets/cdf97f75-c352-44e5-8f51-d6b59bf2fc61" /> | <img width="1440" height="650" alt="7" src="https://github.com/user-attachments/assets/5e6329e4-fa1b-4cfc-9f20-2db385f77c94" />
+ 
 
-시뮬레이션과 결과 검증 이력을 회차별로 확인합니다.
-
+시뮬레이션과 결과 검증 이력을 회차별로 확인합니다.\
 최근까지 해결되지 않은 병목과 이전 집행 결과를 바탕으로 다음 시뮬레이션에서 우선 확인해야 할 항목을 안내합니다.
 
 ## 사용자 예시
