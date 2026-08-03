@@ -1,6 +1,7 @@
 # FastAPI 애플리케이션을 생성하고 API 라우터를 조립하는 진입점
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.routes.businesses import router as businesses_router
@@ -13,6 +14,14 @@ from app.core.config import settings
 from app.core.errors import ApiError
 
 app = FastAPI(title=settings.app_name)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_allow_origin_list,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.exception_handler(ApiError)
