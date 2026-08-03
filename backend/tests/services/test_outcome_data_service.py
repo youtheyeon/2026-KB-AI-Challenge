@@ -17,10 +17,11 @@ from app.domain.enums import (
     DemoSessionStatus,
     ExecutionType,
     OutcomeDataSourceType,
+    OutcomeStatus,
     RepaymentType,
 )
 from app.domain.execution import Execution
-from app.domain.outcome import OutcomeData
+from app.domain.outcome import OutcomeComparison, OutcomeData
 from app.domain.simulation import Simulation
 from app.services.outcome_data import (
     ManualOutcomeMetrics,
@@ -98,10 +99,12 @@ class FakeDatabase:
             )
         ]
         self.outcome_rows: list[OutcomeData] = []
+        self.comparisons: list[OutcomeComparison] = []
         self.datasets: list[Dataset] = []
         self.snapshots: list[BusinessSnapshot] = []
         self.next_file_id = 1
         self.rollback_count = 0
+        self.deleted: list[object] = []
 
     def get(self, model, object_id, **kwargs):
         if model is DemoSession and object_id == self.session.id:
@@ -120,6 +123,8 @@ class FakeDatabase:
             return FakeScalarResult(self.executions)
         if entity is OutcomeData:
             return FakeScalarResult(self.outcome_rows)
+        if entity is OutcomeComparison:
+            return FakeScalarResult(self.comparisons)
         return FakeScalarResult([])
 
     @contextmanager
@@ -142,6 +147,11 @@ class FakeDatabase:
             value.observed_business_snapshot_id = value.observed_business_snapshot.id
             value.id = 300 + len(self.outcome_rows)
             self.outcome_rows.append(value)
+
+    def delete(self, value) -> None:
+        self.deleted.append(value)
+        if isinstance(value, OutcomeData) and value in self.outcome_rows:
+            self.outcome_rows.remove(value)
 
     def flush(self) -> None:
         for dataset in self.datasets:
@@ -283,13 +293,33 @@ def test_outcome_data_requires_execution(service: OutcomeDataService) -> None:
     assert caught.value.code == "EXECUTION_REQUIRED"
 
 
-def test_duplicate_outcome_data_is_rejected(service: OutcomeDataService) -> None:
-    service.create(manual_command(), SESSION_COOKIE, observed_on=OBSERVED_ON)
+def test_duplicate_outcome_data_is_rejected_once_compared(service: OutcomeDataService) -> None:
+    created = service.create(manual_command(), SESSION_COOKIE, observed_on=OBSERVED_ON)
+    service.database.comparisons.append(
+        OutcomeComparison(
+            simulation_id=45,
+            execution_id=81,
+            outcome_data_id=created.outcome_data_id,
+            status=OutcomeStatus.MET,
+        )
+    )
 
     with pytest.raises(ApiError) as caught:
         service.create(manual_command(), SESSION_COOKIE, observed_on=OBSERVED_ON)
 
     assert caught.value.code == "OUTCOME_DATA_ALREADY_EXISTS"
+
+
+def test_outcome_data_retry_replaces_uncompared_attempt(service: OutcomeDataService) -> None:
+    first = service.create(manual_command(), SESSION_COOKIE, observed_on=OBSERVED_ON)
+
+    second = service.create(manual_command(), SESSION_COOKIE, observed_on=OBSERVED_ON)
+
+    assert second.dataset_id != first.dataset_id
+    assert len(service.database.outcome_rows) == 1
+    assert any(
+        getattr(item, "id", None) == first.outcome_data_id for item in service.database.deleted
+    )
 
 
 @pytest.mark.parametrize(

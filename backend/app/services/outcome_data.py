@@ -19,7 +19,7 @@ from app.domain.enums import (
     OutcomeDataStatus,
 )
 from app.domain.execution import Execution
-from app.domain.outcome import OutcomeData
+from app.domain.outcome import OutcomeComparison, OutcomeData
 from app.services.dataset_import import (
     ParsedWorkbook,
     WorkbookProcessingError,
@@ -268,12 +268,20 @@ class OutcomeDataService:
         outcomes = self.database.scalars(
             select(OutcomeData).where(OutcomeData.simulation_id == simulation_id)
         ).all()
-        if any(item.simulation_id == simulation_id for item in outcomes):
-            raise ApiError(
-                409,
-                "OUTCOME_DATA_ALREADY_EXISTS",
-                "이미 사후 데이터가 등록된 시뮬레이션입니다.",
-            )
+        for outcome_data in outcomes:
+            comparisons = self.database.scalars(
+                select(OutcomeComparison).where(
+                    OutcomeComparison.outcome_data_id == outcome_data.id
+                )
+            ).all()
+            if comparisons:
+                raise ApiError(
+                    409,
+                    "OUTCOME_DATA_ALREADY_EXISTS",
+                    "이미 사후 데이터가 등록된 시뮬레이션입니다.",
+                )
+            # 비교로 이어지지 못한 이전 시도(중간 오류로 끊긴 등록)는 재시도를 위해 정리한다.
+            self.database.delete(outcome_data)
 
     def _parse_files(self, command: OutcomeDataCreationCommand) -> _ParsedOutcomeFiles:
         if (

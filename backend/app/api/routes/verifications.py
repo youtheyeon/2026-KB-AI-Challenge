@@ -61,6 +61,7 @@ class VerificationTargetResponse(ApiModel):
     saved_at: datetime = Field(alias="savedAt")
     days_elapsed: int = Field(alias="daysElapsed")
     execution_registered: bool = Field(alias="executionRegistered")
+    execution_id: int | None = Field(alias="executionId")
     business_name: str = Field(alias="businessName")
     region: str
     loan_amount: int = Field(alias="loanAmount")

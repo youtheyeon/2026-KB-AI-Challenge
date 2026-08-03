@@ -45,6 +45,7 @@ class VerificationTarget:
     saved_at: datetime
     days_elapsed: int
     execution_registered: bool
+    execution_id: int | None
     business_name: str
     region: str
     loan_amount: int
@@ -161,7 +162,11 @@ class VerificationService:
             if simulation_ids
             else []
         )
-        execution_ids = {execution.simulation_id for execution in executions}
+        execution_by_simulation = {
+            execution.simulation_id: execution.id
+            for execution in executions
+            if execution.id is not None
+        }
         completed_ids = {comparison.simulation_id for comparison in comparisons}
 
         targets = []
@@ -185,7 +190,8 @@ class VerificationService:
                     simulation_id=simulation.id,
                     saved_at=simulation.created_at,
                     days_elapsed=days_elapsed,
-                    execution_registered=simulation.id in execution_ids,
+                    execution_registered=simulation.id in execution_by_simulation,
+                    execution_id=execution_by_simulation.get(simulation.id),
                     business_name=business.name,
                     region=business.region,
                     loan_amount=simulation.loan_amount,
