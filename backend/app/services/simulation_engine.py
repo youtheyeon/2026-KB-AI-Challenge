@@ -1,4 +1,5 @@
 # 저장 진단을 같은 프로세스의 AI 시뮬레이션 함수에 전달하는 어댑터
+import logging
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -10,6 +11,8 @@ from typing import Any, Protocol
 from requests import RequestException
 
 from app.domain.enums import RepaymentType
+
+logger = logging.getLogger(__name__)
 
 SimulationRunner = Callable[..., dict[str, Any]]
 SimulationRunnerLoader = Callable[[], SimulationRunner]
@@ -58,6 +61,7 @@ class InProcessSimulationEngine:
                 business_history=[dict(record) for record in request.business_history],
             )
         except (ImportError, RequestException, RuntimeError, TypeError) as error:
+            logger.exception("AI 시뮬레이션 엔진 호출이 실패했습니다.")
             raise SimulationGenerationError("시뮬레이션 결과 생성에 실패했습니다.") from error
 
         if not isinstance(result, dict) or not isinstance(result.get("scenario_results"), list):
