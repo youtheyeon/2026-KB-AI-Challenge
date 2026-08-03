@@ -8,8 +8,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://postgres@localhost:5432/kb_ai_challenge"
     migration_database_url: str = "postgresql+psycopg://postgres@localhost:5432/kb_ai_challenge"
     cors_allow_origins: str = (
-        "http://localhost:5173,http://127.0.0.1:5173,"
-        "https://2026-kb-ai-challenge-kirby.vercel.app"
+        "http://localhost:5173,http://127.0.0.1:5173,https://2026-kb-ai-challenge-kirby.vercel.app"
     )
 
     model_config = SettingsConfigDict(
