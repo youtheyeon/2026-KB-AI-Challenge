@@ -173,7 +173,6 @@ class VerificationService:
                 simulation.id is None
                 or simulation.business_id != business_id
                 or simulation.status.upper() != "COMPLETED"
-                or simulation.selection is None
             ):
                 continue
             days_elapsed = _days_elapsed(simulation, as_of)
@@ -217,23 +216,6 @@ class VerificationService:
                 with_for_update=True,
             )
             _require_verification_ready(simulation, saved_at.date())
-            if simulation.selection is None or simulation.selection.id is None:
-                raise ApiError(
-                    409,
-                    "SELECTION_REQUIRED",
-                    "최종 선택이 있는 시뮬레이션만 집행을 등록할 수 있습니다.",
-                )
-            selection = self.database.get(
-                ScenarioSelection,
-                simulation.selection.id,
-                with_for_update=True,
-            )
-            if selection is None:
-                raise ApiError(
-                    409,
-                    "SELECTION_REQUIRED",
-                    "최종 선택이 있는 시뮬레이션만 집행을 등록할 수 있습니다.",
-                )
             existing = self.database.scalars(
                 select(Execution).where(Execution.simulation_id == simulation.id)
             ).all()
@@ -261,9 +243,10 @@ class VerificationService:
                     "INVALID_EXECUTION_TOTAL",
                     "집행금액과 미집행금액의 합은 대출금액과 같아야 합니다.",
                 )
+            selection = _get_or_create_selection(self.database, simulation, command.mode, saved_at)
             execution = Execution(
                 simulation_id=simulation.id,
-                selection_id=selection.id,
+                selection_id=selection.id if selection is not None else None,
                 execution_type=command.mode,
                 total_amount=total_amount,
                 unused_amount=command.unused_amount,
@@ -273,7 +256,8 @@ class VerificationService:
                 allocations=allocations,
             )
             execution.validate_amounts(simulation.loan_amount)
-            selection.lock()
+            if selection is not None:
+                selection.lock()
             self.database.add(execution)
             self.database.flush()
             if execution.id is None:
@@ -286,6 +270,37 @@ class VerificationService:
             total_executed_amount=execution.total_amount,
             saved_at=saved_at,
         )
+
+
+def _get_or_create_selection(
+    database: Session,
+    simulation: Simulation,
+    mode: ExecutionType,
+    now: datetime,
+) -> ScenarioSelection | None:
+    scenario_code = SCENARIO_MODE.get(mode)
+    if scenario_code is None:
+        return simulation.selection
+
+    if simulation.selection is not None:
+        return simulation.selection
+
+    scenario = next(
+        (item for item in simulation.scenarios if item.code is scenario_code),
+        None,
+    )
+    if scenario is None or scenario.id is None:
+        raise ApiError(409, "SCENARIO_NOT_FOUND", "선택할 시나리오를 찾을 수 없습니다.")
+
+    selection = ScenarioSelection(
+        simulation_id=simulation.id,
+        scenario_id=scenario.id,
+        selected_at=now,
+    )
+    simulation.selection = selection
+    database.add(selection)
+    database.flush()
+    return selection
 
 
 def _build_allocations(

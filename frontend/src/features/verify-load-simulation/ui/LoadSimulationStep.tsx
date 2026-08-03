@@ -41,7 +41,7 @@ const EmptyView = () => (
     <div className="space-y-2 rounded border border-border px-5 py-14 text-center">
       <p className="text-sm text-muted-foreground">아직 검증 가능한 시뮬레이션이 없습니다.</p>
       <p className="text-xs text-muted-foreground">
-        시나리오를 선택하고 실제로 대출을 진행한 뒤 90일이 지나야 결과 검증이 가능합니다.
+        시뮬레이션을 저장한 뒤 90일이 지나야 실제 집행 내역을 등록하고 결과를 검증할 수 있습니다.
       </p>
     </div>
   </div>
