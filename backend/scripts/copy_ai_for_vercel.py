@@ -1,5 +1,4 @@
-"""Vercel 빌드 스텝에서 저장소 루트 ai/를 backend/ai/로 복사한다.
-"""
+"""Vercel 빌드 스텝에서 저장소 루트 ai/를 backend/ai/로 복사한다."""
 
 from pathlib import Path
 from shutil import copytree, ignore_patterns, rmtree
@@ -20,8 +19,12 @@ def main() -> None:
     copytree(
         source,
         destination,
-        ignore=ignore_patterns("__pycache__", "*.pyc", ".DS_Store"),
+        ignore=ignore_patterns("__pycache__", "*.pyc", ".DS_Store", ".env", ".env.*"),
     )
+
+    entrypoint = destination / "run_simulation.py"
+    if not entrypoint.is_file():
+        raise RuntimeError(f"AI 엔트리포인트를 찾을 수 없습니다: {entrypoint}")
 
     print(f"AI modules copied: {source} -> {destination}")
 
