@@ -46,6 +46,8 @@ export interface BottleneckResponse {
   code: string;
   /** Confidence */
   confidence: "LOW" | "MEDIUM" | "HIGH";
+  /** Detail */
+  detail: string;
   /** Evidence */
   evidence: string;
   /** Priority */
