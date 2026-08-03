@@ -583,11 +583,15 @@ export enum RepaymentTypeRequest {
 
 /** ScenarioComparisonResponse */
 export interface ScenarioComparisonResponse {
+  /** Allocationrationale */
+  allocationRationale: string | null;
   /** Allocations */
   allocations: AllocationResponse[];
   financialResult: FinancialResultResponse;
   /** Riskreasons */
   riskReasons: string[];
+  /** Scbgrowthoutlook */
+  scbGrowthOutlook: string | null;
   /** Scenariocode */
   scenarioCode: string;
   /** Scenarioid */
@@ -602,6 +606,8 @@ export interface ScenarioComparisonResponse {
 
 /** ScenarioResponse */
 export interface ScenarioResponse {
+  /** Allocationrationale */
+  allocationRationale: string | null;
   /** Allocations */
   allocations: AllocationResponse[];
   financialResult: FinancialResultResponse;
@@ -609,6 +615,8 @@ export interface ScenarioResponse {
   reasons: ReasonResponse[];
   /** Riskreasons */
   riskReasons: string[];
+  /** Scbgrowthoutlook */
+  scbGrowthOutlook: string | null;
   /** Scenariocode */
   scenarioCode: string;
   /** Scenarioid */

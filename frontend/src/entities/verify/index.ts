@@ -30,3 +30,8 @@ export type {
   SimulationOutcome,
   TrendPoint,
 } from './model/types';
+export { getVerificationTargets } from './api/verification';
+export { createExecution } from './api/execution';
+export { createOutcome, createOutcomeData, getOutcome } from './api/outcome';
+export type { ManualOutcomeMetricsRequest, OutcomeDataRequest } from './api/outcome';
+export { getDashboard } from './api/dashboard';

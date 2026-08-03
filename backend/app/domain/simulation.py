@@ -154,6 +154,8 @@ class Scenario(TimestampMixin, Base):
         ARRAY(String(100)), nullable=False, default=list
     )
     risk_reasons: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=False, default=list)
+    allocation_rationale: Mapped[str | None] = mapped_column(Text)
+    scb_growth_outlook: Mapped[str | None] = mapped_column(Text)
 
     simulation: Mapped["Simulation | None"] = relationship(back_populates="scenarios")
     allocations: Mapped[list["ScenarioAllocation"]] = relationship(

@@ -43,6 +43,8 @@ def scenario_payload(code: str, scenario_id: int) -> dict:
         },
         "target_metrics": ["COGS_RATIO"],
         "risk_reasons": ["현재 매출 기준으로 판정했습니다."],
+        "allocation_rationale": "원가율 병목이 가장 뚜렷해 설비 개선에 배분을 집중했습니다.",
+        "scb_growth_outlook": "설비 개선이 자리 잡으면 원가 구조 지표가 개선될 수 있습니다.",
     }
 
 

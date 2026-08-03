@@ -83,6 +83,7 @@ def engine_result() -> dict:
                     },
                 },
                 "allocation_rationale": f"{code}안의 AI 배분 근거",
+                "scb_growth_outlook": f"{code}안의 SCB 성장 가능성",
             }
         )
     return {
@@ -429,10 +430,11 @@ def test_create_persists_complete_scenario_graph(service: SimulationService) -> 
     assert [scenario.code.value for scenario in simulation.scenarios] == ["A", "B", "C"]
     assert sum(len(scenario.allocations) for scenario in simulation.scenarios) == 12
     assert all(
-        {reason.source_type for reason in scenario.reasons}
-        == {DataSourceType.CALCULATED, DataSourceType.AI_GENERATED_TEXT}
+        {reason.source_type for reason in scenario.reasons} == {DataSourceType.CALCULATED}
         for scenario in simulation.scenarios
     )
+    assert all(scenario.allocation_rationale is not None for scenario in simulation.scenarios)
+    assert all(scenario.scb_growth_outlook is not None for scenario in simulation.scenarios)
 
 
 def test_get_result_orders_scenarios_and_allocations(

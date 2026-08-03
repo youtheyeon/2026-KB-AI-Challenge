@@ -3,8 +3,14 @@ import { useNavigate } from 'react-router';
 
 import { ROUTES } from '@/shared/config/routes';
 
-export const Header = () => {
+interface HeaderProps {
+  businessId?: number | null;
+}
+
+export const Header = ({ businessId }: HeaderProps) => {
   const navigate = useNavigate();
+  const dashboardHref =
+    businessId != null ? `${ROUTES.dashboard}?businessId=${businessId}` : ROUTES.dashboard;
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background">
@@ -25,7 +31,7 @@ export const Header = () => {
           <span className="text-sm font-semibold tracking-tight">결과 검증</span>
         </div>
         <button
-          onClick={() => navigate(ROUTES.dashboard)}
+          onClick={() => navigate(dashboardHref)}
           className="text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           대시보드
