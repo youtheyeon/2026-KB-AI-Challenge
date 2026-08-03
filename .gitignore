@@ -1,6 +1,7 @@
 .idea/
 .superpowers/
 ai/.env
+/backend/ai/
 
 __pycache__/
 *.pyc
