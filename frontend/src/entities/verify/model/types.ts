@@ -1,43 +1,10 @@
 import type { IconComponent } from '@/shared/lib/types';
 
-export interface ArchivedSimulation {
-  id: string;
-  date: string;
-  loanAmount: number;
-  scenarios: string[];
-  biz: string;
-  status: string;
-  daysAgo: number;
-}
-
-export interface ExecutionItem {
-  id: string;
-  name: string;
-  amount: number;
-}
-
 export interface TrendPoint {
   month: string;
   revenue: number;
   profit: number;
   online: number;
-}
-
-export type CompareStatus = 'above' | 'in-range' | 'miss' | 'partial';
-
-export interface CompareRow {
-  label: string;
-  scbArea: string;
-  predicted: string;
-  actual: string;
-  status: CompareStatus;
-  note: string;
-  desc: string;
-  external: string;
-}
-
-export interface CompareStatusConfig {
-  badge: string;
 }
 
 export interface ReevalMetric {

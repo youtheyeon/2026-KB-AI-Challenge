@@ -769,6 +769,8 @@ export interface VerificationTargetResponse {
   daysElapsed: number;
   /** Executionregistered */
   executionRegistered: boolean;
+  /** Executionid */
+  executionId: number | null;
   /** Loanamount */
   loanAmount: number;
   /** Plansummaries */

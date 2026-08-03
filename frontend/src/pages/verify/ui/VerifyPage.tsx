@@ -24,6 +24,16 @@ export const VerifyPage = () => {
   const next = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
   const prev = () => setStep((s) => Math.max(s - 1, 0));
 
+  const handleSimulationSelected = (
+    selectedSimulationId: number,
+    selectedExecutionId: number | null,
+  ) => {
+    setSimulationId(selectedSimulationId);
+    setExecutionId(selectedExecutionId);
+    // 이미 실제 집행이 등록된 시뮬레이션이면 집행 단계를 건너뛰고 결과 비교로 바로 이동한다.
+    setStep(selectedExecutionId != null ? 2 : 1);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header businessId={businessId} />
@@ -33,8 +43,7 @@ export const VerifyPage = () => {
         {step === 0 && (
           <LoadSimulationStep
             businessId={businessId}
-            onNext={next}
-            onSimulationSelected={setSimulationId}
+            onSimulationSelected={handleSimulationSelected}
           />
         )}
         {step === 1 && (

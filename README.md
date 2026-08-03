@@ -239,6 +239,38 @@ AI가 정답 하나를 결정하는 대신 서로 다른 목적을 가진 세 �
 - [AI 모듈 실행 안내](./ai/README)
 - [AI 시뮬레이터 상세 설명](./ai/AI_시뮬레이터_최종정리.md)
 
+## 프로젝트 실행 방법 및 구성
+
+프로젝트는 PostgreSQL, FastAPI 백엔드, React 프론트엔드를 순서대로 실행합니다.
+
+### 1. 데이터베이스 실행
+
+```bash
+cd backend
+docker compose up -d postgres
+uv run alembic upgrade head
+```
+
+### 2. 백엔드 실행
+
+```bash
+cd backend
+uv sync —locked —dev
+uv run uvicorn app.main:app —reload
+```
+
+백엔드 API는 `http://127.0.0.1:8000`에서 실행되며, Swagger 문서는 `http://127.0.0.1:8000/docs`에서 확인할 수 있습니다.
+
+### 3. 프론트엔드 실행
+
+```bash
+cd frontend
+pnpm install
+pnpm dev
+```
+
+프론트엔드는 Vite가 안내하는 로컬 주소에서 확인할 수 있습니다. AI 분석 모듈은 별도 서버로 분리하지 않고 FastAPI 백엔드가 같은 저장소의 Python 함수를 직접 호출하는 모노레포 구조로 구성했습니다.
+
 ## 프로젝트 구조
 
 ```text
