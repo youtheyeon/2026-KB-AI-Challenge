@@ -26,8 +26,9 @@ export const SimulationCard = () => {
             시나리오별로 비교해보기
           </p>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            사업 데이터를 연결하면 A·B·C 배분안의 예상 매출·이익·위험을 동일한 기준으로 비교합니다.
-            원하는 안을 직접 선택해 저장하세요.
+            사업 데이터를 연결하면 현재 사업의 병목을 진단하고, A·B·C 배분안의 자금 구성과 재무
+            부담을 동일한 기준으로 비교합니다. AI는 특정 안을 최선으로 추천하지 않으며, 각 안의
+            근거와 위험을 확인한 뒤 사용자가 직접 판단합니다.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
